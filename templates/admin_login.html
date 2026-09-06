@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 로그인 - 뉴스NOW</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: #0d1b2a;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-box {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px 36px;
+            width: 360px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .login-logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .login-logo .logo-mark {
+            font-size: 36px;
+            font-weight: 900;
+            color: #1a56db;
+            letter-spacing: -1px;
+        }
+        .login-logo p {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        .login-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 20px;
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 6px;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .form-input:focus { border-color: #1a56db; }
+        .error-msg {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        .login-btn {
+            width: 100%;
+            background: #1a56db;
+            color: #fff;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .login-btn:hover { background: #1e40af; }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #6b7280;
+            text-decoration: none;
+        }
+        .back-link:hover { color: #1a56db; }
+    </style>
+</head>
+<body>
+<div class="login-box">
+    <div class="login-logo">
+        <div class="logo-mark">뉴스NOW</div>
+        <p>관리자 전용</p>
+    </div>
+    <p class="login-title">관리자 로그인</p>
+    {% if error %}
+    <div class="error-msg">{{ error }}</div>
+    {% endif %}
+    <form method="POST">
+        <div class="form-group">
+            <label class="form-label">비밀번호</label>
+            <input type="password" name="password" class="form-input" 
+                   placeholder="관리자 비밀번호 입력" autofocus>
+        </div>
+        <button type="submit" class="login-btn">로그인</button>
+    </form>
+    <a href="/" class="back-link">← 뉴스 메인으로</a>
+</div>
+</body>
+</html>

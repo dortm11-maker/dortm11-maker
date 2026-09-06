@@ -1,0 +1,86 @@
+{
+  "ads": {
+    "center": {
+      "enabled": true,
+      "mode": "coupang",
+      "coupang_id": 1026359,
+      "tracking_code": "AF3197388",
+      "sub_id": "dortm111",
+      "width": 680,
+      "height": 140,
+      "custom_html": ""
+    },
+    "left": {
+      "enabled": true,
+      "mode": "coupang",
+      "coupang_id": 1026359,
+      "tracking_code": "AF3197388",
+      "sub_id": "dortm111",
+      "width": 200,
+      "height": 600,
+      "custom_html": ""
+    },
+    "popup": {
+      "enabled": true,
+      "mode": "coupang",
+      "delay": 2,
+      "interval_minutes": 5,
+      "close_delay": 3,
+      "coupang_id": 1026359,
+      "tracking_code": "AF3197388",
+      "sub_id": "dortm111",
+      "width": 300,
+      "height": 300,
+      "custom_html": ""
+    },
+    "right": {
+      "enabled": true,
+      "mode": "coupang",
+      "coupang_id": 1026359,
+      "tracking_code": "AF3197388",
+      "sub_id": "dortm111",
+      "width": 200,
+      "height": 600,
+      "custom_html": ""
+    }
+  },
+  "ticker": {
+    "badge": "🔴 실시간 이슈",
+    "enabled": true,
+    "items": [
+      {
+        "title": "🔥 [속보] '건설 추락사고 예방' 아이디어 공모전…숏폼·정책제안 접수",
+        "link": "https://www.yna.co.kr/view/AKR20260904160300530"
+      },
+      {
+        "title": "🔥 [속보] 추석 앞두고 수산물 원산지 표시 특별 점검…성수품 집중 단속",
+        "link": "https://www.yna.co.kr/view/AKR20260904124200030"
+      },
+      {
+        "title": "🔥 [속보] 법원, ‘의대 증원’ 반발 사직 전공의 제기 ‘입영대기 처분’ 취소소송 각하",
+        "link": "https://www.hani.co.kr/arti/society/society_general/1276423.html"
+      },
+      {
+        "title": "🔥 [IFA 2026] 가전 넘어 일상으로…LG·삼성이 그린 ‘AI 홈’",
+        "link": "https://www.hani.co.kr/arti/economy/marketing/1276422.html"
+      },
+      {
+        "title": "🔥 [속보] ‘몸과 마음 치유’···경북, 7~13일 ‘웰니스 여행지’ 최대 반값 할인",
+        "link": "https://www.khan.co.kr/article/202609061107001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news"
+      },
+      {
+        "title": "🔥 [속보] ‘물고문·담뱃불에 성 착취물까지’ 10대 여학생들 집유 확정",
+        "link": "https://www.khan.co.kr/article/202609061101001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news"
+      },
+      {
+        "title": "🔥 [속보] 日 청년 투자열풍 뒤엔 그림자…“하루 한 끼만 먹고 투자한다”",
+        "link": "https://www.donga.com/news/Economy/article/all/20260904/134606351/2"
+      },
+      {
+        "title": "🔥 [속보] 서학개미, 반도체 개별주는 팔고 3배 레버리지는 샀다",
+        "link": "https://www.donga.com/news/Economy/article/all/20260906/134611999/1"
+      }
+    ],
+    "speed": 30
+  }
+}

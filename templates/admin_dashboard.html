@@ -1,0 +1,1252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>통합 관리자 - 뉴스NOW</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans KR', sans-serif; background: #f1f5f9; color: #0f172a; line-height: 1.5; }
+
+        /* ADMIN HEADER */
+        .admin-header {
+            background: #0f172a;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .admin-header-left { display: flex; align-items: center; gap: 14px; }
+        .admin-logo { color: #60a5fa; font-size: 19px; font-weight: 800; letter-spacing: -0.5px; }
+        .admin-badge {
+            background: #1e3a8a; color: #93c5fd; font-size: 11px;
+            padding: 3px 10px; border-radius: 20px; font-weight: 700;
+        }
+        .admin-header-right { display: flex; align-items: center; gap: 12px; }
+        .admin-nav-btn {
+            color: #cbd5e1; font-size: 13px; text-decoration: none;
+            padding: 7px 14px; border-radius: 6px; border: 1px solid #334155;
+            transition: all 0.2s; cursor: pointer; background: none; font-family: inherit;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .admin-nav-btn:hover { color: #fff; border-color: #64748b; background: rgba(255,255,255,0.05); }
+        .admin-nav-btn.primary { background: #2563eb; color: #fff; border-color: #2563eb; font-weight: 600; }
+        .admin-nav-btn.primary:hover { background: #1d4ed8; }
+        .admin-nav-btn.danger { color: #f87171; border-color: #475569; }
+        .admin-nav-btn.danger:hover { background: #7f1d1d; border-color: #991b1b; color: #fca5a5; }
+
+        /* MAIN TAB NAVIGATION */
+        .admin-tabs-bar {
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 60px;
+            z-index: 90;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+        .admin-tabs-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            gap: 8px;
+        }
+        .admin-tab-btn {
+            padding: 16px 20px;
+            border: none;
+            background: none;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            color: #64748b;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .admin-tab-btn:hover { color: #1e293b; }
+        .admin-tab-btn.active {
+            color: #2563eb;
+        }
+        .admin-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #2563eb;
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* LAYOUT */
+        .admin-wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px 80px; }
+        .tab-section { display: none; }
+        .tab-section.active { display: block; animation: fadeIn 0.2s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+        .section-header { margin-bottom: 24px; }
+        .page-title { font-size: 22px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+        .page-sub { font-size: 14px; color: #64748b; }
+
+        /* STATS (RSS TAB) */
+        .stat-cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: #fff; border-radius: 12px; padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+        }
+        .stat-label { font-size: 13px; color: #64748b; margin-bottom: 6px; font-weight: 500; }
+        .stat-value { font-size: 28px; font-weight: 800; color: #0f172a; }
+        .stat-value.blue { color: #2563eb; }
+        .stat-value.green { color: #059669; }
+        .stat-value.orange { color: #d97706; }
+
+        /* PANELS */
+        .panel-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+
+        /* CATEGORY SIDEBAR */
+        .cat-panel {
+            background: #fff; border-radius: 12px; padding: 18px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; height: fit-content;
+        }
+        .cat-panel-title { font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 12px; }
+        .cat-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+        .cat-btn {
+            width: 100%; text-align: left; padding: 10px 14px;
+            border: none; background: none; font-family: inherit; font-size: 14px;
+            color: #334155; border-radius: 8px; cursor: pointer; transition: all 0.15s;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .cat-btn:hover { background: #f8fafc; }
+        .cat-btn.active { background: #eff6ff; color: #2563eb; font-weight: 700; }
+        .cat-badge {
+            background: #e2e8f0; color: #475569; font-size: 11px;
+            padding: 2px 8px; border-radius: 20px; font-weight: 600;
+        }
+        .cat-btn.active .cat-badge { background: #bfdbfe; color: #1d4ed8; }
+
+        .add-cat-wrap { border-top: 1px solid #f1f5f9; padding-top: 14px; }
+        .add-cat-input {
+            width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1;
+            border-radius: 6px; font-size: 13px; font-family: inherit; margin-bottom: 8px;
+        }
+        .add-cat-btn {
+            width: 100%; background: #2563eb; color: #fff; border: none;
+            padding: 9px; border-radius: 6px; font-size: 13px; font-family: inherit;
+            font-weight: 600; cursor: pointer; transition: background 0.15s;
+        }
+        .add-cat-btn:hover { background: #1d4ed8; }
+
+        /* FEED PANEL */
+        .feed-panel {
+            background: #fff; border-radius: 12px; padding: 22px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06); border: 1px solid #e2e8f0;
+        }
+        .feed-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+        .feed-panel-title { font-size: 18px; font-weight: 700; color: #0f172a; }
+
+        .btn {
+            padding: 8px 16px; border-radius: 6px; border: none;
+            font-size: 13px; font-weight: 600; cursor: pointer;
+            font-family: inherit; transition: all 0.15s;
+            display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-primary { background: #2563eb; color: #fff; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-save-all {
+            background: #059669; color: #fff; padding: 10px 20px; font-size: 14px; border-radius: 8px;
+        }
+        .btn-save-all:hover { background: #047857; }
+        .btn-danger { background: #fee2e2; color: #b91c1c; }
+        .btn-danger:hover { background: #fecaca; }
+        .btn-test { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
+        .btn-test:hover { background: #e2e8f0; }
+
+        /* ADD FORM */
+        .add-feed-form {
+            background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+            padding: 16px; margin-bottom: 20px; display: none;
+        }
+        .form-row { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .form-row-2 { display: flex; gap: 10px; }
+        .form-row-2 input { flex: 1; }
+        .form-input {
+            width: 100%; padding: 9px 12px; border: 1px solid #cbd5e1;
+            border-radius: 6px; font-size: 13px; font-family: inherit; background: #fff;
+        }
+        .test-result { font-size: 12px; margin-top: 8px; }
+        .test-result.success { color: #059669; }
+        .test-result.error { color: #dc2626; }
+
+        /* FEED LIST */
+        .feed-list { display: flex; flex-direction: column; gap: 10px; }
+        .feed-card {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 16px; border-radius: 8px; border: 1px solid #e2e8f0;
+            background: #fff; transition: all 0.15s;
+        }
+        .feed-card:hover { border-color: #cbd5e1; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+        .feed-card.disabled { opacity: 0.55; background: #f8fafc; }
+        .feed-card-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .feed-logo { font-size: 20px; flex-shrink: 0; }
+        .feed-info { min-width: 0; }
+        .feed-name { font-size: 14px; font-weight: 600; color: #0f172a; margin-bottom: 2px; }
+        .feed-url { font-size: 12px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 480px; }
+        .feed-card-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+        /* TOGGLE SWITCH */
+        .switch {
+            position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; inset: 0;
+            background-color: #cbd5e1; transition: .2s; border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px;
+            left: 3px; bottom: 3px; background-color: white;
+            transition: .2s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #2563eb; }
+        input:checked + .slider:before { transform: translateX(20px); }
+
+        .btn-del {
+            background: none; border: none; color: #94a3b8; font-size: 16px;
+            cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: all 0.15s;
+        }
+        .btn-del:hover { background: #fee2e2; color: #dc2626; }
+
+        /* ==================== 광고 관리 탭 UI ==================== */
+        .ad-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 28px; }
+        .ad-card {
+            background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;
+            padding: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        .ad-card-header {
+            display: flex; align-items: center; justify-content: space-between;
+            border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;
+        }
+        .ad-card-title {
+            font-size: 16px; font-weight: 700; color: #0f172a;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .ad-status-badge {
+            font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 600;
+        }
+        .ad-status-badge.active { background: #dcfce7; color: #166534; }
+        .ad-status-badge.inactive { background: #f1f5f9; color: #64748b; }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-label { font-size: 13px; font-weight: 600; color: #334155; }
+        .form-hint { font-size: 11px; color: #64748b; }
+        .form-row-multi { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+        .mode-selector {
+            display: flex; background: #f1f5f9; padding: 3px; border-radius: 8px; gap: 4px;
+        }
+        .mode-btn {
+            flex: 1; padding: 7px; border: none; background: none; font-size: 12px;
+            font-weight: 600; color: #64748b; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+        }
+        .mode-btn.active { background: #fff; color: #2563eb; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+
+        .code-textarea {
+            width: 100%; height: 110px; padding: 10px; font-family: monospace; font-size: 12px;
+            border: 1px solid #cbd5e1; border-radius: 6px; resize: vertical; background: #fafafa;
+        }
+
+        /* ==================== 전광판 관리 탭 UI ==================== */
+        .ticker-config-card {
+            background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;
+            padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 24px;
+        }
+        .ticker-items-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
+        .ticker-item-row {
+            display: flex; align-items: center; gap: 10px; background: #f8fafc;
+            padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0;
+        }
+        .ticker-item-num { font-size: 13px; font-weight: 700; color: #64748b; width: 24px; }
+        .ticker-item-input {
+            flex: 1; min-width: 250px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
+            font-size: 13px; font-family: inherit; background: #fff;
+        }
+        .ticker-item-link-input {
+            width: 280px; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px;
+            font-size: 13px; font-family: inherit; background: #fff; color: #1e40af;
+        }
+
+        .save-bar-bottom {
+            position: sticky; bottom: 20px; z-index: 80;
+            background: #0f172a; padding: 14px 24px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            display: flex; align-items: center; justify-content: space-between;
+            color: #fff; margin-top: 24px;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px;
+            background: #0f172a; color: #fff; padding: 12px 20px;
+            border-radius: 8px; font-size: 13px; font-weight: 500;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+            opacity: 0; transform: translateY(10px);
+            transition: all 0.25s; pointer-events: none; z-index: 9999;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 900px) {
+            .ad-grid { grid-template-columns: 1fr; }
+            .panel-grid { grid-template-columns: 1fr; }
+            .stat-cards { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- 상단 헤더 -->
+<header class="admin-header">
+    <div class="admin-header-left">
+        <span class="admin-logo">뉴스NOW</span>
+        <span class="admin-badge">통합 관리자</span>
+    </div>
+    <div class="admin-header-right">
+        <a href="/" class="admin-nav-btn" target="_blank">🌐 사이트 바로가기</a>
+        <a href="/admin/logout" class="admin-nav-btn danger">로그아웃</a>
+    </div>
+</header>
+
+<!-- 3개 메인 탭 네비게이션 -->
+<nav class="admin-tabs-bar">
+    <div class="admin-tabs-inner">
+        <button class="admin-tab-btn active" onclick="switchAdminTab('feedTab', this)">
+            📰 RSS 언론사 피드 관리
+        </button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('adsTab', this)">
+            📢 쿠팡 파트너스 광고 관리
+        </button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('tickerTab', this)">
+            🔴 상단 이슈 전광판 관리
+        </button>
+    </div>
+</nav>
+
+<div class="admin-wrap">
+
+    <!-- ========================================================================= -->
+    <!-- 1. RSS 언론사 피드 관리 탭 -->
+    <!-- ========================================================================= -->
+    <section id="feedTab" class="tab-section active">
+        <div class="section-header">
+            <h1 class="page-title">언론사 RSS 피드 관리</h1>
+            <p class="page-sub">카테고리별 언론사 RSS를 등록, 삭제, 활성/비활성화하고 실시간 기사를 미리 확인할 수 있습니다.</p>
+        </div>
+
+        <!-- 통계 -->
+        <div class="stat-cards">
+            <div class="stat-card">
+                <div class="stat-label">전체 카테고리</div>
+                <div class="stat-value blue" id="statCat">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">전체 언론사 피드</div>
+                <div class="stat-value" id="statTotal">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">활성 피드</div>
+                <div class="stat-value green" id="statEnabled">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">비활성 피드</div>
+                <div class="stat-value orange" id="statDisabled">-</div>
+            </div>
+        </div>
+
+        <div class="panel-grid">
+            <!-- 카테고리 목록 -->
+            <div class="cat-panel">
+                <div class="cat-panel-title">카테고리 선택</div>
+                <div class="cat-list" id="catList"></div>
+                <div class="add-cat-wrap">
+                    <input type="text" id="newCatInput" class="add-cat-input" placeholder="새 카테고리 (예: 부동산)">
+                    <button class="add-cat-btn" onclick="addCategory()">+ 새 카테고리 추가</button>
+                </div>
+            </div>
+
+            <!-- 피드 목록 -->
+            <div class="feed-panel">
+                <div class="feed-panel-header">
+                    <div class="feed-panel-title" id="feedPanelTitle">카테고리를 선택하세요</div>
+                    <button class="btn btn-primary" onclick="toggleAddForm()">+ 피드 등록</button>
+                </div>
+
+                <!-- 피드 추가 폼 -->
+                <div class="add-feed-form" id="addFeedForm">
+                    <div class="form-row">
+                        <input type="text" id="newFeedName" class="form-input" placeholder="언론사 이름 (예: 매일경제)">
+                        <input type="text" id="newFeedLogo" class="form-input" placeholder="아이콘/이모지 (예: 💹)">
+                        <div></div>
+                    </div>
+                    <div class="form-row-2">
+                        <input type="text" id="newFeedUrl" class="form-input" placeholder="RSS URL 입력 (예: https://...)">
+                        <button class="btn btn-test" onclick="testRSS()">URL 테스트</button>
+                        <button class="btn btn-primary" onclick="addFeed()">피드 추가</button>
+                    </div>
+                    <div class="test-result" id="testResult"></div>
+                </div>
+
+                <!-- 피드 카드 목록 -->
+                <div class="feed-list" id="feedList">
+                    <div style="text-align:center; padding: 40px; color:#94a3b8;">← 왼쪽에서 카테고리를 선택해주세요</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 2. 쿠팡 광고 배너 관리 탭 -->
+    <!-- ========================================================================= -->
+    <section id="adsTab" class="tab-section">
+        <div class="section-header">
+            <h1 class="page-title">쿠팡 파트너스 및 광고 배너 관리</h1>
+            <p class="page-sub">좌측·우측 플로팅 날개 배너, 본문 중앙 배너, 팝업 광고를 켜고 끌 수 있으며 키워드 검색 프로그램과 동일한 쿠팡 파트너스를 손쉽게 설정할 수 있습니다.</p>
+        </div>
+
+        <div class="ad-grid">
+
+            <!-- 1) 좌측 날개 배너 -->
+            <div class="ad-card" id="adCardLeft">
+                <div class="ad-card-header">
+                    <div class="ad-card-title">
+                        <span>👈 좌측 플로팅 배너</span>
+                        <span class="ad-status-badge" id="adBadgeLeft">비활성</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="adLeftEnabled" onchange="updateAdStatusBadge('Left')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">광고 설정 모드</label>
+                    <div class="mode-selector">
+                        <button type="button" class="mode-btn active" id="btnModeCoupangLeft" onclick="setAdMode('left', 'coupang')">쿠팡 파트너스 간편설정</button>
+                        <button type="button" class="mode-btn" id="btnModeCustomLeft" onclick="setAdMode('left', 'custom')">직접 HTML/코드 입력</button>
+                    </div>
+                </div>
+
+                <!-- 쿠팡 모드 필드 -->
+                <div id="adLeftCoupangFields">
+                    <div class="form-row-multi" style="margin-bottom:10px;">
+                        <div class="form-group">
+                            <label class="form-label">파트너스 ID</label>
+                            <input type="number" id="adLeftId" class="form-input" placeholder="1026241">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tracking Code</label>
+                            <input type="text" id="adLeftTracking" class="form-input" placeholder="AF3197388">
+                        </div>
+                    </div>
+                    <div class="form-row-multi">
+                        <div class="form-group">
+                            <label class="form-label">Sub ID</label>
+                            <input type="text" id="adLeftSubId" class="form-input" placeholder="dortm111">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">크기 (너비x높이)</label>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <input type="number" id="adLeftWidth" class="form-input" placeholder="160" style="width:75px;">
+                                <span>x</span>
+                                <input type="number" id="adLeftHeight" class="form-input" placeholder="600" style="width:75px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 커스텀 모드 필드 -->
+                <div id="adLeftCustomFields" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">HTML / iframe / 스크립트 코드</label>
+                        <textarea id="adLeftCustomHtml" class="code-textarea" placeholder="<iframe src='...' ...></iframe>"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2) 우측 날개 배너 -->
+            <div class="ad-card" id="adCardRight">
+                <div class="ad-card-header">
+                    <div class="ad-card-title">
+                        <span>👉 우측 플로팅 배너</span>
+                        <span class="ad-status-badge" id="adBadgeRight">비활성</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="adRightEnabled" onchange="updateAdStatusBadge('Right')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">광고 설정 모드</label>
+                    <div class="mode-selector">
+                        <button type="button" class="mode-btn active" id="btnModeCoupangRight" onclick="setAdMode('right', 'coupang')">쿠팡 파트너스 간편설정</button>
+                        <button type="button" class="mode-btn" id="btnModeCustomRight" onclick="setAdMode('right', 'custom')">직접 HTML/코드 입력</button>
+                    </div>
+                </div>
+
+                <!-- 쿠팡 모드 필드 -->
+                <div id="adRightCoupangFields">
+                    <div class="form-row-multi" style="margin-bottom:10px;">
+                        <div class="form-group">
+                            <label class="form-label">파트너스 ID</label>
+                            <input type="number" id="adRightId" class="form-input" placeholder="1026241">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tracking Code</label>
+                            <input type="text" id="adRightTracking" class="form-input" placeholder="AF3197388">
+                        </div>
+                    </div>
+                    <div class="form-row-multi">
+                        <div class="form-group">
+                            <label class="form-label">Sub ID</label>
+                            <input type="text" id="adRightSubId" class="form-input" placeholder="dortm111">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">크기 (너비x높이)</label>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <input type="number" id="adRightWidth" class="form-input" placeholder="160" style="width:75px;">
+                                <span>x</span>
+                                <input type="number" id="adRightHeight" class="form-input" placeholder="600" style="width:75px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 커스텀 모드 필드 -->
+                <div id="adRightCustomFields" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">HTML / iframe / 스크립트 코드</label>
+                        <textarea id="adRightCustomHtml" class="code-textarea" placeholder="<iframe src='...' ...></iframe>"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3) 본문 중앙 가로 배너 -->
+            <div class="ad-card" id="adCardCenter">
+                <div class="ad-card-header">
+                    <div class="ad-card-title">
+                        <span>🎯 본문 중앙 가로 배너</span>
+                        <span class="ad-status-badge" id="adBadgeCenter">비활성</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="adCenterEnabled" onchange="updateAdStatusBadge('Center')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">광고 설정 모드</label>
+                    <div class="mode-selector">
+                        <button type="button" class="mode-btn active" id="btnModeCoupangCenter" onclick="setAdMode('center', 'coupang')">쿠팡 파트너스 간편설정</button>
+                        <button type="button" class="mode-btn" id="btnModeCustomCenter" onclick="setAdMode('center', 'custom')">직접 HTML/코드 입력</button>
+                    </div>
+                </div>
+
+                <!-- 쿠팡 모드 필드 -->
+                <div id="adCenterCoupangFields">
+                    <div class="form-row-multi" style="margin-bottom:10px;">
+                        <div class="form-group">
+                            <label class="form-label">파트너스 ID</label>
+                            <input type="number" id="adCenterId" class="form-input" placeholder="1026241">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tracking Code</label>
+                            <input type="text" id="adCenterTracking" class="form-input" placeholder="AF3197388">
+                        </div>
+                    </div>
+                    <div class="form-row-multi">
+                        <div class="form-group">
+                            <label class="form-label">Sub ID</label>
+                            <input type="text" id="adCenterSubId" class="form-input" placeholder="dortm111">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">크기 (너비x높이)</label>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <input type="number" id="adCenterWidth" class="form-input" placeholder="680" style="width:75px;">
+                                <span>x</span>
+                                <input type="number" id="adCenterHeight" class="form-input" placeholder="140" style="width:75px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 커스텀 모드 필드 -->
+                <div id="adCenterCustomFields" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">HTML / iframe / 스크립트 코드</label>
+                        <textarea id="adCenterCustomHtml" class="code-textarea" placeholder="<ins class='adsbygoogle' ...></ins>"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4) 중앙 팝업 모달 광고 -->
+            <div class="ad-card" id="adCardPopup">
+                <div class="ad-card-header">
+                    <div class="ad-card-title">
+                        <span>🎁 화면 중앙 팝업 광고</span>
+                        <span class="ad-status-badge" id="adBadgePopup">비활성</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="adPopupEnabled" onchange="updateAdStatusBadge('Popup')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">광고 설정 모드</label>
+                    <div class="mode-selector">
+                        <button type="button" class="mode-btn active" id="btnModeCoupangPopup" onclick="setAdMode('popup', 'coupang')">쿠팡 파트너스 간편설정</button>
+                        <button type="button" class="mode-btn" id="btnModeCustomPopup" onclick="setAdMode('popup', 'custom')">직접 HTML/코드 입력</button>
+                    </div>
+                </div>
+
+                <div class="form-row-multi" style="margin-bottom:10px;">
+                    <div class="form-group">
+                        <label class="form-label">최초 노출 지연 (초)</label>
+                        <input type="number" id="adPopupDelay" class="form-input" placeholder="2" min="0">
+                        <span class="form-hint">접속 후 몇 초 뒤 전면광고 띄울지</span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">자동 재노출 주기 (분)</label>
+                        <input type="number" id="adPopupInterval" class="form-input" placeholder="5" min="0">
+                        <span class="form-hint">몇 분마다 다시 띄울지 (0이면 1회)</span>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label">닫기 버튼 활성화 지연 (초)</label>
+                    <input type="number" id="adPopupCloseDelay" class="form-input" placeholder="3" min="1" max="10">
+                    <span class="form-hint">몇 초 뒤에 닫기 버튼을 누를 수 있게 할지 (기본 3초)</span>
+                </div>
+
+                <!-- 쿠팡 모드 필드 -->
+                <div id="adPopupCoupangFields">
+                    <div class="form-row-multi" style="margin-bottom:10px;">
+                        <div class="form-group">
+                            <label class="form-label">파트너스 ID</label>
+                            <input type="number" id="adPopupId" class="form-input" placeholder="1026241">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Tracking Code</label>
+                            <input type="text" id="adPopupTracking" class="form-input" placeholder="AF3197388">
+                        </div>
+                    </div>
+                    <div class="form-row-multi">
+                        <div class="form-group">
+                            <label class="form-label">Sub ID</label>
+                            <input type="text" id="adPopupSubId" class="form-input" placeholder="dortm111">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">크기 (너비x높이)</label>
+                            <div style="display:flex; gap:6px; align-items:center;">
+                                <input type="number" id="adPopupWidth" class="form-input" placeholder="300" style="width:75px;">
+                                <span>x</span>
+                                <input type="number" id="adPopupHeight" class="form-input" placeholder="300" style="width:75px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 커스텀 모드 필드 -->
+                <div id="adPopupCustomFields" style="display:none;">
+                    <div class="form-group">
+                        <label class="form-label">HTML / iframe / 스크립트 코드</label>
+                        <textarea id="adPopupCustomHtml" class="code-textarea" placeholder="<a href='...'><img src='...' /></a>"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="save-bar-bottom">
+            <div>
+                <strong style="font-size:15px;">쿠팡 파트너스 배너 설정</strong>
+                <p style="font-size:12px; color:#94a3b8; margin-top:2px;">설정을 저장하면 즉시 사이트 전역에 반영됩니다.</p>
+            </div>
+            <button class="btn btn-save-all" onclick="saveAdsConfig()">💾 광고 설정 저장하기</button>
+        </div>
+    </section>
+
+    <!-- ========================================================================= -->
+    <!-- 3. 상단 이슈 전광판 관리 탭 -->
+    <!-- ========================================================================= -->
+    <section id="tickerTab" class="tab-section">
+        <div class="section-header">
+            <h1 class="page-title">상단 움직이는 이슈 전광판 관리</h1>
+            <p class="page-sub">사이트 최상단에 부드럽게 흘러가는 실시간 속보·주요 이슈 전광판을 설정하고 문구를 실시간으로 편집할 수 있습니다.</p>
+        </div>
+
+        <div class="ticker-config-card">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; border-bottom:1px solid #f1f5f9; padding-bottom:14px;">
+                <div>
+                    <strong style="font-size:16px; color:#0f172a;">전광판 활성화 상태</strong>
+                    <p style="font-size:12px; color:#64748b; margin-top:2px;">전광판을 끄면 사이트 최상단에서 완전히 숨겨집니다.</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="tickerEnabled">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="form-row-multi" style="margin-bottom:24px;">
+                <div class="form-group">
+                    <label class="form-label">전광판 좌측 뱃지 문구</label>
+                    <input type="text" id="tickerBadge" class="form-input" placeholder="🔴 실시간 이슈">
+                    <span class="form-hint">예: 🔴 실시간 이슈, 🔥 오늘의 뉴스, ⚡ 주요 속보</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">흘러가는 속도 (초 단위)</label>
+                    <input type="number" id="tickerSpeed" class="form-input" placeholder="35" min="10" max="120">
+                    <span class="form-hint">기본 35초 (숫자가 작을수록 빠름, 클수록 천천히 이동)</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+                    <label class="form-label" style="font-size:15px; margin-bottom:0;">📢 전광판 흘러갈 문구 목록</label>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" class="btn" style="background:#059669; color:#fff; font-weight:600;" onclick="fetchLiveTickerItems()">⚡ 실시간 뉴스 속보 자동 불러오기</button>
+                        <button type="button" class="btn btn-primary" onclick="addTickerItemRow()">+ 문구 추가</button>
+                    </div>
+                </div>
+                <div class="ticker-items-list" id="tickerItemsList">
+                    <!-- JS로 동적 렌더링 -->
+                </div>
+            </div>
+        </div>
+
+        <div class="save-bar-bottom">
+            <div>
+                <strong style="font-size:15px;">이슈 전광판 설정</strong>
+                <p style="font-size:12px; color:#94a3b8; margin-top:2px;">문구 수정 후 저장 시 즉시 메인 전광판에 적용됩니다.</p>
+            </div>
+            <button class="btn btn-save-all" onclick="saveTickerConfig()">💾 전광판 설정 저장하기</button>
+        </div>
+    </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// 전역 상태
+// ============================================================
+let feedsData = {};
+let currentCat = null;
+let currentSiteConfig = null;
+let adModes = { left: 'coupang', right: 'coupang', center: 'coupang', popup: 'coupang' };
+
+// ============================================================
+// 초기화
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    loadFeeds();
+    loadSiteConfig();
+});
+
+// 관리자 탭 전환
+function switchAdminTab(tabId, btn) {
+    document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+}
+
+// ============================================================
+// 1. RSS 피드 관리 로직
+// ============================================================
+async function loadFeeds() {
+    try {
+        const resp = await fetch('/admin/api/feeds');
+        const data = await resp.json();
+        if (data.success) {
+            feedsData = data.feeds;
+            renderCatList();
+            updateStats();
+            const cats = Object.keys(feedsData);
+            if (cats.length > 0 && (!currentCat || !feedsData[currentCat])) {
+                selectCategory(cats[0]);
+            } else if (currentCat) {
+                selectCategory(currentCat);
+            }
+        }
+    } catch (e) {
+        showToast('피드 불러오기 실패');
+    }
+}
+
+function updateStats() {
+    const cats = Object.keys(feedsData);
+    let total = 0, enabled = 0, disabled = 0;
+    for (const cat of cats) {
+        for (const feed of feedsData[cat] || []) {
+            total++;
+            if (feed.enabled !== false) enabled++;
+            else disabled++;
+        }
+    }
+    document.getElementById('statCat').textContent = cats.length;
+    document.getElementById('statTotal').textContent = total;
+    document.getElementById('statEnabled').textContent = enabled;
+    document.getElementById('statDisabled').textContent = disabled;
+}
+
+function renderCatList() {
+    const list = document.getElementById('catList');
+    list.innerHTML = '';
+    for (const cat of Object.keys(feedsData)) {
+        const btn = document.createElement('button');
+        btn.className = `cat-btn ${cat === currentCat ? 'active' : ''}`;
+        const count = (feedsData[cat] || []).length;
+        btn.innerHTML = `<span>${cat}</span><span class="cat-badge">${count}</span>`;
+        btn.onclick = () => selectCategory(cat);
+        list.appendChild(btn);
+    }
+}
+
+function selectCategory(cat) {
+    currentCat = cat;
+    renderCatList();
+    document.getElementById('feedPanelTitle').textContent = `${cat} 피드 목록`;
+    renderFeedList();
+}
+
+function renderFeedList() {
+    const list = document.getElementById('feedList');
+    const feeds = feedsData[currentCat] || [];
+    if (feeds.length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8;">등록된 피드가 없습니다. [+ 피드 등록]을 눌러 추가하세요.</div>';
+        return;
+    }
+    list.innerHTML = feeds.map((feed, idx) => `
+        <div class="feed-card ${feed.enabled === false ? 'disabled' : ''}">
+            <div class="feed-card-left">
+                <span class="feed-logo">${feed.logo || '📰'}</span>
+                <div class="feed-info">
+                    <div class="feed-name">${esc(feed.name)}</div>
+                    <div class="feed-url" title="${esc(feed.url)}">${esc(feed.url)}</div>
+                </div>
+            </div>
+            <div class="feed-card-right">
+                <label class="switch" title="활성화/비활성화">
+                    <input type="checkbox" ${feed.enabled !== false ? 'checked' : ''} onchange="toggleFeed(${idx})">
+                    <span class="slider"></span>
+                </label>
+                <button class="btn-del" onclick="deleteFeed(${idx})" title="삭제">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+async function toggleFeed(idx) {
+    const resp = await fetch('/admin/api/feeds/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: currentCat, index: idx })
+    });
+    const data = await resp.json();
+    if (data.success) {
+        feedsData[currentCat][idx].enabled = data.enabled;
+        renderFeedList();
+        updateStats();
+        showToast(data.enabled ? '피드가 활성화되었습니다.' : '피드가 비활성화되었습니다.');
+    }
+}
+
+async function deleteFeed(idx) {
+    if (!confirm(`'${feedsData[currentCat][idx].name}' 피드를 삭제하시겠습니까?`)) return;
+    const resp = await fetch('/admin/api/feeds/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: currentCat, index: idx })
+    });
+    const data = await resp.json();
+    if (data.success) {
+        feedsData[currentCat].splice(idx, 1);
+        renderFeedList();
+        renderCatList();
+        updateStats();
+        showToast('피드가 삭제되었습니다.');
+    }
+}
+
+function toggleAddForm() {
+    const form = document.getElementById('addFeedForm');
+    form.style.display = form.style.display === 'none' || !form.style.display ? 'block' : 'none';
+}
+
+async function testRSS() {
+    const url = document.getElementById('newFeedUrl').value.trim();
+    const res = document.getElementById('testResult');
+    if (!url) { res.textContent = 'URL을 입력해주세요.'; res.className = 'test-result error'; return; }
+    res.textContent = '테스트 중...'; res.className = 'test-result';
+    try {
+        const resp = await fetch('/admin/api/test_rss', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url })
+        });
+        const d = await resp.json();
+        if (d.success) {
+            res.textContent = `✓ 성공: [${d.feed_title}] 최신 기사 ${d.item_count}건 감지됨`;
+            res.className = 'test-result success';
+            if (!document.getElementById('newFeedName').value) {
+                document.getElementById('newFeedName').value = d.feed_title;
+            }
+        } else {
+            res.textContent = `✗ 실패: ${d.message}`;
+            res.className = 'test-result error';
+        }
+    } catch(e) {
+        res.textContent = '테스트 실패: ' + e;
+        res.className = 'test-result error';
+    }
+}
+
+async function addFeed() {
+    const name = document.getElementById('newFeedName').value.trim();
+    const logo = document.getElementById('newFeedLogo').value.trim() || '📰';
+    const url = document.getElementById('newFeedUrl').value.trim();
+    if (!name || !url) { alert('언론사 이름과 RSS URL을 입력해주세요.'); return; }
+
+    const resp = await fetch('/admin/api/feeds/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category: currentCat, feed: { name, logo, url, enabled: true } })
+    });
+    const d = await resp.json();
+    if (d.success) {
+        if (!feedsData[currentCat]) feedsData[currentCat] = [];
+        feedsData[currentCat].push({ name, logo, url, enabled: true });
+        renderFeedList();
+        renderCatList();
+        updateStats();
+        document.getElementById('newFeedName').value = '';
+        document.getElementById('newFeedLogo').value = '';
+        document.getElementById('newFeedUrl').value = '';
+        document.getElementById('testResult').textContent = '';
+        toggleAddForm();
+        showToast('피드가 성공적으로 추가되었습니다.');
+    }
+}
+
+function addCategory() {
+    const val = document.getElementById('newCatInput').value.trim();
+    if (!val) return;
+    if (feedsData[val]) { alert('이미 존재하는 카테고리입니다.'); return; }
+    feedsData[val] = [];
+    document.getElementById('newCatInput').value = '';
+    renderCatList();
+    selectCategory(val);
+    updateStats();
+}
+
+// ============================================================
+// 2. 쿠팡 광고 배너 관리 로직
+// ============================================================
+async function loadSiteConfig() {
+    try {
+        const resp = await fetch('/admin/api/site_config');
+        const data = await resp.json();
+        if (data.success && data.config) {
+            currentSiteConfig = data.config;
+            populateAdsForm(data.config.ads || {});
+            populateTickerForm(data.config.ticker || {});
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+function populateAdsForm(ads) {
+    // 1) 좌측
+    const left = ads.left || {};
+    document.getElementById('adLeftEnabled').checked = !!left.enabled;
+    document.getElementById('adLeftId').value = left.coupang_id || 1026241;
+    document.getElementById('adLeftTracking').value = left.tracking_code || 'AF3197388';
+    document.getElementById('adLeftSubId').value = left.sub_id || 'dortm111';
+    document.getElementById('adLeftWidth').value = left.width || 160;
+    document.getElementById('adLeftHeight').value = left.height || 600;
+    document.getElementById('adLeftCustomHtml').value = left.custom_html || '';
+    setAdMode('left', left.mode || 'coupang');
+    updateAdStatusBadge('Left');
+
+    // 2) 우측
+    const right = ads.right || {};
+    document.getElementById('adRightEnabled').checked = !!right.enabled;
+    document.getElementById('adRightId').value = right.coupang_id || 1026241;
+    document.getElementById('adRightTracking').value = right.tracking_code || 'AF3197388';
+    document.getElementById('adRightSubId').value = right.sub_id || 'dortm111';
+    document.getElementById('adRightWidth').value = right.width || 160;
+    document.getElementById('adRightHeight').value = right.height || 600;
+    document.getElementById('adRightCustomHtml').value = right.custom_html || '';
+    setAdMode('right', right.mode || 'coupang');
+    updateAdStatusBadge('Right');
+
+    // 3) 중앙 가로
+    const center = ads.center || {};
+    document.getElementById('adCenterEnabled').checked = !!center.enabled;
+    document.getElementById('adCenterId').value = center.coupang_id || 1026241;
+    document.getElementById('adCenterTracking').value = center.tracking_code || 'AF3197388';
+    document.getElementById('adCenterSubId').value = center.sub_id || 'dortm111';
+    document.getElementById('adCenterWidth').value = center.width || 680;
+    document.getElementById('adCenterHeight').value = center.height || 140;
+    document.getElementById('adCenterCustomHtml').value = center.custom_html || '';
+    setAdMode('center', center.mode || 'coupang');
+    updateAdStatusBadge('Center');
+
+    // 4) 팝업
+    const popup = ads.popup || {};
+    document.getElementById('adPopupEnabled').checked = !!popup.enabled;
+    document.getElementById('adPopupDelay').value = popup.delay !== undefined ? popup.delay : 2;
+    document.getElementById('adPopupInterval').value = popup.interval_minutes !== undefined ? popup.interval_minutes : 5;
+    document.getElementById('adPopupCloseDelay').value = popup.close_delay !== undefined ? popup.close_delay : 3;
+    document.getElementById('adPopupId').value = popup.coupang_id || 1026359;
+    document.getElementById('adPopupTracking').value = popup.tracking_code || 'AF3197388';
+    document.getElementById('adPopupSubId').value = popup.sub_id || 'dortm111';
+    document.getElementById('adPopupWidth').value = popup.width || 300;
+    document.getElementById('adPopupHeight').value = popup.height || 300;
+    document.getElementById('adPopupCustomHtml').value = popup.custom_html || '';
+    setAdMode('popup', popup.mode || 'coupang');
+    updateAdStatusBadge('Popup');
+}
+
+function setAdMode(key, mode) {
+    adModes[key] = mode;
+    const Cap = key.charAt(0).toUpperCase() + key.slice(1);
+    const btnCoupang = document.getElementById(`btnModeCoupang${Cap}`);
+    const btnCustom = document.getElementById(`btnModeCustom${Cap}`);
+    const fCoupang = document.getElementById(`ad${Cap}CoupangFields`);
+    const fCustom = document.getElementById(`ad${Cap}CustomFields`);
+
+    if (mode === 'coupang') {
+        btnCoupang.classList.add('active');
+        btnCustom.classList.remove('active');
+        fCoupang.style.display = 'block';
+        fCustom.style.display = 'none';
+    } else {
+        btnCustom.classList.add('active');
+        btnCoupang.classList.remove('active');
+        fCoupang.style.display = 'none';
+        fCustom.style.display = 'block';
+    }
+}
+
+function updateAdStatusBadge(pos) {
+    const isChecked = document.getElementById(`ad${pos}Enabled`).checked;
+    const badge = document.getElementById(`adBadge${pos}`);
+    if (isChecked) {
+        badge.textContent = '활성 (노출 중)';
+        badge.className = 'ad-status-badge active';
+    } else {
+        badge.textContent = '비활성';
+        badge.className = 'ad-status-badge inactive';
+    }
+}
+
+async function saveAdsConfig() {
+    if (!currentSiteConfig) currentSiteConfig = {};
+    if (!currentSiteConfig.ads) currentSiteConfig.ads = {};
+
+    currentSiteConfig.ads.left = {
+        enabled: document.getElementById('adLeftEnabled').checked,
+        mode: adModes.left,
+        coupang_id: parseInt(document.getElementById('adLeftId').value) || 1026359,
+        tracking_code: document.getElementById('adLeftTracking').value.trim() || 'AF3197388',
+        sub_id: document.getElementById('adLeftSubId').value.trim() || 'dortm111',
+        width: parseInt(document.getElementById('adLeftWidth').value) || 160,
+        height: parseInt(document.getElementById('adLeftHeight').value) || 600,
+        custom_html: document.getElementById('adLeftCustomHtml').value
+    };
+
+    currentSiteConfig.ads.right = {
+        enabled: document.getElementById('adRightEnabled').checked,
+        mode: adModes.right,
+        coupang_id: parseInt(document.getElementById('adRightId').value) || 1026359,
+        tracking_code: document.getElementById('adRightTracking').value.trim() || 'AF3197388',
+        sub_id: document.getElementById('adRightSubId').value.trim() || 'dortm111',
+        width: parseInt(document.getElementById('adRightWidth').value) || 160,
+        height: parseInt(document.getElementById('adRightHeight').value) || 600,
+        custom_html: document.getElementById('adRightCustomHtml').value
+    };
+
+    currentSiteConfig.ads.center = {
+        enabled: document.getElementById('adCenterEnabled').checked,
+        mode: adModes.center,
+        coupang_id: parseInt(document.getElementById('adCenterId').value) || 1026241,
+        tracking_code: document.getElementById('adCenterTracking').value.trim() || 'AF3197388',
+        sub_id: document.getElementById('adCenterSubId').value.trim() || 'dortm111',
+        width: parseInt(document.getElementById('adCenterWidth').value) || 680,
+        height: parseInt(document.getElementById('adCenterHeight').value) || 140,
+        custom_html: document.getElementById('adCenterCustomHtml').value
+    };
+
+    currentSiteConfig.ads.popup = {
+        enabled: document.getElementById('adPopupEnabled').checked,
+        mode: adModes.popup,
+        delay: parseInt(document.getElementById('adPopupDelay').value) || 2,
+        interval_minutes: parseInt(document.getElementById('adPopupInterval').value) || 0,
+        close_delay: parseInt(document.getElementById('adPopupCloseDelay').value) || 3,
+        coupang_id: parseInt(document.getElementById('adPopupId').value) || 1026359,
+        tracking_code: document.getElementById('adPopupTracking').value.trim() || 'AF3197388',
+        sub_id: document.getElementById('adPopupSubId').value.trim() || 'dortm111',
+        width: parseInt(document.getElementById('adPopupWidth').value) || 300,
+        height: parseInt(document.getElementById('adPopupHeight').value) || 300,
+        custom_html: document.getElementById('adPopupCustomHtml').value
+    };
+
+    try {
+        const resp = await fetch('/admin/api/site_config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentSiteConfig)
+        });
+        const res = await resp.json();
+        if (res.success) {
+            showToast('✅ 쿠팡 광고 배너 설정이 안전하게 저장되었습니다!');
+        } else {
+            showToast('❌ 저장 실패: ' + res.message);
+        }
+    } catch (e) {
+        showToast('저장 에러: ' + e);
+    }
+}
+
+// ============================================================
+// 3. 이슈 전광판 관리 로직
+// ============================================================
+function populateTickerForm(ticker) {
+    document.getElementById('tickerEnabled').checked = !!ticker.enabled;
+    document.getElementById('tickerBadge').value = ticker.badge || '🔴 실시간 이슈';
+    document.getElementById('tickerSpeed').value = ticker.speed || 35;
+
+    const items = ticker.items || [];
+    const listEl = document.getElementById('tickerItemsList');
+    listEl.innerHTML = '';
+    items.forEach((it) => {
+        addTickerItemRow(it);
+    });
+}
+
+function addTickerItemRow(item = '') {
+    let title = '';
+    let link = '';
+    if (typeof item === 'object' && item !== null) {
+        title = item.title || '';
+        link = item.link || '';
+    } else {
+        title = String(item || '');
+        link = '';
+    }
+    const listEl = document.getElementById('tickerItemsList');
+    const row = document.createElement('div');
+    row.className = 'ticker-item-row';
+    const index = listEl.children.length + 1;
+    row.innerHTML = `
+        <span class="ticker-item-num">${index}</span>
+        <input type="text" class="ticker-item-input" value="${escAttr(title)}" placeholder="전광판 문구 (예: 🔥 [속보] ...)">
+        <input type="url" class="ticker-item-link-input" value="${escAttr(link)}" placeholder="기사 연결 링크 URL (선택, 새창 열기)">
+        <button class="btn-del" onclick="this.parentElement.remove(); renumberTickerItems();" title="삭제">✕</button>
+    `;
+    listEl.appendChild(row);
+}
+
+function renumberTickerItems() {
+    const listEl = document.getElementById('tickerItemsList');
+    Array.from(listEl.children).forEach((row, i) => {
+        row.querySelector('.ticker-item-num').textContent = i + 1;
+    });
+}
+
+async function fetchLiveTickerItems() {
+    showToast('⏳ 최신 실시간 속보 뉴스와 기사 링크를 수집하는 중입니다...');
+    try {
+        const resp = await fetch('/admin/api/ticker/fetch_live');
+        const res = await resp.json();
+        if (res.success && res.items && res.items.length > 0) {
+            const listEl = document.getElementById('tickerItemsList');
+            listEl.innerHTML = '';
+            res.items.forEach(it => {
+                addTickerItemRow(it);
+            });
+            showToast(`🔥 실시간 주요 속보 ${res.items.length}건(링크 포함)을 자동으로 불러왔습니다! 수정 후 하단 저장을 누르세요.`);
+        } else {
+            showToast('속보를 불러오지 못했습니다: ' + (res.message || ''));
+        }
+    } catch (e) {
+        showToast('불러오기 오류: ' + e);
+    }
+}
+
+async function saveTickerConfig() {
+    if (!currentSiteConfig) currentSiteConfig = {};
+    const items = [];
+    document.querySelectorAll('.ticker-item-row').forEach(row => {
+        const title = row.querySelector('.ticker-item-input')?.value.trim();
+        const link = row.querySelector('.ticker-item-link-input')?.value.trim() || '#';
+        if (title) items.push({ title, link });
+    });
+
+    currentSiteConfig.ticker = {
+        enabled: document.getElementById('tickerEnabled').checked,
+        badge: document.getElementById('tickerBadge').value.trim() || '🔴 실시간 이슈',
+        speed: parseInt(document.getElementById('tickerSpeed').value) || 35,
+        items: items.length > 0 ? items : [{ title: '📢 실시간 뉴스를 확인하세요', link: '#' }]
+    };
+
+    try {
+        const resp = await fetch('/admin/api/site_config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentSiteConfig)
+        });
+        const res = await resp.json();
+        if (res.success) {
+            showToast('✅ 상단 이슈 전광판 설정이 저장되었습니다!');
+        } else {
+            showToast('❌ 저장 실패: ' + res.message);
+        }
+    } catch (e) {
+        showToast('저장 에러: ' + e);
+    }
+}
+
+// ============================================================
+// 공통 유틸
+// ============================================================
+function showToast(msg) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2800);
+}
+
+function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escAttr(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+</script>
+</body>
+</html>
