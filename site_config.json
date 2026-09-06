@@ -51,7 +51,7 @@
     "apply_target": "article",
     "trigger_mode": "either",
     "time_seconds": 60,
-    "scroll_percent": 80,
+    "scroll_percent": 90,
     "prevent_repeat": true
   },
   "ticker": {
