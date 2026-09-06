@@ -651,7 +651,10 @@ def index():
     feeds = load_feeds_config()
     categories = list(feeds.keys())
     site_cfg = load_site_config()
-    return render_template('index.html', categories=categories, site_config=site_cfg)
+    with RSS_CACHE_LOCK:
+        cached = RSS_CACHE.get('전체')
+        initial_news = cached.get('news', []) if cached else []
+    return render_template('index.html', categories=categories, site_config=site_cfg, initial_news=initial_news)
 
 @app.route('/health')
 def health_check():
@@ -719,9 +722,42 @@ def api_image_proxy():
 # ============================================================
 # 서버 측 RSS 스마트 캐시 & 비동기 갱신 엔진 (0초대 초고속화)
 # ============================================================
+NEWS_SNAPSHOT_FILE = os.path.join(os.path.dirname(__file__), 'news_snapshot.json')
 RSS_CACHE = {}          # category -> {"timestamp": float, "news": list, "count": int, "is_refreshing": bool}
 RSS_CACHE_LOCK = threading.Lock()
 CACHE_TTL = 90          # 90초(1.5분) 동안은 캐시에서 0.001초 만에 즉시 반환
+
+def save_snapshot():
+    """최신 캐시 뉴스를 파일로 영구 보관하여 서버 재부팅 시에도 0.00초 즉시 제공"""
+    try:
+        with RSS_CACHE_LOCK:
+            data = {cat: entry['news'] for cat, entry in RSS_CACHE.items() if entry.get('news')}
+        if data:
+            with open(NEWS_SNAPSHOT_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=1)
+    except Exception as e:
+        print(f"[Snapshot save error]: {e}")
+
+def load_snapshot():
+    """서버 부팅 즉시 파일 스냅샷을 메모리 캐시로 로드 (0.001초 콜드 스타트 제거)"""
+    if os.path.exists(NEWS_SNAPSHOT_FILE):
+        try:
+            with open(NEWS_SNAPSHOT_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                with RSS_CACHE_LOCK:
+                    for cat, news_list in data.items():
+                        RSS_CACHE[cat] = {
+                            'timestamp': time.time() - 30,
+                            'news': news_list,
+                            'count': len(news_list),
+                            'is_refreshing': False
+                        }
+            print(f"[Snapshot] Loaded news snapshot for categories: {list(data.keys())}")
+        except Exception as e:
+            print(f"[Snapshot load error]: {e}")
+
+# 서버 시작 시 스냅샷 즉시 로드
+load_snapshot()
 
 def do_fetch_category_news(category, max_per_feed=15):
     """실제 언론사 RSS들을 병렬로 수집하고, 최상단 눈에 보이는 주요 기사 이미지만 신속 보완"""
@@ -741,20 +777,51 @@ def do_fetch_category_news(category, max_per_feed=15):
         t.start()
         threads.append(t)
     for t in threads:
-        t.join(timeout=4)
+        t.join(timeout=2.5)
     for i in range(len(feeds)):
         all_news.extend(results.get(i, []))
 
-    # 모든 기사의 누락 이미지를 16개 스레드로 초고속 병렬 보완 (경향신문, 한국경제 등 100% 보완)
+    # 1. 이미지가 누락된 기사 식별
     missing_items = [item for item in all_news if is_invalid_image(item.get('image')) and item.get('link')]
-    if missing_items:
+
+    # 2. 최상단 4개 항목(헤드라인 후보)만 동기식으로 초고속 보완 (0.1~0.2초 이내)
+    top_missing = missing_items[:4]
+    if top_missing:
         def fill_img(item):
             img = get_og_image(item['link'], category=category)
             if img:
                 item['image'] = img
 
-        with ThreadPoolExecutor(max_workers=16) as ex:
-            list(ex.map(fill_img, missing_items))
+        with ThreadPoolExecutor(max_workers=4) as ex:
+            list(ex.map(fill_img, top_missing))
+
+    # 3. 5번째 이후 누락 기사는 고화질 카테고리 테마 이미지로 즉시 세팅 (사용자 응답 0초 지연)
+    rest_missing = missing_items[4:]
+    pool = NEWS_THEME_FALLBACKS.get(category, NEWS_THEME_FALLBACKS.get('전체', []))
+    for item in rest_missing:
+        cached_img = IMAGE_CACHE.get(item['link'])
+        if cached_img:
+            item['image'] = cached_img
+        elif pool:
+            idx = abs(hash(item['link'])) % len(pool)
+            item['image'] = pool[idx]
+
+    # 4. 백그라운드 스레드에서 나머지 기사들의 실제 언론사 원문 og:image를 조용히 긁어 캐시 갱신
+    if rest_missing:
+        def bg_enrich():
+            try:
+                def enrich_worker(item):
+                    real_img = fetch_og_image(item['link'])
+                    if real_img and not is_invalid_image(real_img):
+                        item['image'] = real_img
+                        IMAGE_CACHE[item['link']] = real_img
+
+                with ThreadPoolExecutor(max_workers=8) as ex:
+                    list(ex.map(enrich_worker, rest_missing))
+                save_snapshot()
+            except Exception:
+                pass
+        threading.Thread(target=bg_enrich, daemon=True).start()
 
     return all_news
 
@@ -787,6 +854,7 @@ def background_refresh_category(category):
                         'count': len(news),
                         'is_refreshing': False
                     }
+                save_snapshot()
         except Exception as e:
             print(f"[Background Cache Refresh Error] {category}: {e}")
             with RSS_CACHE_LOCK:
@@ -797,7 +865,7 @@ def background_refresh_category(category):
 
 def prewarm_rss_cache():
     """서버 실행 시 첫 방문자도 0초 로딩을 누릴 수 있도록 사전 캐시 빌드"""
-    time.sleep(1)
+    time.sleep(0.5)
     for cat in ['전체', '경제', '부동산', '정치']:
         try:
             news = do_fetch_category_news(cat)
@@ -811,6 +879,7 @@ def prewarm_rss_cache():
                     }
         except Exception:
             pass
+    save_snapshot()
 
 # 백그라운드 프리워밍 시작 (Gunicorn 및 로컬 공통)
 threading.Thread(target=prewarm_rss_cache, daemon=True).start()
@@ -845,6 +914,7 @@ def api_rss():
             'count': len(news),
             'is_refreshing': False
         }
+    save_snapshot()
     resp = jsonify({'success': True, 'category': category, 'count': len(news), 'news': news, 'from_cache': False})
     resp.headers['Cache-Control'] = 'public, max-age=60, stale-while-revalidate=120'
     return resp

@@ -228,10 +228,11 @@
 </div>
 {% endif %}
 
-<!-- 사이트 설정 주입 -->
+<!-- 사이트 설정 및 초기 뉴스 데이터 주입 (0.00초 SSR 즉시 렌더링) -->
 <script>
 window.SITE_CONFIG = {{ site_config | tojson }};
+window.INITIAL_NEWS = {{ initial_news | tojson if initial_news else '[]' }};
 </script>
-<script src="/static/js/app.js?v=20260906_3"></script>
+<script src="/static/js/app.js?v=20260906_4"></script>
 </body>
 </html>

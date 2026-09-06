@@ -57,7 +57,7 @@ function switchCategory(cat) {
 // ============================================================
 // 초고속 브라우저 로컬 캐시 & 스켈레톤 관리
 // ============================================================
-const LOCAL_CACHE_PREFIX = 'news_cache_v4_';
+const LOCAL_CACHE_PREFIX = 'news_cache_v5_';
 
 function getLocalCache(category) {
     try {
@@ -131,29 +131,44 @@ function showSkeleton() {
 // ============================================================
 async function loadNews(category) {
     displayedCount = 0;
+    let initialDataRendered = false;
 
-    // 1. 브라우저 로컬 캐시가 있으면 -> 0.00초 만에 상단부터 즉시 출력!
-    const cached = getLocalCache(category);
-    if (cached && cached.length > 0) {
-        renderTopFirst(cached);
-    } else {
-        // 첫 방문 등으로 캐시가 전혀 없으면 -> 빛나는 스켈레톤 즉시 표시 (흰 공백 화면 방지)
-        showSkeleton();
+    // 1. 서버가 HTML과 함께 전달한 초기 뉴스(SSR)가 있으면 -> 0.00초 즉시 렌더링!
+    if (category === '전체' && window.INITIAL_NEWS && window.INITIAL_NEWS.length > 0) {
+        const ssrNews = window.INITIAL_NEWS;
+        setLocalCache('전체', ssrNews);
+        renderTopFirst(ssrNews);
+        initialDataRendered = true;
+        window.INITIAL_NEWS = null; // 1회 소비 후 초기화
     }
 
-    // 2. 서버(Render)에서 실시간 최신 뉴스 수신
+    // 2. 브라우저 로컬 캐시가 있으면 -> 0.00초 만에 상단부터 즉시 출력!
+    if (!initialDataRendered) {
+        const cached = getLocalCache(category);
+        if (cached && cached.length > 0) {
+            renderTopFirst(cached);
+            initialDataRendered = true;
+        } else {
+            // 첫 방문 등으로 캐시가 전혀 없을 때만 스켈레톤 표시
+            showSkeleton();
+        }
+    }
+
+    // 3. 서버(Render)에서 실시간 최신 뉴스 수신 (백그라운드 비동기 최신화)
     try {
         const resp = await fetch(`/api/rss?category=${encodeURIComponent(category)}&max=15`);
         const data = await resp.json();
 
         if (data.success && data.news && data.news.length > 0) {
             setLocalCache(category, data.news);
-            // 최신 데이터 도착 시 상단부터 스르륵 최신화
-            renderTopFirst(data.news);
+            // 사용자가 아직 동일 카테고리에 머물고 있다면 최신 뉴스로 갱신
+            if (currentCategory === category) {
+                renderTopFirst(data.news);
+            }
         }
     } catch (e) {
         console.error('뉴스 로딩 오류:', e);
-        if (!cached || cached.length === 0) {
+        if (!allNews || allNews.length === 0) {
             const grid = document.getElementById('newsGrid');
             if (grid) {
                 grid.innerHTML = `<div class="empty-state">뉴스를 불러오는 중입니다. 잠시 후 새로고침해주세요.</div>`;
