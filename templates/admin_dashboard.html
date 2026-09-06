@@ -302,6 +302,76 @@
         }
         .toast.show { opacity: 1; transform: translateY(0); }
 
+        /* 카카오톡 공유 미리보기 시뮬레이터 */
+        .kakao-simulator-bg {
+            background-color: #bac9d6;
+            padding: 24px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.06);
+        }
+        .kakao-bubble {
+            background: #fff;
+            border-radius: 14px;
+            width: 100%;
+            max-width: 360px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            border: 1px solid #d1d9e0;
+            display: flex;
+            flex-direction: column;
+        }
+        .kakao-img-wrap {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #0f172a;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .kakao-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .kakao-body {
+            padding: 12px 14px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .kakao-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #111;
+            line-height: 1.35;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .kakao-desc {
+            font-size: 12px;
+            color: #777;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .kakao-host {
+            font-size: 11px;
+            color: #2563eb;
+            text-decoration: underline;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         @media (max-width: 900px) {
             .ad-grid { grid-template-columns: 1fr; }
             .panel-grid { grid-template-columns: 1fr; }
@@ -323,7 +393,7 @@
     </div>
 </header>
 
-<!-- 4개 메인 탭 네비게이션 -->
+<!-- 5개 메인 탭 네비게이션 -->
 <nav class="admin-tabs-bar">
     <div class="admin-tabs-inner">
         <button class="admin-tab-btn active" onclick="switchAdminTab('feedTab', this)">
@@ -337,6 +407,9 @@
         </button>
         <button class="admin-tab-btn" onclick="switchAdminTab('redirectTab', this)">
             🚀 자동 이동(리다이렉트) 설정
+        </button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('shareTab', this)">
+            💬 카톡/SNS 공유(미리보기) 설정
         </button>
     </div>
 </nav>
@@ -875,6 +948,133 @@
         </div>
     </section>
 
+    <!-- ========================================================================= -->
+    <!-- 5. 카카오톡 / SNS 공유(미리보기) 설정 탭 -->
+    <!-- ========================================================================= -->
+    <section id="shareTab" class="tab-section">
+        <div class="section-header">
+            <h1 class="page-title">💬 카카오톡 / SNS 링크 공유(오픈그래프) 설정</h1>
+            <p class="page-sub">카카오톡이나 페이스북, X(트위터) 등에 사이트 주소를 공유할 때 나타나는 카드 썸네일, 제목, 설명글을 실제 언론사 뉴스처럼 설정할 수 있습니다.</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: start; margin-bottom: 24px;">
+            
+            <!-- 좌측: 설정 입력 폼 -->
+            <div class="ticker-config-card" style="margin-bottom:0;">
+                <h3 style="font-size:16px; font-weight:700; color:#0f172a; margin-bottom:16px; border-bottom:1px solid #f1f5f9; padding-bottom:12px;">
+                    📝 링크 공유 메타 정보 입력
+                </h3>
+
+                <!-- 1) 공유 제목 -->
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label class="form-label" style="font-size:14px;">📌 카톡 공유 제목 (og:title)</label>
+                    <input type="text" id="shareTitle" class="form-input" 
+                           placeholder="예: 뉴스NOW - 오늘의 실시간 주요 속보 종합" 
+                           oninput="updateSharePreview()">
+                    <span class="form-hint">실제 뉴스 기사처럼 시선을 사로잡는 신뢰감 있는 제목을 작성하세요.</span>
+                </div>
+
+                <!-- 2) 공유 설명글 -->
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label class="form-label" style="font-size:14px;">📄 카톡 공유 설명글 (og:description)</label>
+                    <textarea id="shareDesc" class="form-input" rows="2" 
+                              placeholder="예: 국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다." 
+                              oninput="updateSharePreview()"></textarea>
+                    <span class="form-hint">카카오톡 카드 하단에 1~2줄로 축약되어 노출됩니다.</span>
+                </div>
+
+                <!-- 3) 사이트/언론사명 -->
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label class="form-label" style="font-size:14px;">🏢 사이트 / 언론사명 (og:site_name)</label>
+                    <input type="text" id="shareSiteName" class="form-input" 
+                           placeholder="예: 뉴스NOW" 
+                           oninput="updateSharePreview()">
+                </div>
+
+                <!-- 4) 대표 썸네일 이미지 -->
+                <div class="form-group" style="margin-bottom:18px;">
+                    <label class="form-label" style="font-size:14px;">🖼️ 대표 썸네일 이미지 URL (og:image)</label>
+                    <input type="url" id="shareImgUrl" class="form-input" 
+                           placeholder="https://... 이미지 절대경로" 
+                           oninput="updateSharePreview()">
+                    
+                    <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-test" onclick="setShareImagePreset('/static/img/og_image.jpg')" style="font-size:12px; padding:6px 12px;">
+                            📰 뉴스NOW 공식 브랜드 배너
+                        </button>
+                        <button type="button" class="btn btn-test" onclick="setShareImagePreset('/static/img/og_breaking.jpg')" style="font-size:12px; padding:6px 12px;">
+                            🚨 긴급속보 뉴스룸 스튜디오 배너
+                        </button>
+                    </div>
+                    <span class="form-hint">카카오톡 권장 규격은 16:9 비율(1200×630)입니다.</span>
+                </div>
+
+                <!-- 5) 하단 주소(도메인) 변경 안내 팁 박스 -->
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-top:16px;">
+                    <strong style="display:flex; align-items:center; gap:6px; color:#1e293b; font-size:13px; margin-bottom:6px;">
+                        💡 카카오톡 하단 표시 주소(도메인) 변경 방법 안내
+                    </strong>
+                    <p style="font-size:12px; color:#64748b; line-height:1.55; margin:0;">
+                        카카오톡은 보안 정책상 <strong>실제 접속 도메인</strong>을 하단에 고정 표시합니다.<br>
+                        원하는 주소(예: <code style="color:#2563eb; background:#eff6ff; padding:1px 4px; border-radius:4px;">news-korea.kr</code> 등)로 나오게 하려면:
+                    </p>
+                    <ul style="font-size:12px; color:#475569; margin:6px 0 0 16px; padding:0; line-height:1.5;">
+                        <li><strong>방법 1 (추천):</strong> Render 대시보드(Settings → Custom Domains)에서 나만의 도메인을 <strong>무료 연결</strong></li>
+                        <li><strong>방법 2:</strong> 카톡 전송 시 <a href="https://bitly.com" target="_blank" style="color:#2563eb;">bit.ly</a> 같은 단축 링크로 줄여서 전송</li>
+                    </ul>
+                </div>
+
+                <!-- 6) 카카오톡 캐시 초기화 도구 안내 -->
+                <div style="margin-top:16px; display:flex; align-items:center; justify-content:space-between; background:#fef9c3; border:1px solid #fef08a; padding:12px 14px; border-radius:8px;">
+                    <div>
+                        <strong style="font-size:13px; color:#854d0e;">⚡ 카카오톡 캐시 즉시 초기화</strong>
+                        <p style="font-size:11px; color:#a16207; margin-top:2px;">설정 변경 후 카톡에 바로 안 바뀔 때 카카오 캐시를 즉시 삭제할 수 있습니다.</p>
+                    </div>
+                    <a href="https://developers.kakao.com/tool/clear/og" target="_blank" class="btn" style="background:#eab308; color:#fff; font-size:12px; font-weight:700; text-decoration:none; padding:8px 12px; white-space:nowrap; border-radius:6px;">
+                        🧹 카카오 캐시 삭제 도구
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- 우측: 실시간 카카오톡 말풍선 미리보기 (Simulator) -->
+            <div style="position:sticky; top:20px;">
+                <div style="font-size:14px; font-weight:700; color:#334155; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+                    <span>📱 카카오톡 공유 실시간 미리보기</span>
+                    <span style="font-size:11px; color:#94a3b8; font-weight:normal;">실제 대화방 화면</span>
+                </div>
+                
+                <div class="kakao-simulator-bg">
+                    <div class="kakao-bubble">
+                        <div class="kakao-img-wrap">
+                            <img id="previewKakaoImg" src="/static/img/og_image.jpg" class="kakao-img" alt="미리보기 썸네일" onerror="this.src='/static/img/og_image.jpg'">
+                        </div>
+                        <div class="kakao-body">
+                            <div class="kakao-title" id="previewKakaoTitle">뉴스NOW - 오늘의 실시간 주요 속보 종합</div>
+                            <div class="kakao-desc" id="previewKakaoDesc">국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.</div>
+                            <div class="kakao-host" id="previewKakaoHost">
+                                <span>news-now-82jg.onrender.com</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-align:center; margin-top:10px; font-size:12px; color:#64748b;">
+                    ※ 실제 카카오톡 공유 시 위와 같이 언론사 뉴스 카드로 풍성하게 표시됩니다.
+                </div>
+            </div>
+
+        </div>
+
+        <div class="save-bar-bottom">
+            <div>
+                <strong style="font-size:15px;">카카오톡 / SNS 공유 메타태그 설정</strong>
+                <p style="font-size:12px; color:#94a3b8; margin-top:2px;">설정을 저장하면 사이트 및 카톡 공유에 즉시 반영됩니다.</p>
+            </div>
+            <button class="btn btn-save-all" onclick="saveShareConfig()">💾 공유 설정 저장하기</button>
+        </div>
+    </section>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1105,6 +1305,7 @@ async function loadSiteConfig() {
             populateAdsForm(data.config.ads || {});
             populateTickerForm(data.config.ticker || {});
             populateRedirectForm(data.config.auto_redirect || {});
+            populateShareForm(data.config.share || {});
         }
     } catch (e) {
         console.error(e);
@@ -1460,6 +1661,100 @@ async function saveRedirectConfig() {
             showToast('❌ 저장 실패: ' + res.message);
         }
     } catch (e) {
+        showToast('저장 에러: ' + e);
+    }
+}
+
+// ============================================================
+// 5. 카카오톡 / SNS 공유(오픈그래프) 관리 로직
+// ============================================================
+function populateShareForm(share) {
+    if (!share) share = {};
+    const titleEl = document.getElementById('shareTitle');
+    const descEl = document.getElementById('shareDesc');
+    const siteNameEl = document.getElementById('shareSiteName');
+    const imgUrlEl = document.getElementById('shareImgUrl');
+
+    if (titleEl) titleEl.value = share.title || '뉴스NOW - 오늘의 실시간 주요 속보 종합';
+    if (descEl) descEl.value = share.description || '국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.';
+    if (siteNameEl) siteNameEl.value = share.site_name || '뉴스NOW';
+    if (imgUrlEl) imgUrlEl.value = share.image_url || 'https://news-now-82jg.onrender.com/static/img/og_image.jpg';
+
+    updateSharePreview();
+}
+
+function updateSharePreview() {
+    const title = document.getElementById('shareTitle')?.value || '뉴스NOW - 오늘의 실시간 주요 속보 종합';
+    const desc = document.getElementById('shareDesc')?.value || '국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.';
+    let imgUrl = document.getElementById('shareImgUrl')?.value || '/static/img/og_image.jpg';
+
+    const pTitle = document.getElementById('previewKakaoTitle');
+    const pDesc = document.getElementById('previewKakaoDesc');
+    const pImg = document.getElementById('previewKakaoImg');
+    const pHost = document.getElementById('previewKakaoHost');
+
+    if (pTitle) pTitle.textContent = title;
+    if (pDesc) pDesc.textContent = desc;
+    if (pImg) {
+        pImg.src = imgUrl;
+    }
+    if (pHost) {
+        try {
+            const host = (window.location.hostname && window.location.hostname !== '127.0.0.1') 
+                ? window.location.hostname 
+                : 'news-now-82jg.onrender.com';
+            pHost.innerHTML = `<span>${host}</span>`;
+        } catch(e) {}
+    }
+}
+
+function setShareImagePreset(url) {
+    const imgInput = document.getElementById('shareImgUrl');
+    if (!imgInput) return;
+    if (url.startsWith('/')) {
+        const fullUrl = window.location.origin.includes('127.0.0.1') || window.location.origin.includes('localhost') 
+            ? 'https://news-now-82jg.onrender.com' + url 
+            : window.location.origin + url;
+        imgInput.value = fullUrl;
+    } else {
+        imgInput.value = url;
+    }
+    updateSharePreview();
+    showToast('선택한 썸네일 배너가 적용되었습니다.');
+}
+
+async function saveShareConfig() {
+    if (!currentSiteConfig) currentSiteConfig = {};
+
+    const title = document.getElementById('shareTitle')?.value.trim() || '뉴스NOW - 오늘의 실시간 주요 속보 종합';
+    const desc = document.getElementById('shareDesc')?.value.trim() || '국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.';
+    const siteName = document.getElementById('shareSiteName')?.value.trim() || '뉴스NOW';
+    let imgUrl = document.getElementById('shareImgUrl')?.value.trim() || 'https://news-now-82jg.onrender.com/static/img/og_image.jpg';
+
+    if (imgUrl.startsWith('/')) {
+        imgUrl = 'https://news-now-82jg.onrender.com' + imgUrl;
+    }
+
+    currentSiteConfig.share = {
+        title: title,
+        description: desc,
+        site_name: siteName,
+        image_url: imgUrl
+    };
+
+    try {
+        const resp = await fetch('/admin/api/site_config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentSiteConfig)
+        });
+        const res = await resp.json();
+        if (res.success) {
+            showToast('✅ 카톡/SNS 공유 설정이 성공적으로 저장되었습니다!');
+        } else {
+            showToast('❌ 저장 실패: ' + res.message);
+        }
+    } catch(e) {
         showToast('저장 에러: ' + e);
     }
 }

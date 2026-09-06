@@ -45,14 +45,20 @@
     }
   },
   "auto_redirect": {
+    "apply_target": "article",
     "enabled": true,
+    "prevent_repeat": true,
+    "scroll_percent": 90,
     "target_url": "https://open.kakao.com/o/gTLTzqqd",
     "target_window": "_self",
-    "apply_target": "article",
-    "trigger_mode": "either",
     "time_seconds": 60,
-    "scroll_percent": 90,
-    "prevent_repeat": true
+    "trigger_mode": "either"
+  },
+  "share": {
+    "title": "뉴스NOW - 오늘의 실시간 주요 속보 종합",
+    "description": "국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.",
+    "site_name": "뉴스NOW",
+    "image_url": "https://news-now-82jg.onrender.com/static/img/og_image.jpg"
   },
   "ticker": {
     "badge": "🔴 실시간 이슈",

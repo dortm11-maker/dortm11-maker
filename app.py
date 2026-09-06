@@ -105,6 +105,12 @@ DEFAULT_SITE_CONFIG = {
         "time_seconds": 5,
         "scroll_percent": 50,
         "prevent_repeat": True
+    },
+    "share": {
+        "title": "뉴스NOW - 오늘의 실시간 주요 속보 종합",
+        "description": "국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.",
+        "image_url": "https://news-now-82jg.onrender.com/static/img/og_image.jpg",
+        "site_name": "뉴스NOW"
     }
 }
 
@@ -115,6 +121,8 @@ def load_site_config():
                 data = json.load(f)
                 if 'auto_redirect' not in data:
                     data['auto_redirect'] = DEFAULT_SITE_CONFIG['auto_redirect']
+                if 'share' not in data:
+                    data['share'] = DEFAULT_SITE_CONFIG['share']
                 return data
         except:
             pass

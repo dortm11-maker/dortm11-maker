@@ -4,12 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes">
     <meta name="referrer" content="no-referrer">
-    <title>{{ article.title }} - 뉴스NOW</title>
-    <meta name="description" content="{% if article.paragraphs %}{{ article.paragraphs[0][:140] }}{% else %}{{ article.title }}{% endif %}">
+    <title>{{ article.title }} - {{ article.publisher or '뉴스NOW' }}</title>
+    {% set article_desc = (article.paragraphs[0][:140] if article.paragraphs and article.paragraphs|length > 0 else article.title) %}
+    <meta name="description" content="{{ article_desc }}">
+
+    <!-- ==================== 기사 카카오톡 / SNS 링크 공유 최적화 ==================== -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="{{ article.publisher or '뉴스NOW' }}">
     <meta property="og:title" content="{{ article.title }}">
-    {% if article.main_img %}
-    <meta property="og:image" content="{{ article.main_img }}">
-    {% endif %}
+    <meta property="og:description" content="{{ article_desc }}">
+    {% set article_img = (article.main_img if article.main_img else 'https://news-now-82jg.onrender.com/static/img/og_image.jpg') %}
+    <meta property="og:image" content="{{ article_img }}">
+    <meta property="og:image:secure_url" content="{{ article_img }}">
+    <meta property="og:url" content="{{ request.url }}">
+
+    <!-- 트위터 카드 -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ article.title }}">
+    <meta name="twitter:description" content="{{ article_desc }}">
+    <meta name="twitter:image" content="{{ article_img }}">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📰</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
