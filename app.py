@@ -54,6 +54,12 @@ class VisitorTracker:
         self.total_uv = 0
         self.total_pv = 0
         self.daily = {}          # {date_str: {"uv": int, "pv": int}}
+        self.ad_clicks = {
+            'total': 0,
+            'today': 0,
+            'by_type': {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0},
+            'recent_logs': []
+        }
         self.last_saved = time.time()
         self.load()
 
@@ -66,6 +72,8 @@ class VisitorTracker:
                     self.total_pv = data.get('total_pv', 0)
                     self.daily = data.get('daily', {})
                     self.visitor_logs = data.get('visitor_logs', {})
+                    if 'ad_clicks' in data:
+                        self.ad_clicks = data['ad_clicks']
             except Exception as e:
                 print(f"[Stats] Load error: {e}")
         
@@ -77,11 +85,18 @@ class VisitorTracker:
     def save(self):
         try:
             saved_logs = dict(list(self.visitor_logs.items())[-100:])
+            saved_ad_logs = self.ad_clicks.get('recent_logs', [])[-100:]
             data = {
                 'total_uv': self.total_uv,
                 'total_pv': self.total_pv,
                 'daily': self.daily,
-                'visitor_logs': saved_logs
+                'visitor_logs': saved_logs,
+                'ad_clicks': {
+                    'total': self.ad_clicks.get('total', 0),
+                    'today': self.ad_clicks.get('today', 0),
+                    'by_type': self.ad_clicks.get('by_type', {}),
+                    'recent_logs': saved_ad_logs
+                }
             }
             with open(VISITOR_STATS_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
@@ -98,6 +113,48 @@ class VisitorTracker:
                 v['visit_count'] = 0
             if today not in self.daily:
                 self.daily[today] = {"uv": 0, "pv": 0}
+            if 'today' in self.ad_clicks:
+                self.ad_clicks['today'] = 0
+            self.save()
+
+    def record_ad_click(self, ip, device, ad_type, page_name):
+        now = time.time()
+        now_str = datetime.now(KST).strftime('%H:%M:%S')
+        label_map = {
+            'left': '좌측 날개 배너',
+            'right': '우측 날개 배너',
+            'center': '본문 가로 배너',
+            'popup': '중앙 팝업 배너',
+            'link': '쿠팡 파트너스 링크',
+            'auto_redirect': '자동 리다이렉트 이동'
+        }
+        ad_label = label_map.get(ad_type, f'광고 배너 ({ad_type})')
+        with self.lock:
+            self._check_date_rollover()
+            if 'total' not in self.ad_clicks:
+                self.ad_clicks['total'] = 0
+            if 'today' not in self.ad_clicks:
+                self.ad_clicks['today'] = 0
+            if 'by_type' not in self.ad_clicks:
+                self.ad_clicks['by_type'] = {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}
+            if 'recent_logs' not in self.ad_clicks:
+                self.ad_clicks['recent_logs'] = []
+
+            self.ad_clicks['total'] = self.ad_clicks.get('total', 0) + 1
+            self.ad_clicks['today'] = self.ad_clicks.get('today', 0) + 1
+            self.ad_clicks['by_type'][ad_type] = self.ad_clicks['by_type'].get(ad_type, 0) + 1
+
+            self.ad_clicks['recent_logs'].append({
+                'time': now_str,
+                'ip': ip,
+                'device': device,
+                'ad_type': ad_type,
+                'label': ad_label,
+                'page': page_name or '메인 홈',
+                'ts': now
+            })
+            if len(self.ad_clicks['recent_logs']) > 150:
+                self.ad_clicks['recent_logs'] = self.ad_clicks['recent_logs'][-100:]
             self.save()
 
     def record_visit(self, ip, device, page_name, is_pageview=True):
@@ -194,6 +251,13 @@ class VisitorTracker:
             
             v_list.sort(key=lambda x: (1 if x['is_live'] else 0, x['last_ts']), reverse=True)
 
+            # 쿠팡 광고 클릭 통계
+            ad_total = self.ad_clicks.get('total', 0)
+            ad_today = self.ad_clicks.get('today', 0)
+            today_uv = today_stat.get('uv', 0)
+            ctr = round((ad_today / max(1, today_uv)) * 100, 1) if today_uv > 0 else 0.0
+            recent_ad_logs = list(reversed(self.ad_clicks.get('recent_logs', [])))[:50]
+
             return {
                 'realtime_now': realtime_count,
                 'today_uv': today_stat.get('uv', 0),
@@ -201,7 +265,14 @@ class VisitorTracker:
                 'total_uv': self.total_uv,
                 'total_pv': self.total_pv,
                 'recent_daily': recent_daily,
-                'visitor_list': v_list[:50]
+                'visitor_list': v_list[:50],
+                'ad_stats': {
+                    'total': ad_total,
+                    'today': ad_today,
+                    'ctr': ctr,
+                    'by_type': self.ad_clicks.get('by_type', {}),
+                    'recent_logs': recent_ad_logs
+                }
             }
 
 visitor_tracker = VisitorTracker()
@@ -877,8 +948,10 @@ def get_client_real_ip():
         return x_real.strip()
     return request.remote_addr or '127.0.0.1'
 
-def detect_device():
-    ua = request.headers.get('User-Agent', '').lower()
+def detect_device(ua=None):
+    if ua is None:
+        ua = request.headers.get('User-Agent', '')
+    ua = ua.lower()
     if any(k in ua for k in ['iphone', 'ipad', 'android', 'mobile', 'blackberry', 'webos']):
         return '📱 모바일'
     return '💻 PC'
@@ -919,6 +992,20 @@ def api_ping():
     page = request.args.get('page', '')
     visitor_tracker.update_ping(client_ip, page_name=page)
     return jsonify({'ok': True})
+
+@app.route('/api/track_ad_click', methods=['POST'])
+def api_track_ad_click():
+    """쿠팡 파트너스 광고 및 링크 클릭 실시간 추적 API"""
+    try:
+        data = request.get_json(silent=True) or {}
+        ad_type = data.get('ad_type', 'unknown')
+        page_name = data.get('page', '')
+        client_ip = get_client_real_ip()
+        device = detect_device()
+        visitor_tracker.record_ad_click(client_ip, device, ad_type, page_name)
+        return jsonify({'success': True})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
 
 # ============================================================
 # 라우트 - 일반 사용자

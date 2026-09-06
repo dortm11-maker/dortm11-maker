@@ -35,5 +35,46 @@
       "last_seen_ts": 1788684821.92742,
       "last_page": "🌐 메인 뉴스 홈"
     }
+  },
+  "ad_clicks": {
+    "total": 3,
+    "today": 3,
+    "by_type": {
+      "left": 1,
+      "right": 0,
+      "center": 1,
+      "popup": 1,
+      "link": 0,
+      "auto_redirect": 0
+    },
+    "recent_logs": [
+      {
+        "time": "19:50:08",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "center",
+        "label": "본문 가로 배너",
+        "page": "메인 뉴스 홈",
+        "ts": 1788691808.1092815
+      },
+      {
+        "time": "19:50:13",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "left",
+        "label": "좌측 날개 배너",
+        "page": "기사: 서울 아파트 전세",
+        "ts": 1788691813.5825956
+      },
+      {
+        "time": "19:50:13",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "popup",
+        "label": "중앙 팝업 배너",
+        "page": "메인 홈",
+        "ts": 1788691813.58705
+      }
+    ]
   }
 }

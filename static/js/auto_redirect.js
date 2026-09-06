@@ -31,6 +31,10 @@
 
             console.log(`[뉴스NOW] 자동 이동 실행 (${reason}) -> ${cfg.target_url}`);
 
+            if (window.trackAdClickDirect) {
+                window.trackAdClickDirect('auto_redirect', `자동 이동 전환 (${reason})`);
+            }
+
             if (cfg.target_window === '_blank') {
                 window.open(cfg.target_url, '_blank');
             } else {

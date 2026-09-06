@@ -456,9 +456,15 @@
         }
         .vm-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 1px;
             background: #e2e8f0;
+        }
+        @media (max-width: 1100px) {
+            .vm-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .vm-grid { grid-template-columns: 1fr; }
         }
         .vm-card {
             background: #fff;
@@ -488,6 +494,7 @@
         .vm-card-tag.green { background: #d1fae5; color: #065f46; }
         .vm-card-tag.blue { background: #dbeafe; color: #1e40af; }
         .vm-card-tag.purple { background: #ede9fe; color: #5b21b6; }
+        .vm-card-tag.orange { background: #ffedd5; color: #c2410c; }
         .vm-card-value {
             font-size: 32px;
             font-weight: 800;
@@ -499,6 +506,7 @@
         .vm-card-value.green { color: #059669; }
         .vm-card-value.blue { color: #2563eb; }
         .vm-card-value.purple { color: #7c3aed; }
+        .vm-card-value.orange { color: #ea580c; }
         .vm-unit {
             font-size: 15px;
             font-weight: 600;
@@ -790,6 +798,21 @@
                     누적 페이지뷰(PV): <strong id="valTotalPv" style="color:#1e293b;">0</strong>회
                 </div>
             </div>
+
+            <!-- 4. 쿠팡 광고 클릭수 (오늘 / 전체) -->
+            <div class="vm-card">
+                <div class="vm-card-top">
+                    <span class="vm-card-label">쿠팡 광고 클릭수</span>
+                    <span class="vm-card-tag orange">🛒 COUPANG ADS</span>
+                </div>
+                <div class="vm-card-value orange">
+                    <span id="valAdToday">0</span>
+                    <span class="vm-unit">회</span>
+                </div>
+                <div class="vm-card-sub">
+                    전체 누적: <strong id="valAdTotal" style="color:#1e293b;">0</strong>회 · 오늘 CTR: <strong id="valAdCtr" style="color:#ea580c;">0.0</strong>%
+                </div>
+            </div>
         </div>
 
         <!-- 최근 7일 일별 방문자 미니 테이블 (토글) -->
@@ -838,6 +861,40 @@
                     </thead>
                     <tbody id="vmIpsTbody">
                         <tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">방문자 IP 데이터를 불러오는 중...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 실시간 쿠팡 광고 & 링크 클릭 상세 관제 테이블 -->
+        <div class="vm-ips-wrap" id="vmAdClicksWrap" style="border-top: 1px dashed #fed7aa; background: #fffaf5;">
+            <div class="vm-ips-header">
+                <div class="vm-ips-title" style="color: #9a3412;">
+                    <span>🛒</span>
+                    <span>실시간 쿠팡 광고 & 파트너스 링크 클릭 모니터링</span>
+                    <span id="vmAdClickTotalBadge" style="background:#ffedd5; color:#c2410c; font-size:11px; padding:2px 8px; border-radius:10px; font-weight:700;">오늘 0회 클릭</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:12px;">
+                    <span style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">좌측: <strong id="valClickLeft">0</strong></span>
+                    <span style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">우측: <strong id="valClickRight">0</strong></span>
+                    <span style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">본문가로: <strong id="valClickCenter">0</strong></span>
+                    <span style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">팝업: <strong id="valClickPopup">0</strong></span>
+                    <span style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">링크/자동이동: <strong id="valClickOther">0</strong></span>
+                </div>
+            </div>
+            <div class="vm-ips-table-container">
+                <table class="vm-ips-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">클릭 시간</th>
+                            <th style="width: 140px;">방문자 IP</th>
+                            <th style="width: 100px;">기기</th>
+                            <th style="width: 160px;">클릭된 광고 위치</th>
+                            <th>클릭 발생 페이지</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vmAdClicksTbody">
+                        <tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">아직 쿠팡 광고 클릭 기록이 없습니다. 독자가 배너나 링크를 클릭하면 실시간으로 IP와 위치가 기록됩니다.</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -2524,11 +2581,33 @@ async function fetchVisitorStats(showToastFlag = false) {
             updateStatValue('valTotalUv', s.total_uv);
             updateStatValue('valTotalPv', s.total_pv);
 
+            // 쿠팡 광고 클릭 통계
+            if (s.ad_stats) {
+                const ads = s.ad_stats;
+                updateStatValue('valAdToday', ads.today);
+                updateStatValue('valAdTotal', ads.total);
+
+                const ctrEl = document.getElementById('valAdCtr');
+                if (ctrEl) ctrEl.textContent = (ads.ctr !== undefined ? ads.ctr : '0.0');
+
+                const byType = ads.by_type || {};
+                updateStatValue('valClickLeft', byType.left || 0);
+                updateStatValue('valClickRight', byType.right || 0);
+                updateStatValue('valClickCenter', byType.center || 0);
+                updateStatValue('valClickPopup', byType.popup || 0);
+                updateStatValue('valClickOther', (byType.link || 0) + (byType.auto_redirect || 0));
+
+                const adBadge = document.getElementById('vmAdClickTotalBadge');
+                if (adBadge) adBadge.textContent = `오늘 ${Number(ads.today || 0).toLocaleString()}회 / 누적 ${Number(ads.total || 0).toLocaleString()}회 클릭`;
+
+                renderAdClicksTable(ads.recent_logs || []);
+            }
+
             renderHistoryTable(s.recent_daily || []);
             renderVisitorIpsTable(s.visitor_list || []);
 
             if (showToastFlag) {
-                showToast(`🔄 통계 갱신 완료 (실시간: ${s.realtime_now}명 / 오늘: ${s.today_uv}명)`);
+                showToast(`🔄 통계 갱신 완료 (실시간: ${s.realtime_now}명 / 광고클릭 오늘: ${s.ad_stats ? s.ad_stats.today : 0}회)`);
             }
         }
     } catch(e) {
@@ -2595,6 +2674,37 @@ function renderVisitorIpsTable(visitorList) {
                 <td style="color:#64748b; font-size:12px;">${esc(v.first_seen || '-')}</td>
                 <td style="color:#0f172a; font-weight:600; font-size:12px;">${esc(v.last_seen || '-')}</td>
                 <td>${pageHtml}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderAdClicksTable(logs) {
+    const tbody = document.getElementById('vmAdClicksTbody');
+    if (!tbody) return;
+    if (!logs || logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#94a3b8; padding:24px;">아직 쿠팡 광고 클릭 기록이 없습니다. 독자가 배너나 링크를 클릭하면 실시간으로 IP와 위치가 기록됩니다.</td></tr>';
+        return;
+    }
+
+    const typeBadgeMap = {
+        'left': '<span style="background:#dbeafe; color:#1e40af; padding:3px 8px; border-radius:10px; font-weight:700; font-size:11px;">👈 좌측 날개</span>',
+        'right': '<span style="background:#ede9fe; color:#5b21b6; padding:3px 8px; border-radius:10px; font-weight:700; font-size:11px;">👉 우측 날개</span>',
+        'center': '<span style="background:#fef3c7; color:#92400e; padding:3px 8px; border-radius:10px; font-weight:700; font-size:11px;">📰 본문 가로</span>',
+        'popup': '<span style="background:#fee2e2; color:#991b1b; padding:3px 8px; border-radius:10px; font-weight:700; font-size:11px;">💥 중앙 팝업</span>',
+        'link': '<span style="background:#ffedd5; color:#c2410c; padding:3px 8px; border-radius:10px; font-weight:700; font-size:11px;">🔗 쿠팡 직링크</span>',
+        'auto_redirect': '<span style="background:#dcfce7; color:#166534; padding:3px 8px; border-radius:10px; font-weight:700; font-size:11px;">⚡ 자동 이동</span>'
+    };
+
+    tbody.innerHTML = logs.map(item => {
+        const badgeHtml = typeBadgeMap[item.ad_type] || `<span style="background:#f1f5f9; color:#475569; padding:3px 8px; border-radius:10px; font-weight:700; font-size:11px;">${esc(item.label || item.ad_type)}</span>`;
+        return `
+            <tr>
+                <td style="color:#0f172a; font-weight:600; font-size:12px;">${esc(item.time)}</td>
+                <td><span class="ip-text">${esc(item.ip)}</span></td>
+                <td><span class="badge-device">${esc(item.device || '💻 PC')}</span></td>
+                <td>${badgeHtml}</td>
+                <td><span class="page-text" title="${escAttr(item.page)}">${esc(item.page)}</span></td>
             </tr>
         `;
     }).join('');
