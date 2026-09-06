@@ -178,6 +178,9 @@
             <div class="article-badge-row">
                 <span class="article-publisher-pill">{{ article.pub_logo }} {{ article.publisher }}</span>
                 <span class="article-status-pill">실시간 속보</span>
+                {% if article.is_rewritten %}
+                <span class="article-ai-pill" style="background:#eff6ff; color:#2563eb; font-size:12px; font-weight:700; padding:4px 10px; border-radius:6px; border:1px solid #bfdbfe;">🤖 AI 안심 리포트</span>
+                {% endif %}
             </div>
             <h1 class="article-view-title">{{ article.title }}</h1>
             <div class="article-meta-info">
@@ -247,10 +250,14 @@
         <div class="article-source-box">
             <div class="source-box-header">
                 <span class="source-icon">📰</span>
-                <span class="source-title">{{ article.publisher }} 원문 기사 및 저작권 안내</span>
+                <span class="source-title">{{ article.publisher }} 원문 출처 및 저작권 안내</span>
             </div>
             <p class="source-desc">
+                {% if article.is_rewritten %}
+                본 기사는 언론사 공식 보도 사실(Fact)을 바탕으로 뉴스NOW AI가 독자적인 문체로 재구성한 2차 요약 보도물입니다. 기사의 원작자 저작권과 권리를 존중하며, 전체 원문 및 영상은 아래 언론사 공식 보도 보기를 통해 확인하실 수 있습니다.
+                {% else %}
                 본 기사의 저작권 및 모든 법적 권리는 <strong>{{ article.publisher }}</strong>에 있으며, 뉴스NOW는 RSS 및 공개 정보 제공 목적으로 기사를 전달합니다. 전문 및 관련 영상은 원문 페이지에서 확인하실 수 있습니다.
+                {% endif %}
             </p>
             <div class="source-action">
                 <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="source-link-btn">

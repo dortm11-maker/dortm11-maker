@@ -441,6 +441,15 @@ DEFAULT_SITE_CONFIG = {
             "custom_html": ""
         }
     },
+    "ai_rewrite": {
+        "enabled": True,
+        "api_provider": "gemini",
+        "api_key": "",
+        "use_premium_images": True,
+        "image_safeguard": True,
+        "rewrite_title": True,
+        "rewrite_body": True
+    },
     "auto_redirect": {
         "enabled": False,
         "target_url": "https://link.coupang.com/",
@@ -468,12 +477,14 @@ def load_site_config():
                     data['auto_redirect'] = DEFAULT_SITE_CONFIG['auto_redirect']
                 if 'share' not in data:
                     data['share'] = DEFAULT_SITE_CONFIG['share']
+                if 'ai_rewrite' not in data:
+                    data['ai_rewrite'] = DEFAULT_SITE_CONFIG['ai_rewrite']
                 if 'ads' in data and 'mobile' not in data['ads']:
                     data['ads']['mobile'] = DEFAULT_SITE_CONFIG['ads']['mobile']
                 return data
         except:
             pass
-    return DEFAULT_SITE_CONFIG
+    return DEFAULT_SITE_CONFIG.copy()
 
 def save_site_config(config):
     with open(SITE_CONFIG_FILE, 'w', encoding='utf-8') as f:
@@ -1170,8 +1181,32 @@ def fetch_article_detail(url):
                 else:
                     paragraphs.append("기사의 본문 내용을 불러오는 중입니다. 전문은 아래 언론사 원문 보기를 통해 확인하실 수 있습니다.")
 
+        # AI 리라이팅 & 저작권 안심 이미지 강화 파이프라인
+        is_rewritten = False
+        original_title = title
+        try:
+            site_cfg = load_site_config()
+            ai_cfg = site_cfg.get('ai_rewrite', {})
+
+            # 1. 텍스트 AI 리라이팅 (저작권 회피)
+            if ai_cfg.get('enabled', True):
+                from services.ai_rewriter import rewrite_article
+                title, paragraphs, is_rewritten = rewrite_article(title, paragraphs, site_cfg, url)
+
+            # 2. 이미지 강화 (부동산/경제/증권 고화질 프리미엄 스톡 매칭 및 원본 보호)
+            if ai_cfg.get('use_premium_images', True):
+                from services.image_enhancer import get_premium_stock_image, process_image_safeguard
+                stock_img = get_premium_stock_image(original_title, " ".join(paragraphs[:3]))
+                if stock_img:
+                    main_img = stock_img
+                elif main_img and ai_cfg.get('image_safeguard', True):
+                    main_img = process_image_safeguard(main_img)
+        except Exception as ai_err:
+            print(f"[AI Rewrite/Image Error] {ai_err}")
+
         result = {
             'title': title or '최신 뉴스',
+            'original_title': original_title,
             'publisher': publisher,
             'pub_logo': pub_logo,
             'pub_date': pub_date,
@@ -1179,7 +1214,8 @@ def fetch_article_detail(url):
             'main_img': main_img,
             'caption': lead_img_caption,
             'paragraphs': paragraphs,
-            'url': url
+            'url': url,
+            'is_rewritten': is_rewritten
         }
 
         ARTICLE_CACHE[url] = (now_ts, result)
@@ -1833,6 +1869,31 @@ def admin_convert_share_link():
         })
     except Exception as e:
         return jsonify({'success': False, 'message': f'변환 실패: {str(e)}'})
+
+# ---- AI 리라이팅 & 이미지 즉시 테스트 API ----
+@app.route('/admin/api/test_ai_rewrite', methods=['POST'])
+def admin_test_ai_rewrite():
+    if not is_admin():
+        abort(403)
+    data = request.get_json() or {}
+    news_url = (data.get('url') or '').strip()
+    if not news_url:
+        return jsonify({'success': False, 'message': '뉴스 기사 URL을 입력해주세요.'})
+    try:
+        art = fetch_article_detail(news_url)
+        if not art:
+            return jsonify({'success': False, 'message': '기사를 불러올 수 없습니다.'})
+        return jsonify({
+            'success': True,
+            'title': art.get('title'),
+            'original_title': art.get('original_title', art.get('title')),
+            'main_img': art.get('main_img'),
+            'publisher': art.get('publisher'),
+            'paragraphs': art.get('paragraphs', [])[:4],
+            'is_rewritten': art.get('is_rewritten', False)
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'테스트 오류: {str(e)}'})
 
 # ---- 관리자 비밀번호 변경 API ----
 @app.route('/admin/api/change_password', methods=['POST'])

@@ -10,3 +10,4 @@ scratch_*.py
 .DS_Store
 Thumbs.db
 cloudflared.exe
+backup_*.zip

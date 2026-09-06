@@ -55,6 +55,15 @@
       "width": 360
     }
   },
+  "ai_rewrite": {
+    "enabled": true,
+    "api_provider": "gemini",
+    "api_key": "",
+    "use_premium_images": true,
+    "image_safeguard": true,
+    "rewrite_title": true,
+    "rewrite_body": true
+  },
   "auto_redirect": {
     "enabled": true,
     "target_url": "https://open.kakao.com/o/gTLTzqqd",
