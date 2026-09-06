@@ -127,14 +127,14 @@
 <!-- ===================== 5. 메인 콘텐츠 ===================== -->
 <main class="main-content container">
 
-    <!-- 로딩 스피너 -->
-    <div class="loading-screen" id="loadingScreen">
+    <!-- 로딩 스피너 (비상 폴백용) -->
+    <div class="loading-screen" id="loadingScreen" style="display:none">
         <div class="loading-dots"><span></span><span></span><span></span></div>
         <p>최신 뉴스를 실시간으로 불러오는 중입니다...</p>
     </div>
 
-    <!-- 뉴스 레이아웃 -->
-    <div class="news-layout" id="newsLayout" style="display:none">
+    <!-- 뉴스 레이아웃 (스켈레톤 및 캐시 즉시 렌더링) -->
+    <div class="news-layout" id="newsLayout">
         
         <!-- 주요 헤드라인 -->
         <section class="headline-section" id="headlineSection"></section>

@@ -55,31 +55,133 @@ function switchCategory(cat) {
 }
 
 // ============================================================
-// 뉴스 로딩
+// 초고속 브라우저 로컬 캐시 & 스켈레톤 관리
+// ============================================================
+const LOCAL_CACHE_PREFIX = 'news_cache_v2_';
+
+function getLocalCache(category) {
+    try {
+        const raw = localStorage.getItem(LOCAL_CACHE_PREFIX + category);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        // 캐시가 20분 이내인 경우 즉시 활용
+        if (Date.now() - parsed.savedAt < 20 * 60 * 1000) {
+            return parsed.news;
+        }
+    } catch (e) {}
+    return null;
+}
+
+function setLocalCache(category, news) {
+    try {
+        localStorage.setItem(LOCAL_CACHE_PREFIX + category, JSON.stringify({
+            savedAt: Date.now(),
+            news: news.slice(0, 45)
+        }));
+    } catch (e) {}
+}
+
+function showSkeleton() {
+    const headlineSection = document.getElementById('headlineSection');
+    const newsGrid = document.getElementById('newsGrid');
+    const layout = document.getElementById('newsLayout');
+    const loadingScreen = document.getElementById('loadingScreen');
+
+    if (loadingScreen) loadingScreen.style.display = 'none';
+    if (layout) layout.style.display = 'block';
+
+    if (headlineSection) {
+        headlineSection.innerHTML = `
+            <div class="headline-grid skeleton-container">
+                <div class="headline-card skeleton-card">
+                    <div class="headline-img-wrap skeleton-box"></div>
+                    <div class="headline-body">
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line title"></div>
+                        <div class="skeleton-line text"></div>
+                    </div>
+                </div>
+                <div class="headline-card skeleton-card">
+                    <div class="headline-img-wrap skeleton-box"></div>
+                    <div class="headline-body">
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line title"></div>
+                        <div class="skeleton-line text"></div>
+                    </div>
+                </div>
+            </div>`;
+    }
+
+    if (newsGrid) {
+        newsGrid.innerHTML = Array(6).fill(0).map(() => `
+            <div class="news-card skeleton-card">
+                <div class="news-card-img-wrap skeleton-box"></div>
+                <div class="news-card-body">
+                    <div class="skeleton-line short"></div>
+                    <div class="skeleton-line title"></div>
+                    <div class="skeleton-line date"></div>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+// ============================================================
+// 뉴스 로딩 - 눈에 보이는 상단 헤드라인 먼저 출력 & 아래 연결
 // ============================================================
 async function loadNews(category) {
-    document.getElementById('loadingScreen').style.display = 'flex';
-    document.getElementById('newsLayout').style.display = 'none';
-    allNews = [];
     displayedCount = 0;
 
+    // 1. 브라우저 로컬 캐시가 있으면 -> 0.00초 만에 상단부터 즉시 출력!
+    const cached = getLocalCache(category);
+    if (cached && cached.length > 0) {
+        renderTopFirst(cached);
+    } else {
+        // 첫 방문 등으로 캐시가 전혀 없으면 -> 빛나는 스켈레톤 즉시 표시 (흰 공백 화면 방지)
+        showSkeleton();
+    }
+
+    // 2. 서버(Render)에서 실시간 최신 뉴스 수신
     try {
-        const resp = await fetch(`/api/rss?category=${encodeURIComponent(category)}&max=15&_t=${Date.now()}`);
+        const resp = await fetch(`/api/rss?category=${encodeURIComponent(category)}&max=15`);
         const data = await resp.json();
 
-        if (data.success) {
-            allNews = data.news;
-            renderAll();
-            document.getElementById('newsLayout').style.display = 'block';
+        if (data.success && data.news && data.news.length > 0) {
+            setLocalCache(category, data.news);
+            // 최신 데이터 도착 시 상단부터 스르륵 최신화
+            renderTopFirst(data.news);
         }
     } catch (e) {
-        console.error(e);
-        document.getElementById('newsLayout').innerHTML = `
-            <div class="empty-state">뉴스를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.</div>`;
-        document.getElementById('newsLayout').style.display = 'block';
-    } finally {
-        document.getElementById('loadingScreen').style.display = 'none';
+        console.error('뉴스 로딩 오류:', e);
+        if (!cached || cached.length === 0) {
+            const grid = document.getElementById('newsGrid');
+            if (grid) {
+                grid.innerHTML = `<div class="empty-state">뉴스를 불러오는 중입니다. 잠시 후 새로고침해주세요.</div>`;
+            }
+        }
     }
+}
+
+// ============================================================
+// 점진적 렌더링: 상단 2개 대형 헤드라인 우선 출력 후 아래 그리드 연결
+// ============================================================
+function renderTopFirst(newsList) {
+    allNews = newsList;
+
+    const layout = document.getElementById('newsLayout');
+    const loadingScreen = document.getElementById('loadingScreen');
+    if (loadingScreen) loadingScreen.style.display = 'none';
+    if (layout) layout.style.display = 'block';
+
+    // 1단계: 사용자 눈에 가장 먼저 보이는 최상단 헤드라인 2개 즉각 렌더링!
+    renderHeadlines();
+
+    // 2단계: 헤드라인 렌더링 직후 자연스럽게 아래 뉴스 그리드 연결
+    requestAnimationFrame(() => {
+        renderGrid();
+        const countEl = document.getElementById('sectionCount');
+        if (countEl) countEl.textContent = `${allNews.length}건`;
+    });
 }
 
 // ============================================================
@@ -98,21 +200,13 @@ function handleImgError(img, originalUrl, isHeadline) {
 }
 
 // ============================================================
-// 렌더링
+// 헤드라인 & 그리드 렌더링
 // ============================================================
-function renderAll() {
-    renderHeadlines();
-    renderGrid();
-    const count = allNews.length;
-    const countEl = document.getElementById('sectionCount');
-    if (countEl) countEl.textContent = `${count}건`;
-}
-
 function renderHeadlines() {
     const section = document.getElementById('headlineSection');
     if (!section || allNews.length === 0) return;
 
-    // 이미지 있는 것 우선, 없으면 그냥 상위 2개
+    // 이미지 있는 것 우선, 없으면 상위 2개
     const withImg = allNews.filter(n => n.image);
     const top2 = withImg.length >= 2 ? withImg.slice(0, 2) : allNews.slice(0, 2);
 
@@ -123,8 +217,12 @@ function renderGrid() {
     const grid = document.getElementById('newsGrid');
     if (!grid) return;
 
-    // 헤드라인 2개는 제외
-    const rest = allNews.slice(2);
+    // 상단에 나간 헤드라인 2개 제외하고 목록 구성
+    const withImg = allNews.filter(n => n.image);
+    const top2 = withImg.length >= 2 ? withImg.slice(0, 2) : allNews.slice(0, 2);
+    const top2Links = new Set(top2.map(t => t.link));
+    const rest = allNews.filter(n => !top2Links.has(n.link));
+
     const toShow = rest.slice(0, PAGE_SIZE);
     displayedCount = toShow.length;
 
@@ -143,7 +241,12 @@ function renderGrid() {
 function loadMore() {
     const grid = document.getElementById('newsGrid');
     if (!grid) return;
-    const rest = allNews.slice(2);
+
+    const withImg = allNews.filter(n => n.image);
+    const top2 = withImg.length >= 2 ? withImg.slice(0, 2) : allNews.slice(0, 2);
+    const top2Links = new Set(top2.map(t => t.link));
+    const rest = allNews.filter(n => !top2Links.has(n.link));
+
     const nextItems = rest.slice(displayedCount, displayedCount + PAGE_SIZE);
     grid.insertAdjacentHTML('beforeend', nextItems.map(item => createNewsCard(item)).join(''));
     displayedCount += nextItems.length;

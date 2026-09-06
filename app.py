@@ -367,7 +367,7 @@ def fetch_rss(feed_url, source_name, logo, max_items=15):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
-        resp = requests.get(feed_url, headers=headers, timeout=8)
+        resp = requests.get(feed_url, headers=headers, timeout=4)
         resp.encoding = resp.apparent_encoding or 'utf-8'
         feed = feedparser.parse(resp.text)
         items = []
@@ -602,6 +602,10 @@ def index():
     site_cfg = load_site_config()
     return render_template('index.html', categories=categories, site_config=site_cfg)
 
+@app.route('/health')
+def health_check():
+    return jsonify({'status': 'ok', 'service': 'news-now'}), 200
+
 @app.route('/article')
 def article_page():
     url = request.args.get('url', '').strip()
@@ -672,10 +676,15 @@ def api_image_proxy():
     except Exception:
         return abort(404)
 
-@app.route('/api/rss')
-def api_rss():
-    category = request.args.get('category', '전체')
-    max_per_feed = int(request.args.get('max', 15))
+# ============================================================
+# 서버 측 RSS 스마트 캐시 & 비동기 갱신 엔진 (0초대 초고속화)
+# ============================================================
+RSS_CACHE = {}          # category -> {"timestamp": float, "news": list, "count": int, "is_refreshing": bool}
+RSS_CACHE_LOCK = threading.Lock()
+CACHE_TTL = 90          # 90초(1.5분) 동안은 캐시에서 0.001초 만에 즉시 반환
+
+def do_fetch_category_news(category, max_per_feed=15):
+    """실제 언론사 RSS들을 병렬로 수집하고, 최상단 눈에 보이는 주요 기사 이미지만 신속 보완"""
     feeds_config = load_feeds_config()
     feeds = [f for f in feeds_config.get(category, feeds_config.get('전체', [])) if f.get('enabled', True)]
 
@@ -692,26 +701,105 @@ def api_rss():
         t.start()
         threads.append(t)
     for t in threads:
-        t.join(timeout=12)
+        t.join(timeout=4)
     for i in range(len(feeds)):
         all_news.extend(results.get(i, []))
 
-    # 누락되었거나 로고 이미지로 잘못 잡힌 기사(한국경제, 매일경제, 경향신문 등) 정밀 자동 보완
-    missing_items = [item for item in all_news if is_invalid_image(item.get('image')) and item.get('link')]
+    # [핵심 최적화] 모든 기사를 다 긁느라 지연되지 않도록,
+    # 실제 상단 헤드라인 및 첫 화면에 노출될 최상위 기사들(최대 6개)의 이미지 누락만 빠르게 보완
+    missing_items = [item for item in all_news[:12] if is_invalid_image(item.get('image')) and item.get('link')]
     if missing_items:
         def fill_img(item):
             img = get_og_image(item['link'], category=category)
             if img:
                 item['image'] = img
 
-        with ThreadPoolExecutor(max_workers=8) as ex:
-            list(ex.map(fill_img, missing_items))
+        with ThreadPoolExecutor(max_workers=6) as ex:
+            list(ex.map(fill_img, missing_items[:6]))
 
-    response = jsonify({'success': True, 'category': category, 'count': len(all_news), 'news': all_news})
-    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
-    response.headers['Pragma'] = 'no-cache'
-    response.headers['Expires'] = '0'
-    return response
+    return all_news
+
+def background_refresh_category(category):
+    """캐시 만료 시 백그라운드에서 최신 뉴스를 조용히 갱신 (Stale-While-Revalidate)"""
+    with RSS_CACHE_LOCK:
+        entry = RSS_CACHE.get(category)
+        if entry and entry.get('is_refreshing'):
+            return
+        if entry:
+            entry['is_refreshing'] = True
+
+    def worker():
+        try:
+            news = do_fetch_category_news(category)
+            if news:
+                with RSS_CACHE_LOCK:
+                    RSS_CACHE[category] = {
+                        'timestamp': time.time(),
+                        'news': news,
+                        'count': len(news),
+                        'is_refreshing': False
+                    }
+        except Exception as e:
+            print(f"[Background Cache Refresh Error] {category}: {e}")
+            with RSS_CACHE_LOCK:
+                if category in RSS_CACHE:
+                    RSS_CACHE[category]['is_refreshing'] = False
+
+    threading.Thread(target=worker, daemon=True).start()
+
+def prewarm_rss_cache():
+    """서버 실행 시 첫 방문자도 0초 로딩을 누릴 수 있도록 사전 캐시 빌드"""
+    time.sleep(1)
+    for cat in ['전체', '경제', '부동산', '정치']:
+        try:
+            news = do_fetch_category_news(cat)
+            if news:
+                with RSS_CACHE_LOCK:
+                    RSS_CACHE[cat] = {
+                        'timestamp': time.time(),
+                        'news': news,
+                        'count': len(news),
+                        'is_refreshing': False
+                    }
+        except Exception:
+            pass
+
+# 백그라운드 프리워밍 시작 (Gunicorn 및 로컬 공통)
+threading.Thread(target=prewarm_rss_cache, daemon=True).start()
+
+@app.route('/api/rss')
+def api_rss():
+    category = request.args.get('category', '전체')
+    now = time.time()
+
+    with RSS_CACHE_LOCK:
+        cached = RSS_CACHE.get(category)
+
+    # 1. 유효한 캐시가 있는 경우 -> 0.001초 즉시 반환
+    if cached and (now - cached['timestamp'] < CACHE_TTL):
+        resp = jsonify({'success': True, 'category': category, 'count': cached['count'], 'news': cached['news'], 'from_cache': True})
+        resp.headers['Cache-Control'] = 'public, max-age=60, stale-while-revalidate=120'
+        return resp
+
+    # 2. 캐시가 있지만 90초가 지난 경우 -> 이전 데이터를 즉시 0.001초 반환하고, 백그라운드에서 조용히 갱신
+    if cached and cached.get('news'):
+        background_refresh_category(category)
+        resp = jsonify({'success': True, 'category': category, 'count': cached['count'], 'news': cached['news'], 'from_cache': True, 'stale': True})
+        resp.headers['Cache-Control'] = 'public, max-age=30, stale-while-revalidate=60'
+        return resp
+
+    # 3. 최초 호출인 경우 -> 동기 로드 후 캐시 보관
+    news = do_fetch_category_news(category)
+    with RSS_CACHE_LOCK:
+        RSS_CACHE[category] = {
+            'timestamp': now,
+            'news': news,
+            'count': len(news),
+            'is_refreshing': False
+        }
+    resp = jsonify({'success': True, 'category': category, 'count': len(news), 'news': news, 'from_cache': False})
+    resp.headers['Cache-Control'] = 'public, max-age=60, stale-while-revalidate=120'
+    return resp
 
 def get_live_ticker_items(limit=8):
     """실제 RSS 뉴스에서 실시간 주요 이슈/속보 헤드라인과 원문 링크를 자동으로 추출"""
