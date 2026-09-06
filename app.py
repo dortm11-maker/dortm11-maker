@@ -12,7 +12,8 @@ import html
 from concurrent.futures import ThreadPoolExecutor
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session, abort, Response
 from bs4 import BeautifulSoup
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+import hashlib
 import re
 
 # Windows 인코딩 안전 설정
@@ -32,6 +33,125 @@ app.secret_key = 'news_now_secret_2026_!@#'
 # 관리자 설정 (비밀번호 변경 가능)
 # ============================================================
 ADMIN_PASSWORD = 'admin1234'
+
+# ============================================================
+# 실시간 방문자 & 투데이/토탈 통계 추적 엔진
+# ============================================================
+VISITOR_STATS_FILE = os.path.join(os.path.dirname(__file__), 'visitor_stats.json')
+KST = timezone(timedelta(hours=9))
+
+def get_kst_today_str():
+    return datetime.now(KST).strftime('%Y-%m-%d')
+
+class VisitorTracker:
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.active_users = {}   # {visitor_id: last_active_timestamp}
+        self.today_vids = set()  # 당일 고유 방문자 식별자 집합
+        self.current_date = get_kst_today_str()
+        self.total_uv = 0
+        self.total_pv = 0
+        self.daily = {}          # {date_str: {"uv": int, "pv": int}}
+        self.last_saved = time.time()
+        self.load()
+
+    def load(self):
+        if os.path.exists(VISITOR_STATS_FILE):
+            try:
+                with open(VISITOR_STATS_FILE, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    self.total_uv = data.get('total_uv', 0)
+                    self.total_pv = data.get('total_pv', 0)
+                    self.daily = data.get('daily', {})
+            except Exception as e:
+                print(f"[Stats] Load error: {e}")
+        
+        today = get_kst_today_str()
+        self.current_date = today
+        if today not in self.daily:
+            self.daily[today] = {"uv": 0, "pv": 0}
+
+    def save(self):
+        try:
+            data = {
+                'total_uv': self.total_uv,
+                'total_pv': self.total_pv,
+                'daily': self.daily
+            }
+            with open(VISITOR_STATS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            self.last_saved = time.time()
+        except Exception as e:
+            print(f"[Stats] Save error: {e}")
+
+    def _check_date_rollover(self):
+        today = get_kst_today_str()
+        if today != self.current_date:
+            self.current_date = today
+            self.today_vids.clear()
+            if today not in self.daily:
+                self.daily[today] = {"uv": 0, "pv": 0}
+            self.save()
+
+    def record_visit(self, visitor_id, is_pageview=True):
+        now = time.time()
+        with self.lock:
+            self._check_date_rollover()
+            today = self.current_date
+            
+            # 실시간 활성 사용자 갱신
+            self.active_users[visitor_id] = now
+            
+            # 당일 고유 방문자(UV) 여부
+            if visitor_id not in self.today_vids:
+                self.today_vids.add(visitor_id)
+                self.daily[today]['uv'] = self.daily[today].get('uv', 0) + 1
+                self.total_uv += 1
+
+            # 페이지뷰(PV)
+            if is_pageview:
+                self.daily[today]['pv'] = self.daily[today].get('pv', 0) + 1
+                self.total_pv += 1
+
+            # 20초마다 자동 파일 저장
+            if now - self.last_saved > 20:
+                self.save()
+
+    def update_ping(self, visitor_id):
+        now = time.time()
+        with self.lock:
+            self.active_users[visitor_id] = now
+
+    def get_stats(self):
+        now = time.time()
+        with self.lock:
+            self._check_date_rollover()
+            today = self.current_date
+
+            # 최근 5분(300초) 이내 활동 사용자를 실시간 접속자로 판정
+            cutoff_5m = now - 300
+            cutoff_10m = now - 600
+
+            expired = [vid for vid, ts in self.active_users.items() if ts < cutoff_10m]
+            for vid in expired:
+                del self.active_users[vid]
+
+            realtime_count = sum(1 for ts in self.active_users.values() if ts >= cutoff_5m)
+            today_stat = self.daily.get(today, {"uv": 0, "pv": 0})
+            
+            sorted_dates = sorted(self.daily.keys(), reverse=True)[:7]
+            recent_daily = [{"date": d, "uv": self.daily[d].get('uv', 0), "pv": self.daily[d].get('pv', 0)} for d in sorted_dates]
+
+            return {
+                'realtime_now': realtime_count,
+                'today_uv': today_stat.get('uv', 0),
+                'today_pv': today_stat.get('pv', 0),
+                'total_uv': self.total_uv,
+                'total_pv': self.total_pv,
+                'recent_daily': recent_daily
+            }
+
+visitor_tracker = VisitorTracker()
 
 # ============================================================
 # RSS 피드 설정 파일
@@ -665,6 +785,59 @@ def fetch_article_detail(url):
         }
 
 # ============================================================
+# 방문자 트래킹 미들웨어 & 실시간 핑
+# ============================================================
+BOT_USER_AGENTS = ['bot', 'spider', 'crawler', 'curl', 'wget', 'python', 'render', 'uptime', 'pingdom']
+
+def is_bot_or_crawler():
+    ua = request.headers.get('User-Agent', '').lower()
+    return any(b in ua for b in BOT_USER_AGENTS)
+
+@app.before_request
+def track_visitor_middleware():
+    path = request.path
+    # 정적 리소스, 헬스체크, 관리자 페이지, API 등 제외
+    if path.startswith('/static') or path.startswith('/admin') or path.startswith('/api') or path in ['/favicon.ico', '/robots.txt', '/health']:
+        return
+
+    # 봇/크롤러 제외
+    if is_bot_or_crawler():
+        return
+
+    # 방문자 ID 생성 (IP + User-Agent 해시 또는 쿠키)
+    vid = request.cookies.get('n_vid')
+    if not vid:
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr or '')
+        if ',' in ip:
+            ip = ip.split(',')[0].strip()
+        ua = request.headers.get('User-Agent', '')
+        raw_key = f"{ip}_{ua}"
+        vid = hashlib.sha256(raw_key.encode('utf-8')).hexdigest()[:16]
+        request._set_nvid = vid
+
+    # 방문 기록 (실시간 + UV + PV)
+    visitor_tracker.record_visit(vid, is_pageview=True)
+
+@app.after_request
+def set_visitor_cookie(response):
+    if hasattr(request, '_set_nvid'):
+        response.set_cookie('n_vid', request._set_nvid, max_age=365*24*3600, httponly=True, samesite='Lax')
+    return response
+
+@app.route('/api/ping', methods=['POST', 'GET'])
+def api_ping():
+    """체류 중 실시간 접속자 상태 유지용 가벼운 핑"""
+    vid = request.cookies.get('n_vid')
+    if not vid:
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr or '')
+        if ',' in ip:
+            ip = ip.split(',')[0].strip()
+        ua = request.headers.get('User-Agent', '')
+        vid = hashlib.sha256(f"{ip}_{ua}".encode('utf-8')).hexdigest()[:16]
+    visitor_tracker.update_ping(vid)
+    return jsonify({'ok': True})
+
+# ============================================================
 # 라우트 - 일반 사용자
 # ============================================================
 @app.route('/')
@@ -1023,6 +1196,13 @@ def admin_dashboard():
 def admin_logout():
     session.pop('is_admin', None)
     return redirect(url_for('index'))
+
+@app.route('/admin/api/visitor_stats', methods=['GET'])
+def admin_visitor_stats():
+    """오직 관리자만 조회 가능한 실시간/오늘/누적 방문자 통계 API (외부 열람 불가)"""
+    if not is_admin():
+        abort(403)
+    return jsonify({'success': True, 'stats': visitor_tracker.get_stats()})
 
 @app.route('/admin/api/feeds', methods=['GET'])
 def admin_get_feeds():

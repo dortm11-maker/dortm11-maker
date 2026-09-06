@@ -454,5 +454,14 @@ document.addEventListener('DOMContentLoaded', initArticleAds);
 window.SITE_CONFIG = {{ site_config | tojson }};
 </script>
 <script src="/static/js/auto_redirect.js?v=20260906_1"></script>
+<script>
+// 실시간 체류 접속자 상태 유지 (60초 간격 핑)
+setInterval(function() {
+    try {
+        if (navigator.sendBeacon) { navigator.sendBeacon('/api/ping'); }
+        else { fetch('/api/ping', {method:'POST', keepalive:true}).catch(function(){}); }
+    } catch(e) {}
+}, 60000);
+</script>
 </body>
 </html>
