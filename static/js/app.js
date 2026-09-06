@@ -265,11 +265,47 @@ function getArticleUrl(link) {
     return `/article?url=${encodeURIComponent(link)}`;
 }
 
+// ============================================================
+// 기사 클릭 초고속화: 마우스 오버 시 사전 로딩 & 클릭 시 즉시 프로그레스바
+// ============================================================
+const prefetchSet = new Set();
+function prefetchArticle(link) {
+    if (!link || link === '#' || prefetchSet.has(link)) return;
+    prefetchSet.add(link);
+    // 마우스가 카드 위로 올라가는 0.2~0.3초 사이에 서버가 기사를 미리 캐싱해둠!
+    fetch(`/api/article?url=${encodeURIComponent(link)}`, { priority: 'low' }).catch(() => {});
+}
+
+function onCardClick() {
+    let bar = document.getElementById('topLoadingBar');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'topLoadingBar';
+        bar.style.position = 'fixed';
+        bar.style.top = '0';
+        bar.style.left = '0';
+        bar.style.height = '3px';
+        bar.style.width = '0%';
+        bar.style.backgroundColor = '#1a56db';
+        bar.style.zIndex = '99999';
+        bar.style.transition = 'width 0.2s cubic-bezier(0.1, 0.9, 0.2, 1)';
+        bar.style.boxShadow = '0 0 10px rgba(26, 86, 219, 0.9)';
+        document.body.appendChild(bar);
+    }
+    bar.style.display = 'block';
+    bar.style.width = '0%';
+    setTimeout(() => { bar.style.width = '75%'; }, 10);
+    setTimeout(() => { bar.style.width = '96%'; }, 180);
+}
+
 function createHeadlineCard(item) {
     const hasImg = item.image && item.image.trim() !== '';
     const targetUrl = getArticleUrl(item.link);
     return `
-    <a class="headline-card" href="${targetUrl}">
+    <a class="headline-card" href="${targetUrl}"
+       onmouseenter="prefetchArticle('${escAttr(item.link)}')"
+       ontouchstart="prefetchArticle('${escAttr(item.link)}')"
+       onclick="onCardClick()">
         <div class="headline-img-wrap">
             ${hasImg
                 ? `<img class="headline-img" src="${escAttr(item.image)}" alt="" loading="lazy"
@@ -293,7 +329,10 @@ function createNewsCard(item) {
     const hasImg = item.image && item.image.trim() !== '';
     const targetUrl = getArticleUrl(item.link);
     return `
-    <a class="news-card" href="${targetUrl}">
+    <a class="news-card" href="${targetUrl}"
+       onmouseenter="prefetchArticle('${escAttr(item.link)}')"
+       ontouchstart="prefetchArticle('${escAttr(item.link)}')"
+       onclick="onCardClick()">
         <div class="news-card-img-wrap">
             ${hasImg
                 ? `<img class="news-card-img" src="${escAttr(item.image)}" alt="" loading="lazy"
