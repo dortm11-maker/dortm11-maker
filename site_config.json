@@ -43,6 +43,16 @@
       "sub_id": "dortm111",
       "tracking_code": "AF3197388",
       "width": 200
+    },
+    "mobile": {
+      "coupang_id": 1026359,
+      "custom_html": "",
+      "enabled": true,
+      "height": 100,
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 360
     }
   },
   "auto_redirect": {

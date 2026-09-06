@@ -160,6 +160,7 @@ class VisitorTracker:
             'right': '우측 날개 배너',
             'center': '정면 본문 배너',
             'sticky': '모바일 하단 고정 배너',
+            'mobile': '모바일 하단 고정 배너',
             'popup': '중앙 팝업 배너',
             'link': '쿠팡 파트너스 링크',
             'auto_redirect': '자동 자리이동'
@@ -428,6 +429,16 @@ DEFAULT_SITE_CONFIG = {
             "width": 300,
             "height": 300,
             "custom_html": ""
+        },
+        "mobile": {
+            "enabled": True,
+            "mode": "coupang",
+            "coupang_id": 1026359,
+            "tracking_code": "AF3197388",
+            "sub_id": "dortm111",
+            "width": 360,
+            "height": 100,
+            "custom_html": ""
         }
     },
     "auto_redirect": {
@@ -457,6 +468,8 @@ def load_site_config():
                     data['auto_redirect'] = DEFAULT_SITE_CONFIG['auto_redirect']
                 if 'share' not in data:
                     data['share'] = DEFAULT_SITE_CONFIG['share']
+                if 'ads' in data and 'mobile' not in data['ads']:
+                    data['ads']['mobile'] = DEFAULT_SITE_CONFIG['ads']['mobile']
                 return data
         except:
             pass
@@ -1788,8 +1801,8 @@ def admin_convert_share_link():
         base_host = "https://news-now-82jg.onrender.com"
         our_article_url = f"{base_host}/article?url={urllib.parse.quote(target_news_url)}"
 
-        # 5. 네이버 공식 우회 브릿지 링크 (link.naver.com)
-        naver_bridge_url = f"https://link.naver.com/bridge?url={urllib.parse.quote(our_article_url)}"
+        # 5. 네이버 공식 우회 브릿지 링크 (link.naver.com - 모바일에서 네이버홈으로 튕기지 않도록 dst 명시)
+        naver_bridge_url = f"https://link.naver.com/bridge?url={urllib.parse.quote(our_article_url)}&dst={urllib.parse.quote(our_article_url)}"
 
         # 6. 초단축 URL (TinyURL) 옵션 생성
         short_url = ''

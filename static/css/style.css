@@ -21,9 +21,9 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; min-width: 1240px; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.6; }
 
-.container { max-width: 1200px; min-width: 1200px; margin: 0 auto; padding: 0 16px; }
+.container { max-width: 1200px; width: 100%; margin: 0 auto; padding: 0 16px; }
 
 /* ============ SITE HEADER ============ */
 .site-header {
@@ -712,7 +712,26 @@ body.is-mobile-device.has-mobile-ad {
     padding-bottom: 220px !important;
 }
 
-body.is-mobile-device .mobile-sticky-ad-bar,
+body.is-mobile-device .mobile-sticky-ad-bar {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 -4px 25px rgba(15, 23, 42, 0.16);
+    border-top: 2px solid #2563eb;
+    z-index: 99999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px 8px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: slideUpMobileAd 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 @media (max-width: 1024px) {
     .mobile-sticky-ad-bar {
         display: flex !important;
@@ -723,8 +742,8 @@ body.is-mobile-device .mobile-sticky-ad-bar,
         width: 100%;
         background: rgba(255, 255, 255, 0.98);
         box-shadow: 0 -4px 25px rgba(15, 23, 42, 0.16);
-        border-top: 2px solid #e2e8f0;
-        z-index: 9999;
+        border-top: 2px solid #2563eb;
+        z-index: 99999;
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -965,9 +984,9 @@ body.is-mobile-device .mobile-sticky-ad-bar,
 
 /* ============ 8. 기사 본문 자체 뷰어 (ARTICLE READER) ============ */
 .article-detail-container {
-    max-width: 960px !important;
-    min-width: 960px !important;
-    margin: 24px auto 60px auto !important;
+    max-width: 960px;
+    width: 100%;
+    margin: 24px auto 60px auto;
 }
 
 .article-top-nav {
@@ -1310,14 +1329,15 @@ body.is-mobile-device .mobile-sticky-ad-bar,
     background: #fafbfc;
 }
 
-/* ============ 10. 모바일 화면 하단 플로팅 고정 배너 (스크롤 따라오기) ============ */
+/* ============ 10. 모바일 화면 최적화 & 하단 플로팅 고정 배너 ============ */
 .mobile-sticky-ad-bar {
     display: none; /* PC 기본 화면에서는 숨김 */
 }
 
+/* 모바일 접속 감지 시 또는 1024px 이하 태블릿/모바일 */
+body.is-mobile-device .mobile-sticky-ad-bar,
 @media (max-width: 1024px) {
-    body.is-mobile-device .mobile-sticky-ad-bar,
-    body .mobile-sticky-ad-bar {
+    .mobile-sticky-ad-bar {
         display: block !important;
         position: fixed !important;
         bottom: 0 !important;
@@ -1333,7 +1353,7 @@ body.is-mobile-device .mobile-sticky-ad-bar,
     }
 
     body.has-mobile-ad {
-        padding-bottom: 190px !important;
+        padding-bottom: 160px !important;
     }
 
     .mobile-sticky-ad-inner {
@@ -1379,7 +1399,7 @@ body.is-mobile-device .mobile-sticky-ad-bar,
         justify-content: center;
         align-items: center;
         overflow: hidden;
-        min-height: 100px;
+        min-height: 95px;
     }
 
     .mobile-sticky-footer {
@@ -1395,6 +1415,166 @@ body.is-mobile-device .mobile-sticky-ad-bar,
     from { transform: translateY(100%); }
     to { transform: translateY(0); }
 }
+
+/* ============ 11. 스마트폰(모바일 768px 이하) 전용 반응형 레이아웃 ============ */
+@media (max-width: 768px) {
+    body {
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    .container {
+        padding: 0 12px !important;
+    }
+
+    /* 헤더 */
+    .header-inner {
+        height: 50px !important;
+    }
+    .logo-text {
+        font-size: 17px !important;
+    }
+    .logo-icon {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 16px !important;
+    }
+    .header-right {
+        display: none !important;
+    }
+    .gnb-item {
+        padding: 0 10px !important;
+        font-size: 13.5px !important;
+        line-height: 48px !important;
+    }
+
+    /* 메인 뉴스 홈 피드 (1열 그리드) */
+    .headline-grid,
+    .news-grid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+    .news-card {
+        border-radius: 10px !important;
+    }
+
+    /* 기사 상세 뷰어 */
+    .article-detail-container {
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 10px auto 36px auto !important;
+        padding: 0 10px !important;
+    }
+    .article-card-main {
+        padding: 20px 14px !important;
+        border-radius: 12px !important;
+    }
+    .article-top-nav {
+        margin-bottom: 12px !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+    }
+    .article-back-btn,
+    .article-share-btn,
+    .article-origin-btn {
+        padding: 6px 12px !important;
+        font-size: 12.5px !important;
+    }
+    .article-view-title {
+        font-size: 20px !important;
+        line-height: 1.42 !important;
+        margin-bottom: 14px !important;
+        letter-spacing: -0.4px !important;
+        word-break: break-word !important;
+    }
+    .article-meta-info {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 6px !important;
+        padding-bottom: 14px !important;
+        margin-bottom: 18px !important;
+        font-size: 12px !important;
+    }
+    .article-meta-left {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+    .article-hero-figure {
+        margin: 16px 0 20px 0 !important;
+    }
+    .article-hero-img {
+        max-height: 280px !important;
+        width: 100% !important;
+        object-fit: cover !important;
+        border-radius: 8px !important;
+    }
+    .article-view-content {
+        font-size: 16px !important;
+        line-height: 1.8 !important;
+        margin-bottom: 24px !important;
+    }
+    .article-para {
+        margin-bottom: 18px !important;
+        text-align: left !important;
+        word-break: break-word !important;
+    }
+    .article-source-box {
+        padding: 16px 14px !important;
+        margin-top: 24px !important;
+        margin-bottom: 20px !important;
+        border-radius: 10px !important;
+    }
+    .source-desc {
+        font-size: 13px !important;
+        margin-bottom: 14px !important;
+    }
+    .source-action {
+        width: 100% !important;
+    }
+    .source-link-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 10px 14px !important;
+        font-size: 13.5px !important;
+    }
+    .article-bottom-nav {
+        margin-top: 24px !important;
+        padding-top: 18px !important;
+    }
+    .article-bottom-back-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 12px 16px !important;
+        font-size: 14.5px !important;
+    }
+
+    /* 본문 중앙 배너 가로 크기 반응형 */
+    .ad-banner-horizontal {
+        padding: 10px 10px !important;
+        margin: 14px 0 20px 0 !important;
+        overflow: hidden !important;
+    }
+    .ad-banner-horizontal iframe {
+        max-width: 100% !important;
+    }
+
+    /* 하단 고정 배너 */
+    body.has-mobile-ad {
+        padding-bottom: 155px !important;
+    }
+    .mobile-sticky-ad-bar {
+        padding: 5px 6px 6px !important;
+    }
+    .mobile-sticky-body {
+        max-width: 100% !important;
+        overflow: hidden !important;
+        min-height: 90px !important;
+    }
+    .mobile-sticky-body iframe {
+        max-width: 100% !important;
+    }
+}
+
 
 
 

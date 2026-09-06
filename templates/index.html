@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
     <meta name="referrer" content="no-referrer">
     <title>{{ site_config.share.title if site_config.share and site_config.share.title else '뉴스NOW - 오늘의 실시간 주요 속보 종합' }}</title>
     <meta name="description" content="{{ site_config.share.description if site_config.share and site_config.share.description else '국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.' }}">
@@ -224,7 +224,7 @@
 </footer>
 
 <!-- ===================== 7-1. 모바일 화면 하단 플로팅 고정 배너 (스크롤 추적) ===================== -->
-{% if site_config.ads.center.enabled %}
+{% if site_config.ads.mobile and site_config.ads.mobile.enabled %}
 <aside class="mobile-sticky-ad-bar" id="mobileStickyAd" role="complementary" aria-label="모바일 추천 특가">
     <div class="mobile-sticky-ad-inner">
         <button type="button" class="mobile-sticky-ad-close" onclick="closeMobileStickyAd()" aria-label="광고 배너 닫기" title="닫기">✕</button>
@@ -233,17 +233,17 @@
             <span class="ad-subtext">실시간 추천 특가 혜택</span>
         </div>
         <div class="ad-horizontal-body mobile-sticky-body">
-            {% if site_config.ads.center.mode == 'custom' and site_config.ads.center.custom_html %}
-                {{ site_config.ads.center.custom_html | safe }}
+            {% if site_config.ads.mobile.mode == 'custom' and site_config.ads.mobile.custom_html %}
+                {{ site_config.ads.mobile.custom_html | safe }}
             {% else %}
                 <script>
                     new PartnersCoupang.G({
-                        "id": {{ site_config.ads.center.coupang_id or 1026359 }},
+                        "id": {{ site_config.ads.mobile.coupang_id or 1026359 }},
                         "template": "carousel",
-                        "trackingCode": "{{ site_config.ads.center.tracking_code or 'AF3197388' }}",
-                        "subId": "{{ site_config.ads.center.sub_id or 'dortm111' }}",
-                        "width": "{{ site_config.ads.center.width or 680 }}",
-                        "height": "{{ site_config.ads.center.height or 140 }}",
+                        "trackingCode": "{{ site_config.ads.mobile.tracking_code or 'AF3197388' }}",
+                        "subId": "{{ site_config.ads.mobile.sub_id or 'dortm111' }}",
+                        "width": "{{ site_config.ads.mobile.width or 360 }}",
+                        "height": "{{ site_config.ads.mobile.height or 100 }}",
                         "tsource": ""
                     });
                 </script>

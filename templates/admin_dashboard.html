@@ -1916,6 +1916,72 @@
                     </div>
                 </div>
 
+                <!-- 5) 모바일 화면 하단 고정 배너 (스크롤 추적) -->
+                <div class="ad-card" id="adCardMobile" style="border: 2px solid #3b82f6;">
+                    <div class="ad-card-header">
+                        <div class="ad-card-title">
+                            <span>📱 모바일 하단 고정 배너</span>
+                            <span class="ad-status-badge" id="adBadgeMobile">비활성</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="adMobileEnabled" onchange="updateAdStatusBadge('Mobile')">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">광고 설정 모드</label>
+                        <div class="mode-selector">
+                            <button type="button" class="mode-btn active" id="btnModeCoupangMobile"
+                                onclick="setAdMode('mobile', 'coupang')">쿠팡 파트너스 간편설정</button>
+                            <button type="button" class="mode-btn" id="btnModeCustomMobile"
+                                onclick="setAdMode('mobile', 'custom')">직접 HTML/코드 입력</button>
+                        </div>
+                    </div>
+
+                    <!-- 쿠팡 모드 필드 -->
+                    <div id="adMobileCoupangFields">
+                        <div class="form-row-multi" style="margin-bottom:10px;">
+                            <div class="form-group">
+                                <label class="form-label">파트너스 ID</label>
+                                <input type="number" id="adMobileId" class="form-input" placeholder="1026359">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Tracking Code</label>
+                                <input type="text" id="adMobileTracking" class="form-input" placeholder="AF3197388">
+                            </div>
+                        </div>
+                        <div class="form-row-multi">
+                            <div class="form-group">
+                                <label class="form-label">Sub ID</label>
+                                <input type="text" id="adMobileSubId" class="form-input" placeholder="dortm111">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">크기 (너비x높이)</label>
+                                <div style="display:flex; gap:6px; align-items:center;">
+                                    <input type="number" id="adMobileWidth" class="form-input" placeholder="360"
+                                        style="width:75px;">
+                                    <span>x</span>
+                                    <input type="number" id="adMobileHeight" class="form-input" placeholder="100"
+                                        style="width:75px;">
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size:11px; color:#2563eb; margin-top:8px; font-weight:600; line-height:1.4;">
+                            💡 스마트폰(모바일) 화면 최하단에 항상 밀착되어 스크롤을 내려도 따라오는 플로팅 고정 배너입니다. (권장: 360x100 또는 320x100)
+                        </div>
+                    </div>
+
+                    <!-- 커스텀 모드 필드 -->
+                    <div id="adMobileCustomFields" style="display:none;">
+                        <div class="form-group">
+                            <label class="form-label">HTML / iframe / 스크립트 코드</label>
+                            <textarea id="adMobileCustomHtml" class="code-textarea"
+                                placeholder="<iframe src='...' ...></iframe>"></textarea>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <div class="save-bar-bottom">
@@ -2735,6 +2801,18 @@
             document.getElementById('adPopupCustomHtml').value = popup.custom_html || '';
             setAdMode('popup', popup.mode || 'coupang');
             updateAdStatusBadge('Popup');
+
+            // 5) 모바일 하단 고정 배너
+            const mobile = ads.mobile || {};
+            document.getElementById('adMobileEnabled').checked = mobile.enabled !== undefined ? !!mobile.enabled : true;
+            document.getElementById('adMobileId').value = mobile.coupang_id || 1026359;
+            document.getElementById('adMobileTracking').value = mobile.tracking_code || 'AF3197388';
+            document.getElementById('adMobileSubId').value = mobile.sub_id || 'dortm111';
+            document.getElementById('adMobileWidth').value = mobile.width || 360;
+            document.getElementById('adMobileHeight').value = mobile.height || 100;
+            document.getElementById('adMobileCustomHtml').value = mobile.custom_html || '';
+            setAdMode('mobile', mobile.mode || 'coupang');
+            updateAdStatusBadge('Mobile');
         }
 
         function setAdMode(key, mode) {
@@ -2776,7 +2854,7 @@
 
             currentSiteConfig.ads.left = {
                 enabled: document.getElementById('adLeftEnabled').checked,
-                mode: adModes.left,
+                mode: adModes.left || 'coupang',
                 coupang_id: parseInt(document.getElementById('adLeftId').value) || 1026359,
                 tracking_code: document.getElementById('adLeftTracking').value.trim() || 'AF3197388',
                 sub_id: document.getElementById('adLeftSubId').value.trim() || 'dortm111',
@@ -2787,7 +2865,7 @@
 
             currentSiteConfig.ads.right = {
                 enabled: document.getElementById('adRightEnabled').checked,
-                mode: adModes.right,
+                mode: adModes.right || 'coupang',
                 coupang_id: parseInt(document.getElementById('adRightId').value) || 1026359,
                 tracking_code: document.getElementById('adRightTracking').value.trim() || 'AF3197388',
                 sub_id: document.getElementById('adRightSubId').value.trim() || 'dortm111',
@@ -2798,7 +2876,7 @@
 
             currentSiteConfig.ads.center = {
                 enabled: document.getElementById('adCenterEnabled').checked,
-                mode: adModes.center,
+                mode: adModes.center || 'coupang',
                 coupang_id: parseInt(document.getElementById('adCenterId').value) || 1026241,
                 tracking_code: document.getElementById('adCenterTracking').value.trim() || 'AF3197388',
                 sub_id: document.getElementById('adCenterSubId').value.trim() || 'dortm111',
@@ -2809,7 +2887,7 @@
 
             currentSiteConfig.ads.popup = {
                 enabled: document.getElementById('adPopupEnabled').checked,
-                mode: adModes.popup,
+                mode: adModes.popup || 'coupang',
                 delay: parseInt(document.getElementById('adPopupDelay').value) || 2,
                 interval_minutes: parseInt(document.getElementById('adPopupInterval').value) || 0,
                 close_delay: parseInt(document.getElementById('adPopupCloseDelay').value) || 3,
@@ -2819,6 +2897,17 @@
                 width: parseInt(document.getElementById('adPopupWidth').value) || 300,
                 height: parseInt(document.getElementById('adPopupHeight').value) || 300,
                 custom_html: document.getElementById('adPopupCustomHtml').value
+            };
+
+            currentSiteConfig.ads.mobile = {
+                enabled: document.getElementById('adMobileEnabled').checked,
+                mode: adModes.mobile || 'coupang',
+                coupang_id: parseInt(document.getElementById('adMobileId').value) || 1026359,
+                tracking_code: document.getElementById('adMobileTracking').value.trim() || 'AF3197388',
+                sub_id: document.getElementById('adMobileSubId').value.trim() || 'dortm111',
+                width: parseInt(document.getElementById('adMobileWidth').value) || 360,
+                height: parseInt(document.getElementById('adMobileHeight').value) || 100,
+                custom_html: document.getElementById('adMobileCustomHtml').value
             };
 
             try {
