@@ -229,14 +229,54 @@ BAD_IMG_KEYWORDS = [
     'logo.png', 'logo.jpg', 'default_thumb', 'blank.gif', 'spacer.gif', 'icon'
 ]
 
-# 사진이 전혀 없는 부동산 단신 기사를 위한 고화질 아파트/주거 단지 테마 이미지 풀
+# 사진이 전혀 없는 단신 기사를 위한 고화질 테마 이미지 풀
 REALESTATE_FALLBACK_IMAGES = [
-    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&auto=format&fit=crop&q=80',  # 아파트 단지 전경
-    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop&q=80',  # 현대식 고층 주거/빌딩
-    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&auto=format&fit=crop&q=80',  # 고급 주거 단지
-    'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&auto=format&fit=crop&q=80',  # 주택/부동산
-    'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&auto=format&fit=crop&q=80',  # 쾌적한 주거 타운
+    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&auto=format&fit=crop&q=80',
+    'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&auto=format&fit=crop&q=80',
 ]
+
+NEWS_THEME_FALLBACKS = {
+    '전체': [
+        'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?w=600&auto=format&fit=crop&q=80',
+    ],
+    '정치': [
+        'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1575320181282-9afab399332c?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600&auto=format&fit=crop&q=80',
+    ],
+    '경제': [
+        'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop&q=80',
+    ],
+    '부동산': REALESTATE_FALLBACK_IMAGES,
+    '증권': [
+        'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=600&auto=format&fit=crop&q=80',
+    ],
+    '사회': [
+        'https://images.unsplash.com/photo-1477959858617-67f30bc75b82?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&auto=format&fit=crop&q=80',
+    ],
+    'IT/과학': [
+        'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop&q=80',
+    ],
+    '스포츠': [
+        'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&auto=format&fit=crop&q=80',
+    ],
+    '연예': [
+        'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80',
+    ]
+}
 
 def is_invalid_image(img_url):
     """유효하지 않은 이미지(비어있거나 언론사 로고 플레이트)인지 검사"""
@@ -249,13 +289,13 @@ def get_og_image(url, category=None):
     """기사 웹페이지에서 실제 기사 사진을 정밀 추출 (한국경제, 매일경제, 경향신문 등 특화 파싱)"""
     if not url or url == '#' or not str(url).startswith('http'):
         return ''
-    if url in IMAGE_CACHE:
+    if url in IMAGE_CACHE and IMAGE_CACHE[url]:
         return IMAGE_CACHE[url]
     try:
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
         }
-        resp = requests.get(url, headers=headers, timeout=4.0)
+        resp = requests.get(url, headers=headers, timeout=3.0)
         resp_text = resp.text
 
         img_url = ''
@@ -300,18 +340,20 @@ def get_og_image(url, category=None):
                         img_url = src
                         break
 
-        # 5) 사진이 전혀 없는 부동산 단신(시세) 기사를 위한 고화질 테마 이미지 매칭
-        if not img_url and category == '부동산':
-            idx = abs(hash(url)) % len(REALESTATE_FALLBACK_IMAGES)
-            img_url = REALESTATE_FALLBACK_IMAGES[idx]
+        # 5) 사진이 전혀 없는 단신 기사를 위한 고화질 카테고리 테마 이미지 100% 매칭
+        if not img_url:
+            pool = NEWS_THEME_FALLBACKS.get(category, NEWS_THEME_FALLBACKS.get('전체', []))
+            if pool:
+                idx = abs(hash(url)) % len(pool)
+                img_url = pool[idx]
 
         IMAGE_CACHE[url] = img_url
         return img_url
     except Exception:
-        # 에러 시 부동산 단신일 경우 폴백 이미지 적용
-        if category == '부동산':
-            idx = abs(hash(url)) % len(REALESTATE_FALLBACK_IMAGES)
-            fallback = REALESTATE_FALLBACK_IMAGES[idx]
+        pool = NEWS_THEME_FALLBACKS.get(category, NEWS_THEME_FALLBACKS.get('전체', []))
+        if pool:
+            idx = abs(hash(url)) % len(pool)
+            fallback = pool[idx]
             IMAGE_CACHE[url] = fallback
             return fallback
         IMAGE_CACHE[url] = ''
@@ -703,19 +745,27 @@ def do_fetch_category_news(category, max_per_feed=15):
     for i in range(len(feeds)):
         all_news.extend(results.get(i, []))
 
-    # [핵심 최적화] 모든 기사를 다 긁느라 지연되지 않도록,
-    # 실제 상단 헤드라인 및 첫 화면에 노출될 최상위 기사들(최대 6개)의 이미지 누락만 빠르게 보완
-    missing_items = [item for item in all_news[:12] if is_invalid_image(item.get('image')) and item.get('link')]
+    # 모든 기사의 누락 이미지를 16개 스레드로 초고속 병렬 보완 (경향신문, 한국경제 등 100% 보완)
+    missing_items = [item for item in all_news if is_invalid_image(item.get('image')) and item.get('link')]
     if missing_items:
         def fill_img(item):
             img = get_og_image(item['link'], category=category)
             if img:
                 item['image'] = img
 
-        with ThreadPoolExecutor(max_workers=6) as ex:
-            list(ex.map(fill_img, missing_items[:6]))
+        with ThreadPoolExecutor(max_workers=16) as ex:
+            list(ex.map(fill_img, missing_items))
 
     return all_news
+
+@app.route('/api/get_image')
+def api_get_image():
+    url = request.args.get('url', '').strip()
+    category = request.args.get('category', '전체')
+    if not url or not url.startswith('http'):
+        return jsonify({'success': False, 'image': ''}), 400
+    img = get_og_image(url, category=category)
+    return jsonify({'success': True, 'image': img})
 
 def background_refresh_category(category):
     """캐시 만료 시 백그라운드에서 최신 뉴스를 조용히 갱신 (Stale-While-Revalidate)"""

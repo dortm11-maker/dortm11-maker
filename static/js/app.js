@@ -57,7 +57,7 @@ function switchCategory(cat) {
 // ============================================================
 // 초고속 브라우저 로컬 캐시 & 스켈레톤 관리
 // ============================================================
-const LOCAL_CACHE_PREFIX = 'news_cache_v2_';
+const LOCAL_CACHE_PREFIX = 'news_cache_v4_';
 
 function getLocalCache(category) {
     try {
@@ -76,7 +76,7 @@ function setLocalCache(category, news) {
     try {
         localStorage.setItem(LOCAL_CACHE_PREFIX + category, JSON.stringify({
             savedAt: Date.now(),
-            news: news.slice(0, 45)
+            news: news.slice(0, 90)
         }));
     } catch (e) {}
 }
@@ -230,6 +230,7 @@ function renderGrid() {
         grid.innerHTML = `<div class="empty-state">표시할 뉴스가 없습니다.</div>`;
     } else {
         grid.innerHTML = toShow.map(item => createNewsCard(item)).join('');
+        resolveMissingImages();
     }
 
     const moreWrap = document.getElementById('moreWrap');
@@ -250,6 +251,7 @@ function loadMore() {
     const nextItems = rest.slice(displayedCount, displayedCount + PAGE_SIZE);
     grid.insertAdjacentHTML('beforeend', nextItems.map(item => createNewsCard(item)).join(''));
     displayedCount += nextItems.length;
+    resolveMissingImages();
 
     const moreWrap = document.getElementById('moreWrap');
     if (moreWrap) {
@@ -333,7 +335,7 @@ function createNewsCard(item) {
        onmouseenter="prefetchArticle('${escAttr(item.link)}')"
        ontouchstart="prefetchArticle('${escAttr(item.link)}')"
        onclick="onCardClick()">
-        <div class="news-card-img-wrap">
+        <div class="news-card-img-wrap" ${!hasImg ? `data-fetch-img="${escAttr(item.link)}"` : ''}>
             ${hasImg
                 ? `<img class="news-card-img" src="${escAttr(item.image)}" alt="" loading="lazy"
                        referrerpolicy="no-referrer"
@@ -346,6 +348,22 @@ function createNewsCard(item) {
             <div class="news-card-date">${esc(item.date)}</div>
         </div>
     </a>`;
+}
+
+function resolveMissingImages() {
+    document.querySelectorAll('.news-card-img-wrap[data-fetch-img]').forEach(wrap => {
+        const link = wrap.dataset.fetchImg;
+        if (!link) return;
+        delete wrap.dataset.fetchImg;
+        fetch(`/api/get_image?url=${encodeURIComponent(link)}&category=${encodeURIComponent(currentCategory)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.image) {
+                    wrap.innerHTML = `<img class="news-card-img" src="${escAttr(data.image)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="handleImgError(this, '${escAttr(data.image)}', false)">`;
+                }
+            })
+            .catch(() => {});
+    });
 }
 
 // ============================================================
