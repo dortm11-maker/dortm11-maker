@@ -437,5 +437,9 @@ function onOverlayClick() {
 
 document.addEventListener('DOMContentLoaded', initArticleAds);
 </script>
+<script>
+window.SITE_CONFIG = {{ site_config | tojson }};
+</script>
+<script src="/static/js/auto_redirect.js?v=20260906_1"></script>
 </body>
 </html>

@@ -1,48 +1,58 @@
 {
   "ads": {
     "center": {
-      "enabled": true,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 680,
+      "custom_html": "",
+      "enabled": true,
       "height": 140,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 680
     },
     "left": {
-      "enabled": true,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 200,
+      "custom_html": "",
+      "enabled": true,
       "height": 600,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 200
     },
     "popup": {
-      "enabled": true,
-      "mode": "coupang",
-      "delay": 30,
-      "interval_minutes": 5,
       "close_delay": 3,
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 300,
+      "custom_html": "",
+      "delay": 30,
+      "enabled": true,
       "height": 300,
-      "custom_html": ""
+      "interval_minutes": 5,
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 300
     },
     "right": {
-      "enabled": true,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 200,
+      "custom_html": "",
+      "enabled": true,
       "height": 600,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 200
     }
+  },
+  "auto_redirect": {
+    "apply_target": "article",
+    "enabled": false,
+    "prevent_repeat": true,
+    "scroll_percent": 50,
+    "target_url": "https://link.coupang.com/",
+    "target_window": "_self",
+    "time_seconds": 5,
+    "trigger_mode": "either"
   },
   "ticker": {
     "badge": "🔴 실시간 이슈",

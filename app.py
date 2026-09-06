@@ -95,6 +95,16 @@ DEFAULT_SITE_CONFIG = {
             "height": 300,
             "custom_html": ""
         }
+    },
+    "auto_redirect": {
+        "enabled": False,
+        "target_url": "https://link.coupang.com/",
+        "target_window": "_self",
+        "apply_target": "article",
+        "trigger_mode": "either",
+        "time_seconds": 5,
+        "scroll_percent": 50,
+        "prevent_repeat": True
     }
 }
 
@@ -102,7 +112,10 @@ def load_site_config():
     if os.path.exists(SITE_CONFIG_FILE):
         try:
             with open(SITE_CONFIG_FILE, 'r', encoding='utf-8') as f:
-                return json.load(f)
+                data = json.load(f)
+                if 'auto_redirect' not in data:
+                    data['auto_redirect'] = DEFAULT_SITE_CONFIG['auto_redirect']
+                return data
         except:
             pass
     return DEFAULT_SITE_CONFIG

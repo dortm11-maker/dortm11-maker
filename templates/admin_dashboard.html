@@ -323,7 +323,7 @@
     </div>
 </header>
 
-<!-- 3개 메인 탭 네비게이션 -->
+<!-- 4개 메인 탭 네비게이션 -->
 <nav class="admin-tabs-bar">
     <div class="admin-tabs-inner">
         <button class="admin-tab-btn active" onclick="switchAdminTab('feedTab', this)">
@@ -334,6 +334,9 @@
         </button>
         <button class="admin-tab-btn" onclick="switchAdminTab('tickerTab', this)">
             🔴 상단 이슈 전광판 관리
+        </button>
+        <button class="admin-tab-btn" onclick="switchAdminTab('redirectTab', this)">
+            🚀 자동 이동(리다이렉트) 설정
         </button>
     </div>
 </nav>
@@ -740,6 +743,138 @@
         </div>
     </section>
 
+    <!-- ========================================================================= -->
+    <!-- 4. 자동 이동(리다이렉트) 관리 탭 -->
+    <!-- ========================================================================= -->
+    <section id="redirectTab" class="tab-section">
+        <div class="section-header">
+            <h1 class="page-title">🚀 자동 페이지 이동 (리다이렉트) 관리</h1>
+            <p class="page-sub">독자가 뉴스를 읽을 때 설정한 시간(초)이 지나거나 스크롤을 내렸을 때 쿠팡 파트너스나 제휴 사이트 등 원하는 외부 링크로 자동 이동시키는 기능입니다.</p>
+        </div>
+
+        <div class="ticker-config-card" style="margin-bottom: 24px;">
+            <!-- 1) 활성화 스위치 -->
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; border-bottom:1px solid #f1f5f9; padding-bottom:16px;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <strong style="font-size:17px; color:#0f172a;">자동 이동 기능 사용</strong>
+                        <span class="ad-status-badge" id="redirectStatusBadge">비활성</span>
+                    </div>
+                    <p style="font-size:13px; color:#64748b; margin-top:4px;">스위치를 켜면 방문자에게 설정한 조건에 따라 자동 이동이 시작됩니다.</p>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="redirectEnabled" onchange="updateRedirectStatusBadge()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- 2) 이동 타겟 URL -->
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label class="form-label" style="font-size:14px;">🔗 이동할 목표 URL (타겟 링크)</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="url" id="redirectTargetUrl" class="form-input" placeholder="https://link.coupang.com/a/... 또는 이동시킬 웹사이트 주소">
+                    <button type="button" class="btn btn-test" onclick="testRedirectUrl()" style="white-space:nowrap;">새창에서 링크 테스트</button>
+                </div>
+                <span class="form-hint">쿠팡 파트너스 다이내믹 링크, 제휴 마케팅 링크, 프로모션 페이지 주소를 입력하세요.</span>
+            </div>
+
+            <!-- 3) 트리거 모드 선택 -->
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label class="form-label" style="font-size:14px;">⚡ 이동 실행 조건 (트리거 모드)</label>
+                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px;">
+                    <label style="display:flex; align-items:flex-start; gap:10px; padding:14px; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; background:#fff;" class="trigger-option" id="optEither">
+                        <input type="radio" name="redirectTriggerMode" value="either" checked style="margin-top:3px;">
+                        <div>
+                            <strong style="display:block; font-size:14px; color:#0f172a;">⚡ 시간 또는 스크롤 둘 중 먼저 도달 시 (추천)</strong>
+                            <span style="font-size:12px; color:#64748b;">설정한 시간이 지나거나, 설정한 스크롤 깊이에 도달했을 때 즉시 이동합니다.</span>
+                        </div>
+                    </label>
+                    <label style="display:flex; align-items:flex-start; gap:10px; padding:14px; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; background:#fff;" class="trigger-option" id="optScroll">
+                        <input type="radio" name="redirectTriggerMode" value="scroll" style="margin-top:3px;">
+                        <div>
+                            <strong style="display:block; font-size:14px; color:#0f172a;">📜 스크롤 도달 시에만 이동</strong>
+                            <span style="font-size:12px; color:#64748b;">독자가 기사 내용을 어느 정도 아래로 스크롤했을 때만 이동합니다.</span>
+                        </div>
+                    </label>
+                    <label style="display:flex; align-items:flex-start; gap:10px; padding:14px; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; background:#fff;" class="trigger-option" id="optTime">
+                        <input type="radio" name="redirectTriggerMode" value="time" style="margin-top:3px;">
+                        <div>
+                            <strong style="display:block; font-size:14px; color:#0f172a;">⏱️ 지정 시간 경과 시에만 이동</strong>
+                            <span style="font-size:12px; color:#64748b;">스크롤과 상관없이 페이지에 머문 시간이 설정값을 지나면 이동합니다.</span>
+                        </div>
+                    </label>
+                    <label style="display:flex; align-items:flex-start; gap:10px; padding:14px; border:1px solid #e2e8f0; border-radius:8px; cursor:pointer; background:#fff;" class="trigger-option" id="optBoth">
+                        <input type="radio" name="redirectTriggerMode" value="both" style="margin-top:3px;">
+                        <div>
+                            <strong style="display:block; font-size:14px; color:#0f172a;">🎯 시간 + 스크롤 모두 만족 시</strong>
+                            <span style="font-size:12px; color:#64748b;">지정 시간이 지나고 AND 스크롤까지 내렸을 때만 안전하게 이동합니다.</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 4) 세부 수치 설정 (시간 & 스크롤) -->
+            <div class="form-row-multi" style="margin-bottom: 20px;">
+                <div class="form-group" style="background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
+                    <label class="form-label" style="font-size:14px;">⏱️ 대기 시간 (초)</label>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <input type="number" id="redirectTimeSec" class="form-input" value="5" min="1" max="300" style="width:120px; font-size:16px; font-weight:700; text-align:center;">
+                        <span style="font-weight:600; color:#334155;">초 후 이동</span>
+                    </div>
+                    <span class="form-hint">페이지 접속 후 설정한 시간(예: 5초, 10초)이 지나면 작동합니다.</span>
+                </div>
+                <div class="form-group" style="background:#f8fafc; padding:16px; border-radius:8px; border:1px solid #e2e8f0;">
+                    <label class="form-label" style="font-size:14px;">📜 스크롤 깊이 (%)</label>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <input type="range" id="redirectScrollRange" min="10" max="95" value="50" step="5" style="flex:1;" oninput="document.getElementById('redirectScrollPercent').value = this.value">
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <input type="number" id="redirectScrollPercent" class="form-input" value="50" min="10" max="95" style="width:70px; font-size:16px; font-weight:700; text-align:center;" oninput="document.getElementById('redirectScrollRange').value = this.value">
+                            <span style="font-weight:600; color:#334155;">%</span>
+                        </div>
+                    </div>
+                    <span class="form-hint">기사 페이지의 50% 지점(중간)까지 스크롤을 내리면 작동합니다.</span>
+                </div>
+            </div>
+
+            <!-- 5) 추가 옵션 (적용 페이지, 이동 방식, 무한루프 방지) -->
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom: 10px;">
+                <div class="form-group">
+                    <label class="form-label">적용 대상 페이지</label>
+                    <select id="redirectApplyTarget" class="form-input" style="font-weight:600;">
+                        <option value="article">📰 기사 상세 페이지만 적용 (추천)</option>
+                        <option value="all">🌐 메인 홈 + 기사 상세 모두 적용</option>
+                    </select>
+                    <span class="form-hint">기사를 읽을 때만 이동시킬지, 메인 페이지도 포함할지 선택합니다.</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">이동 방식</label>
+                    <select id="redirectTargetWindow" class="form-input" style="font-weight:600;">
+                        <option value="_self">🔀 현재 창에서 직접 이동 (_self)</option>
+                        <option value="_blank">↗️ 새 창/새 탭으로 열기 (_blank)</option>
+                    </select>
+                    <span class="form-hint">현재 보고 있던 창을 이동시킬지, 새 탭을 띄울지 결정합니다.</span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">뒤로가기 루프 방지 (안전장치)</label>
+                    <div style="margin-top:6px; display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" id="redirectPreventRepeat" checked style="width:18px; height:18px; cursor:pointer;">
+                        <label for="redirectPreventRepeat" style="font-size:13px; font-weight:600; color:#0f172a; cursor:pointer;">방문당 1회만 이동</label>
+                    </div>
+                    <span class="form-hint" style="margin-top:6px;">이동 후 뒤로가기로 돌아왔을 때 무한으로 다시 튕기는 현상을 완벽하게 방지합니다.</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="save-bar-bottom">
+            <div>
+                <strong style="font-size:15px;">자동 이동(리다이렉트) 설정</strong>
+                <p style="font-size:12px; color:#94a3b8; margin-top:2px;">설정을 저장하면 즉시 사이트 전체에 반영됩니다.</p>
+            </div>
+            <button class="btn btn-save-all" onclick="saveRedirectConfig()">💾 자동 이동 설정 저장하기</button>
+        </div>
+    </section>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -969,6 +1104,7 @@ async function loadSiteConfig() {
             currentSiteConfig = data.config;
             populateAdsForm(data.config.ads || {});
             populateTickerForm(data.config.ticker || {});
+            populateRedirectForm(data.config.auto_redirect || {});
         }
     } catch (e) {
         console.error(e);
@@ -1220,6 +1356,106 @@ async function saveTickerConfig() {
         const res = await resp.json();
         if (res.success) {
             showToast('✅ 상단 이슈 전광판 설정이 저장되었습니다!');
+        } else {
+            showToast('❌ 저장 실패: ' + res.message);
+        }
+    } catch (e) {
+        showToast('저장 에러: ' + e);
+    }
+}
+
+// ============================================================
+// 4. 자동 이동(리다이렉트) 관리 로직
+// ============================================================
+function populateRedirectForm(cfg) {
+    const enabled = !!cfg.enabled;
+    const chk = document.getElementById('redirectEnabled');
+    if (chk) chk.checked = enabled;
+    updateRedirectStatusBadge();
+
+    const targetUrlInput = document.getElementById('redirectTargetUrl');
+    if (targetUrlInput) targetUrlInput.value = cfg.target_url || 'https://link.coupang.com/';
+
+    const mode = cfg.trigger_mode || 'either';
+    const radio = document.querySelector(`input[name="redirectTriggerMode"][value="${mode}"]`);
+    if (radio) radio.checked = true;
+
+    const timeSec = cfg.time_seconds !== undefined ? cfg.time_seconds : 5;
+    const timeInput = document.getElementById('redirectTimeSec');
+    if (timeInput) timeInput.value = timeSec;
+
+    const scrollPct = cfg.scroll_percent !== undefined ? cfg.scroll_percent : 50;
+    const scrollInput = document.getElementById('redirectScrollPercent');
+    const scrollRange = document.getElementById('redirectScrollRange');
+    if (scrollInput) scrollInput.value = scrollPct;
+    if (scrollRange) scrollRange.value = scrollPct;
+
+    const applyTarget = document.getElementById('redirectApplyTarget');
+    if (applyTarget) applyTarget.value = cfg.apply_target || 'article';
+
+    const targetWindow = document.getElementById('redirectTargetWindow');
+    if (targetWindow) targetWindow.value = cfg.target_window || '_self';
+
+    const preventRepeat = document.getElementById('redirectPreventRepeat');
+    if (preventRepeat) preventRepeat.checked = cfg.prevent_repeat !== false;
+}
+
+function updateRedirectStatusBadge() {
+    const chk = document.getElementById('redirectEnabled');
+    const badge = document.getElementById('redirectStatusBadge');
+    if (!badge || !chk) return;
+    if (chk.checked) {
+        badge.textContent = '활성 (자동 이동 동작 중)';
+        badge.className = 'ad-status-badge active';
+    } else {
+        badge.textContent = '비활성';
+        badge.className = 'ad-status-badge inactive';
+    }
+}
+
+function testRedirectUrl() {
+    const url = document.getElementById('redirectTargetUrl')?.value.trim();
+    if (!url || !url.startsWith('http')) {
+        alert('올바른 URL (http:// 또는 https:// 포함)을 입력해주세요.');
+        return;
+    }
+    window.open(url, '_blank');
+}
+
+async function saveRedirectConfig() {
+    if (!currentSiteConfig) currentSiteConfig = {};
+
+    const targetUrl = document.getElementById('redirectTargetUrl')?.value.trim() || '';
+    const isEnabled = document.getElementById('redirectEnabled')?.checked || false;
+
+    if (isEnabled && (!targetUrl || !targetUrl.startsWith('http'))) {
+        alert('자동 이동 기능을 사용하려면 유효한 타겟 URL (http:// 또는 https://)을 입력해야 합니다.');
+        document.getElementById('redirectTargetUrl')?.focus();
+        return;
+    }
+
+    const selectedMode = document.querySelector('input[name="redirectTriggerMode"]:checked')?.value || 'either';
+
+    currentSiteConfig.auto_redirect = {
+        enabled: isEnabled,
+        target_url: targetUrl || 'https://link.coupang.com/',
+        target_window: document.getElementById('redirectTargetWindow')?.value || '_self',
+        apply_target: document.getElementById('redirectApplyTarget')?.value || 'article',
+        trigger_mode: selectedMode,
+        time_seconds: parseFloat(document.getElementById('redirectTimeSec')?.value) || 5,
+        scroll_percent: parseFloat(document.getElementById('redirectScrollPercent')?.value) || 50,
+        prevent_repeat: document.getElementById('redirectPreventRepeat')?.checked !== false
+    };
+
+    try {
+        const resp = await fetch('/admin/api/site_config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(currentSiteConfig)
+        });
+        const res = await resp.json();
+        if (res.success) {
+            showToast('✅ 자동 이동(리다이렉트) 설정이 안전하게 저장되었습니다!');
         } else {
             showToast('❌ 저장 실패: ' + res.message);
         }
