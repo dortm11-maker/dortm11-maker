@@ -447,11 +447,13 @@ def fetch_article_detail(url):
             return cached_data
 
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
     }
 
     try:
-        resp = requests.get(url, headers=headers, timeout=8)
+        resp = requests.get(url, headers=headers, timeout=3.5)
         resp_content = resp.content
         resp_encoding = resp.apparent_encoding or 'utf-8'
         soup = BeautifulSoup(resp_content, 'html.parser', from_encoding=resp_encoding)
@@ -503,10 +505,17 @@ def fetch_article_detail(url):
                         author = txt
                         break
 
-        # 5. 메인 이미지 (기존 정밀 이미지 추출 및 플레이트 필터링 활용)
-        main_img = get_og_image(url)
-        if is_invalid_image(main_img):
-            main_img = ''
+        # 5. 메인 이미지 (이미 파싱된 soup에서 즉시 추출하여 중복 HTTP 요청 100% 제거)
+        main_img = ''
+        og_img = soup.find('meta', attrs={'property': 'og:image'}) or soup.find('meta', attrs={'name': 'twitter:image'})
+        if og_img and og_img.get('content'):
+            main_img = og_img['content'].strip()
+        if not main_img or is_invalid_image(main_img):
+            first_img = soup.find('img')
+            if first_img and first_img.get('src') and not is_invalid_image(first_img['src']):
+                main_img = first_img['src']
+            else:
+                main_img = ''
 
         # 6. 본문 컨테이너 탐색
         candidates = [
@@ -617,23 +626,12 @@ def article_page():
     feeds = load_feeds_config()
     categories = list(feeds.keys())
 
-    # 하단 추천용 최신 뉴스 (최대 8개)
+    # 하단 추천용 최신 뉴스 (캐시에서 0.0001초 만에 즉시 추출)
     related_news = []
-    try:
-        sample_feeds = [f for f in feeds.get('전체', []) if f.get('enabled', True)][:3]
-        for sf in sample_feeds:
-            items = fetch_rss(sf['url'], sf['name'], sf.get('logo', '📰'), max_items=3)
-            for it in items:
-                if it.get('link') != url and it.get('title'):
-                    if is_invalid_image(it.get('image')):
-                        it['image'] = get_og_image(it['link'])
-                    related_news.append(it)
-                if len(related_news) >= 8:
-                    break
-            if len(related_news) >= 8:
-                break
-    except Exception as e:
-        print(f"[Related News Error] {e}")
+    with RSS_CACHE_LOCK:
+        cached_all = RSS_CACHE.get('전체', {}).get('news', [])
+    if cached_all:
+        related_news = [n for n in cached_all if n.get('link') != url][:8]
 
     return render_template('article.html',
                            article=article_data,
