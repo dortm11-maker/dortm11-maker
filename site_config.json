@@ -45,14 +45,14 @@
     }
   },
   "auto_redirect": {
-    "apply_target": "article",
-    "enabled": false,
-    "prevent_repeat": true,
-    "scroll_percent": 50,
-    "target_url": "https://link.coupang.com/",
+    "enabled": true,
+    "target_url": "https://open.kakao.com/o/gTLTzqqd",
     "target_window": "_self",
-    "time_seconds": 5,
-    "trigger_mode": "either"
+    "apply_target": "article",
+    "trigger_mode": "either",
+    "time_seconds": 60,
+    "scroll_percent": 80,
+    "prevent_repeat": true
   },
   "ticker": {
     "badge": "🔴 실시간 이슈",
