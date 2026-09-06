@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280, initial-scale=0.35, minimum-scale=0.2, maximum-scale=3.0, user-scalable=yes">
+    <meta name="referrer" content="no-referrer">
+    <title>{{ article.title }} - 뉴스NOW</title>
+    <meta name="description" content="{% if article.paragraphs %}{{ article.paragraphs[0][:140] }}{% else %}{{ article.title }}{% endif %}">
+    <meta property="og:title" content="{{ article.title }}">
+    {% if article.main_img %}
+    <meta property="og:image" content="{{ article.main_img }}">
+    {% endif %}
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📰</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 쿠팡 파트너스 공식 SDK -->
+    <script src="https://ads-partners.coupang.com/g.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css?v=20260906_3">
+</head>
+<body class="article-page-body">
+
+<!-- ===================== 1. 상단 이슈 전광판 (마퀴 티커) ===================== -->
+{% if site_config.ticker.enabled %}
+<div class="issue-ticker" id="issueTicker">
+    <div class="ticker-inner container">
+        <div class="ticker-badge">
+            <span class="ticker-pulse"></span>
+            <span class="ticker-label-text">{{ site_config.ticker.badge or '🔴 실시간 이슈' }}</span>
+        </div>
+        <div class="ticker-wrap">
+            <div class="ticker-track" id="tickerTrack" style="--ticker-speed: {{ site_config.ticker.speed or 35 }}s;">
+                {% for item in site_config.ticker['items'] %}
+                    {% if item is mapping %}
+                        {% if item.link and item.link != '#' %}
+                            <a href="/article?url={{ item.link | urlencode }}" class="ticker-item ticker-link" title="{{ item.title }}">{{ item.title }}</a>
+                        {% else %}
+                            <span class="ticker-item">{{ item.title }}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="ticker-item">{{ item }}</span>
+                    {% endif %}
+                    <span class="ticker-sep">•</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- ===================== 2. HEADER ===================== -->
+<header class="site-header">
+    <div class="header-inner container">
+        <div class="logo-area">
+            <a href="/" class="logo">
+                <span class="logo-icon">N</span>
+                <span class="logo-text">뉴스NOW</span>
+            </a>
+            <nav class="header-gnb" id="headerGnb">
+                {% for cat in categories %}
+                <a href="/?cat={{ cat }}" class="gnb-item">{{ '홈' if cat == '전체' else cat }}</a>
+                {% endfor %}
+            </nav>
+        </div>
+        <div class="header-right">
+            <div id="currentDate" class="header-date"></div>
+        </div>
+    </div>
+</header>
+
+<!-- ===================== 3. 좌측 쿠팡 파트너스 플로팅 날개 배너 ===================== -->
+{% if site_config.ads.left.enabled %}
+<aside class="ad-wing-banner left" id="adWingLeft">
+    <div class="ad-wing-inner">
+        <div class="ad-wing-body">
+            {% if site_config.ads.left.mode == 'custom' and site_config.ads.left.custom_html %}
+                {{ site_config.ads.left.custom_html | safe }}
+            {% else %}
+                <script>
+                    new PartnersCoupang.G({
+                        "id": {{ site_config.ads.left.coupang_id or 1026359 }},
+                        "template": "carousel",
+                        "trackingCode": "{{ site_config.ads.left.tracking_code or 'AF3197388' }}",
+                        "subId": "{{ site_config.ads.left.sub_id or 'dortm111' }}",
+                        "width": "{{ site_config.ads.left.width or 200 }}",
+                        "height": "{{ (site_config.ads.left.height or 600) - 45 }}",
+                        "tsource": ""
+                    });
+                </script>
+            {% endif %}
+        </div>
+        <div class="ad-wing-footer">
+            <span>이 포스팅은 쿠팡 파트너스 활동의 일환으로,</span><br>
+            <span>이에 따른 일정액의 수수료를 제공받습니다.</span>
+        </div>
+    </div>
+</aside>
+{% endif %}
+
+<!-- ===================== 4. 우측 쿠팡 파트너스 플로팅 날개 배너 ===================== -->
+{% if site_config.ads.right.enabled %}
+<aside class="ad-wing-banner right" id="adWingRight">
+    <div class="ad-wing-inner">
+        <div class="ad-wing-body">
+            {% if site_config.ads.right.mode == 'custom' and site_config.ads.right.custom_html %}
+                {{ site_config.ads.right.custom_html | safe }}
+            {% else %}
+                <script>
+                    new PartnersCoupang.G({
+                        "id": {{ site_config.ads.right.coupang_id or 1026359 }},
+                        "template": "carousel",
+                        "trackingCode": "{{ site_config.ads.right.tracking_code or 'AF3197388' }}",
+                        "subId": "{{ site_config.ads.right.sub_id or 'dortm111' }}",
+                        "width": "{{ site_config.ads.right.width or 200 }}",
+                        "height": "{{ (site_config.ads.right.height or 600) - 45 }}",
+                        "tsource": ""
+                    });
+                </script>
+            {% endif %}
+        </div>
+        <div class="ad-wing-footer">
+            <span>이 포스팅은 쿠팡 파트너스 활동의 일환으로,</span><br>
+            <span>이에 따른 일정액의 수수료를 제공받습니다.</span>
+        </div>
+    </div>
+</aside>
+{% endif %}
+
+<!-- ===================== 5. 메인 기사 본문 영역 ===================== -->
+<main class="main-content container article-detail-container">
+
+    <!-- 상단 내비게이션 바 -->
+    <div class="article-top-nav">
+        <button class="article-back-btn" onclick="goBackOrHome()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>목록으로 돌아가기</span>
+        </button>
+        <div class="article-top-actions">
+            <button class="article-share-btn" onclick="copyArticleUrl()" title="링크 복사">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span id="copyText">링크 복사</span>
+            </button>
+            <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="article-origin-btn" title="언론사 원문 새창 보기">
+                <span>원문 보기</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <!-- 기사 본문 카드 -->
+    <article class="article-card-main">
+        
+        <!-- 기사 헤더 -->
+        <header class="article-view-header">
+            <div class="article-badge-row">
+                <span class="article-publisher-pill">{{ article.pub_logo }} {{ article.publisher }}</span>
+                <span class="article-status-pill">실시간 속보</span>
+            </div>
+            <h1 class="article-view-title">{{ article.title }}</h1>
+            <div class="article-meta-info">
+                <div class="article-meta-left">
+                    {% if article.author %}
+                    <span class="article-author">{{ article.author }}</span>
+                    <span class="article-meta-dot">•</span>
+                    {% endif %}
+                    <span class="article-date">입력 {{ article.pub_date }}</span>
+                </div>
+                <div class="article-meta-right">
+                    <span class="article-source-tag">제공: {{ article.publisher }}</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 본문 상단 쿠팡 파트너스 배너 -->
+        {% if site_config.ads.center.enabled %}
+        <div class="ad-banner-horizontal in-article" id="adCenterBanner">
+            <div class="ad-horizontal-header">
+                <span class="ad-tag">쿠팡 추천</span>
+                <span class="ad-subtext">실시간 추천 특가 혜택</span>
+            </div>
+            <div class="ad-horizontal-body">
+                {% if site_config.ads.center.mode == 'custom' and site_config.ads.center.custom_html %}
+                    {{ site_config.ads.center.custom_html | safe }}
+                {% else %}
+                    <script>
+                        new PartnersCoupang.G({
+                            "id": {{ site_config.ads.center.coupang_id or 1026241 }},
+                            "template": "carousel",
+                            "trackingCode": "{{ site_config.ads.center.tracking_code or 'AF3197388' }}",
+                            "subId": "{{ site_config.ads.center.sub_id or 'dortm111' }}",
+                            "width": "{{ site_config.ads.center.width or 680 }}",
+                            "height": "{{ site_config.ads.center.height or 140 }}",
+                            "tsource": ""
+                        });
+                    </script>
+                {% endif %}
+            </div>
+            <div class="ad-horizontal-footer">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+        </div>
+        {% endif %}
+
+        <!-- 메인 보도 사진 -->
+        {% if article.main_img %}
+        <figure class="article-view-hero-figure">
+            <img src="{{ article.main_img }}" alt="{{ article.title }}" class="article-hero-img" referrerpolicy="no-referrer" onerror="this.parentElement.style.display='none'">
+            {% if article.caption %}
+            <figcaption class="article-hero-caption">{{ article.caption }}</figcaption>
+            {% endif %}
+        </figure>
+        {% endif %}
+
+        <!-- 기사 본문 텍스트 문단 -->
+        <section class="article-view-content">
+            {% for p in article.paragraphs %}
+            <p class="article-para">{{ p }}</p>
+            {% endfor %}
+        </section>
+
+        <!-- 하단 원문 출처 및 저작권 박스 -->
+        <div class="article-source-box">
+            <div class="source-box-header">
+                <span class="source-icon">📰</span>
+                <span class="source-title">{{ article.publisher }} 원문 기사 및 저작권 안내</span>
+            </div>
+            <p class="source-desc">
+                본 기사의 저작권 및 모든 법적 권리는 <strong>{{ article.publisher }}</strong>에 있으며, 뉴스NOW는 RSS 및 공개 정보 제공 목적으로 기사를 전달합니다. 전문 및 관련 영상은 원문 페이지에서 확인하실 수 있습니다.
+            </p>
+            <div class="source-action">
+                <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="source-link-btn">
+                    <span>{{ article.publisher }} 원문 기사 전문 보러가기</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- 하단 목록 돌아가기 큰 버튼 -->
+        <div class="article-bottom-nav">
+            <button class="article-bottom-back-btn" onclick="goBackOrHome()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>최신 뉴스 목록으로 돌아가기</span>
+            </button>
+        </div>
+
+    </article>
+
+    <!-- ===================== 6. 하단 관련 / 이 시각 주요 뉴스 추천 ===================== -->
+    {% if related_news %}
+    <section class="related-news-section">
+        <div class="section-divider">
+            <h2 class="section-heading">🔥 이 시각 실시간 주요 뉴스</h2>
+            <span class="section-count">추천 뉴스</span>
+        </div>
+        <div class="related-news-grid">
+            {% for item in related_news %}
+            <a class="news-card" href="/article?url={{ item.link | urlencode }}">
+                <div class="news-card-img-wrap">
+                    {% if item.image %}
+                        <img class="news-card-img" src="{{ item.image }}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML='<div class=\'news-card-img-placeholder\'>📰</div>'">
+                    {% else %}
+                        <div class="news-card-img-placeholder">📰</div>
+                    {% endif %}
+                </div>
+                <div class="news-card-body">
+                    <div class="news-card-source">{{ item.logo }} {{ item.source }}</div>
+                    <div class="news-card-title">{{ item.title }}</div>
+                    <div class="news-card-date">{{ item.date }}</div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+</main>
+
+<!-- ===================== 7. FOOTER ===================== -->
+<footer class="site-footer">
+    <div class="container footer-inner">
+        <div class="footer-left">
+            <span class="footer-logo">뉴스NOW</span>
+            <span class="footer-copy">국내 주요 언론사 실시간 RSS 뉴스 통합 플랫폼</span>
+        </div>
+        <div class="footer-right">
+            <span class="footer-notice">모든 뉴스의 저작권은 해당 언론사에 있습니다.</span>
+        </div>
+    </div>
+</footer>
+
+<!-- ===================== 8. 중앙 팝업 광고 ===================== -->
+{% if site_config.ads.popup.enabled %}
+<div class="popup-overlay" id="popupOverlay" style="display:none" onclick="onOverlayClick()">
+    <div class="popup-box" onclick="event.stopPropagation()">
+        <button class="popup-corner-close" id="popupCloseBtn" onclick="closePopup()" title="닫기" disabled>3</button>
+        <div class="popup-body">
+            {% if site_config.ads.popup.mode == 'custom' and site_config.ads.popup.custom_html %}
+                {{ site_config.ads.popup.custom_html | safe }}
+            {% else %}
+                <script>
+                    new PartnersCoupang.G({
+                        "id": {{ site_config.ads.popup.coupang_id or 1026359 }},
+                        "template": "carousel",
+                        "trackingCode": "{{ site_config.ads.popup.tracking_code or 'AF3197388' }}",
+                        "subId": "{{ site_config.ads.popup.sub_id or 'dortm111' }}",
+                        "width": "{{ site_config.ads.popup.width or 300 }}",
+                        "height": "{{ site_config.ads.popup.height or 300 }}",
+                        "tsource": ""
+                    });
+                </script>
+            {% endif %}
+        </div>
+        <div class="popup-footer">
+            <span class="popup-disclosure">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- 클라이언트 스크립트 -->
+<script>
+window.SITE_CONFIG = {{ site_config | tojson }};
+
+// 오늘 날짜 표기
+function updateDate() {
+    const el = document.getElementById('currentDate');
+    if (!el) return;
+    const now = new Date();
+    const days = ['일', '월', '화', '수', '목', '금', '토'];
+    el.textContent = `${now.getMonth()+1}.${now.getDate()}(${days[now.getDay()]})`;
+}
+updateDate();
+
+// 뒤로가기 또는 홈으로
+function goBackOrHome() {
+    if (document.referrer && document.referrer.includes(window.location.host)) {
+        window.history.back();
+    } else {
+        window.location.href = '/';
+    }
+}
+
+// 링크 복사
+function copyArticleUrl() {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        const copyTxt = document.getElementById('copyText');
+        if (copyTxt) {
+            const original = copyTxt.textContent;
+            copyTxt.textContent = '복사 완료!';
+            setTimeout(() => { copyTxt.textContent = original; }, 2000);
+        }
+    }).catch(() => {
+        alert('주소가 복사되었습니다: ' + window.location.href);
+    });
+}
+
+// 티커 속도 & 무한 반복
+const track = document.getElementById('tickerTrack');
+if (track) {
+    const items = track.innerHTML;
+    track.innerHTML = items + items;
+}
+
+// 팝업 광고
+let popupCanClose = false;
+let popupCountdownTimer = null;
+
+function initArticleAds() {
+    const cfg = window.SITE_CONFIG?.ads;
+    if (!cfg || !cfg.popup || !cfg.popup.enabled) return;
+
+    const delay = (cfg.popup.delay !== undefined ? cfg.popup.delay : 2) * 1000;
+    setTimeout(() => { showPopup(); }, delay);
+
+    const intervalMin = parseInt(cfg.popup.interval_minutes) || 0;
+    if (intervalMin > 0) {
+        setInterval(() => { showPopup(); }, intervalMin * 60 * 1000);
+    }
+}
+
+function showPopup() {
+    const overlay = document.getElementById('popupOverlay');
+    if (!overlay) return;
+    const btn = document.getElementById('popupCloseBtn');
+    const cfg = window.SITE_CONFIG?.ads?.popup;
+    let remaining = cfg?.close_delay !== undefined ? parseInt(cfg.close_delay) : 3;
+    if (remaining < 1) remaining = 1;
+
+    popupCanClose = false;
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = remaining;
+    }
+    overlay.style.display = 'flex';
+
+    if (popupCountdownTimer) clearInterval(popupCountdownTimer);
+    popupCountdownTimer = setInterval(() => {
+        remaining--;
+        if (remaining > 0) {
+            if (btn) btn.textContent = remaining;
+        } else {
+            clearInterval(popupCountdownTimer);
+            popupCountdownTimer = null;
+            popupCanClose = true;
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = '✕';
+            }
+        }
+    }, 1000);
+}
+
+function closePopup() {
+    if (!popupCanClose) return;
+    const overlay = document.getElementById('popupOverlay');
+    if (overlay) overlay.style.display = 'none';
+}
+
+function onOverlayClick() {
+    if (!popupCanClose) return;
+    closePopup();
+}
+
+document.addEventListener('DOMContentLoaded', initArticleAds);
+</script>
+</body>
+</html>

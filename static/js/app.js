@@ -20,8 +20,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 광고 초기화
     initAds();
 
-    // 첫 뉴스 로딩
-    loadNews('전체');
+    // URL 파라미터로 카테고리가 넘어온 경우 처리 (예: /?cat=정치)
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialCat = urlParams.get('cat') || '전체';
+    switchCategory(initialCat);
 });
 
 
@@ -153,12 +155,18 @@ function loadMore() {
 }
 
 // ============================================================
-// 카드 생성 - 클릭 시 원문 바로 이동 (복사/원문 버튼 없음)
+// 카드 생성 - 클릭 시 사이트 내부 자체 기사 뷰어(/article)로 연결
 // ============================================================
+function getArticleUrl(link) {
+    if (!link || link === '#') return '#';
+    return `/article?url=${encodeURIComponent(link)}`;
+}
+
 function createHeadlineCard(item) {
     const hasImg = item.image && item.image.trim() !== '';
+    const targetUrl = getArticleUrl(item.link);
     return `
-    <a class="headline-card" href="${escAttr(item.link)}" target="_blank" rel="noopener noreferrer">
+    <a class="headline-card" href="${targetUrl}">
         <div class="headline-img-wrap">
             ${hasImg
                 ? `<img class="headline-img" src="${escAttr(item.image)}" alt="" loading="lazy"
@@ -180,8 +188,9 @@ function createHeadlineCard(item) {
 
 function createNewsCard(item) {
     const hasImg = item.image && item.image.trim() !== '';
+    const targetUrl = getArticleUrl(item.link);
     return `
-    <a class="news-card" href="${escAttr(item.link)}" target="_blank" rel="noopener noreferrer">
+    <a class="news-card" href="${targetUrl}">
         <div class="news-card-img-wrap">
             ${hasImg
                 ? `<img class="news-card-img" src="${escAttr(item.image)}" alt="" loading="lazy"

@@ -15,10 +15,13 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 import re
 
-# Windows 인코딩 강제 설정
+# Windows 인코딩 안전 설정
 if sys.platform == 'win32':
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+    try:
+        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+        sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+    except Exception:
+        pass
 
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
@@ -398,6 +401,198 @@ def is_admin():
     return session.get('is_admin', False)
 
 # ============================================================
+# 기사 본문 자체 파싱 & 뷰어 엔진
+# ============================================================
+ARTICLE_CACHE = {}
+
+def get_publisher_info(url, soup=None):
+    domain_map = {
+        'yna.co.kr': ('연합뉴스', '🔴'),
+        'ytn.co.kr': ('YTN', '🟠'),
+        'imbc.com': ('MBC', '🔵'),
+        'kbs.co.kr': ('KBS', '🟢'),
+        'sbs.co.kr': ('SBS', '🟡'),
+        'chosun.com': ('조선일보', '⚫'),
+        'joins.com': ('중앙일보', '🟤'),
+        'joongang.co.kr': ('중앙일보', '🟤'),
+        'donga.com': ('동아일보', '⭕'),
+        'hani.co.kr': ('한겨레', '🔷'),
+        'khan.co.kr': ('경향신문', '🔶'),
+        'mk.co.kr': ('매일경제', '💹'),
+        'hankyung.com': ('한국경제', '📈'),
+        'mt.co.kr': ('머니투데이', '💰'),
+        'heraldcorp.com': ('헤럴드경제', '📊'),
+        'asiae.co.kr': ('아시아경제', '💹'),
+        'edaily.co.kr': ('이데일리', '🗞️'),
+        'etnews.com': ('전자신문', '💻')
+    }
+    for dom, (name, logo) in domain_map.items():
+        if dom in url:
+            return name, logo
+    if soup:
+        og_site = soup.find('meta', property='og:site_name')
+        if og_site and og_site.get('content'):
+            return og_site['content'].strip(), '📰'
+    return '주요 언론사', '📰'
+
+def fetch_article_detail(url):
+    """기사 웹페이지를 분석하여 본문 문단, 메인 사진, 기자명, 발행시간 등을 추출"""
+    if not url or not url.startswith('http'):
+        return None
+        
+    now_ts = time.time()
+    if url in ARTICLE_CACHE:
+        cached_time, cached_data = ARTICLE_CACHE[url]
+        if now_ts - cached_time < 3600:
+            return cached_data
+
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    }
+
+    try:
+        resp = requests.get(url, headers=headers, timeout=8)
+        resp_content = resp.content
+        resp_encoding = resp.apparent_encoding or 'utf-8'
+        soup = BeautifulSoup(resp_content, 'html.parser', from_encoding=resp_encoding)
+
+        # 1. 언론사 정보
+        publisher, pub_logo = get_publisher_info(url, soup)
+
+        # 2. 제목 추출
+        og_title = soup.find('meta', attrs={'property': 'og:title'})
+        title = og_title['content'].strip() if og_title and og_title.get('content') else ''
+        if not title and soup.find('h1'):
+            title = soup.find('h1').get_text(strip=True)
+        title = re.sub(r'\s*[-|:]\s*(?:연합뉴스|매일경제|한국경제|경향신문|동아일보|조선일보|한겨레|SBS|MBC|KBS|YTN|머니투데이|아시아경제).*$', '', title).strip()
+
+        # 3. 작성일시 추출
+        pub_date = ''
+        og_date = soup.find('meta', attrs={'property': 'article:published_time'}) or soup.find('meta', attrs={'property': 'og:pubdate'})
+        if og_date and og_date.get('content'):
+            raw_d = og_date['content']
+            m = re.search(r'(\d{4})[-/.](\d{2})[-/.](\d{2})[T\s](\d{2}:\d{2})', raw_d)
+            if m:
+                pub_date = f"{m.group(1)}.{m.group(2)}.{m.group(3)} {m.group(4)}"
+        if not pub_date:
+            date_candidates = soup.select('.update-time, .news-date, .date, .txt-date, .author-box span, .byline, .article_date, .input_date, .media_end_head_info_datestamp_time')
+            for el in date_candidates:
+                txt = el.get_text(strip=True)
+                m = re.search(r'(\d{4})[.-](\d{2})[.-](\d{2})(?:\s+(\d{2}:\d{2}))?', txt)
+                if m:
+                    pub_date = txt
+                    break
+        if not pub_date:
+            pub_date = datetime.now().strftime('%Y.%m.%d %H:%M')
+
+        # 4. 기자명 / 작성자
+        author = ''
+        og_author = soup.find('meta', attrs={'property': 'dable:author'}) or soup.find('meta', attrs={'name': 'author'}) or soup.find('meta', attrs={'property': 'article:author'})
+        if og_author and og_author.get('content'):
+            author = og_author['content'].strip()
+        if not author:
+            for selector in ['.byline', '.reporter', '.author', '.writer', '.news-reporter', '.reporter_name']:
+                el = soup.select_one(selector)
+                if el:
+                    txt = el.get_text(strip=True)
+                    m = re.search(r'([가-힣]{2,4}\s*기자)', txt)
+                    if m:
+                        author = m.group(1)
+                        break
+                    elif len(txt) <= 15:
+                        author = txt
+                        break
+
+        # 5. 메인 이미지 (기존 정밀 이미지 추출 및 플레이트 필터링 활용)
+        main_img = get_og_image(url)
+        if is_invalid_image(main_img):
+            main_img = ''
+
+        # 6. 본문 컨테이너 탐색
+        candidates = [
+            soup.find('article', class_='story-news'),
+            soup.find('div', class_='story-news'),
+            soup.find(id='article-view-content-div'),
+            soup.find(id='articletxt'),
+            soup.find(id='articleBody'),
+            soup.find(id='news_view'),
+            soup.find(class_='news_cnt_detail_wrap'),
+            soup.find(class_='art_txt'),
+            soup.find(class_='article-body'),
+            soup.find(class_='article_txt'),
+            soup.find(class_='article_text'),
+            soup.find(class_='main_text'),
+            soup.find(id='dic_area'),
+            soup.find('article'),
+        ]
+        body_elem = next((c for c in candidates if c), None)
+
+        paragraphs = []
+        lead_img_caption = ''
+
+        if body_elem:
+            # 불필요한 태그/광고/스크립트 제거
+            for tag in body_elem(['script', 'style', 'aside', 'button', 'iframe', 'form', 'noscript', '.ad', '.ad-box', '.share-box', '.sns_area', '.reporter_area', '.relation_news', '.article_sns']):
+                tag.decompose()
+
+            # 이미지 캡션 탐색
+            fig_cap = body_elem.find(['figcaption', '.caption', '.img-desc'])
+            if fig_cap:
+                lead_img_caption = fig_cap.get_text(strip=True)
+
+            # <br> 태그를 개행 문자로 변환
+            for br in body_elem.find_all('br'):
+                br.replace_with('\n')
+
+            p_tags = [p.get_text(strip=True) for p in body_elem.find_all('p') if len(p.get_text(strip=True)) > 20]
+            if len(p_tags) >= 2:
+                candidate_paras = p_tags
+            else:
+                candidate_paras = [line.strip() for line in body_elem.get_text().split('\n') if len(line.strip()) > 20]
+
+            for p in candidate_paras:
+                if not any(k in p for k in ['저작권자', '무단전재 및 재배포', '무단 전재', '카카오톡', '제보하기', '구독신청', '기자의 다른 기사', 'All rights reserved', 'DB 금지', '재판매 및 DB']):
+                    if not re.match(r'^\s*\[.*(?:제공|사진|출처|그래픽).*\]\s*$', p):
+                        if p not in paragraphs:
+                            paragraphs.append(p)
+
+        if not paragraphs:
+            og_desc = soup.find('meta', attrs={'property': 'og:description'})
+            if og_desc and og_desc.get('content'):
+                paragraphs.append(og_desc['content'].strip())
+            else:
+                paragraphs.append("기사의 본문 내용을 불러오는 중입니다. 전문은 아래 언론사 원문 보기를 통해 확인하실 수 있습니다.")
+
+        result = {
+            'title': title or '최신 뉴스',
+            'publisher': publisher,
+            'pub_logo': pub_logo,
+            'pub_date': pub_date,
+            'author': author,
+            'main_img': main_img,
+            'caption': lead_img_caption,
+            'paragraphs': paragraphs,
+            'url': url
+        }
+
+        ARTICLE_CACHE[url] = (now_ts, result)
+        return result
+
+    except Exception as e:
+        print(f"[Article Parse Error] {url}: {e}")
+        return {
+            'title': '뉴스 기사 안내',
+            'publisher': '언론사 뉴스',
+            'pub_logo': '📰',
+            'pub_date': datetime.now().strftime('%Y.%m.%d %H:%M'),
+            'author': '',
+            'main_img': '',
+            'caption': '',
+            'paragraphs': ['기사 본문을 불러오는 과정에서 오류가 발생했습니다. 아래 공식 언론사 원문 기사 보기를 클릭하여 확인해주세요.'],
+            'url': url
+        }
+
+# ============================================================
 # 라우트 - 일반 사용자
 # ============================================================
 @app.route('/')
@@ -406,6 +601,49 @@ def index():
     categories = list(feeds.keys())
     site_cfg = load_site_config()
     return render_template('index.html', categories=categories, site_config=site_cfg)
+
+@app.route('/article')
+def article_page():
+    url = request.args.get('url', '').strip()
+    if not url or not url.startswith('http'):
+        return redirect('/')
+
+    article_data = fetch_article_detail(url)
+    site_cfg = load_site_config()
+    feeds = load_feeds_config()
+    categories = list(feeds.keys())
+
+    # 하단 추천용 최신 뉴스 (최대 8개)
+    related_news = []
+    try:
+        sample_feeds = [f for f in feeds.get('전체', []) if f.get('enabled', True)][:3]
+        for sf in sample_feeds:
+            items = fetch_rss(sf['url'], sf['name'], sf.get('logo', '📰'), max_items=3)
+            for it in items:
+                if it.get('link') != url and it.get('title'):
+                    if is_invalid_image(it.get('image')):
+                        it['image'] = get_og_image(it['link'])
+                    related_news.append(it)
+                if len(related_news) >= 8:
+                    break
+            if len(related_news) >= 8:
+                break
+    except Exception as e:
+        print(f"[Related News Error] {e}")
+
+    return render_template('article.html',
+                           article=article_data,
+                           site_config=site_cfg,
+                           categories=categories,
+                           related_news=related_news)
+
+@app.route('/api/article')
+def api_article():
+    url = request.args.get('url', '').strip()
+    if not url or not url.startswith('http'):
+        return jsonify({'success': False, 'error': '유효한 URL이 필요합니다.'}), 400
+    data = fetch_article_detail(url)
+    return jsonify({'success': True, 'article': data})
 
 @app.route('/api/site_config')
 def api_site_config():

@@ -12,7 +12,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- 쿠팡 파트너스 공식 SDK -->
     <script src="https://ads-partners.coupang.com/g.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260906_2">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260906_3">
 </head>
 <body>
 
@@ -28,7 +28,11 @@
             <div class="ticker-track" id="tickerTrack" style="--ticker-speed: {{ site_config.ticker.speed or 35 }}s;">
                 {% for item in site_config.ticker['items'] %}
                     {% if item is mapping %}
-                        <a href="{{ item.link or '#' }}" {% if item.link and item.link != '#' %}target="_blank" rel="noopener noreferrer"{% endif %} class="ticker-item ticker-link" title="{{ item.title }} (새창 열기)">{{ item.title }}</a>
+                        {% if item.link and item.link != '#' %}
+                            <a href="/article?url={{ item.link | urlencode }}" class="ticker-item ticker-link" title="{{ item.title }}">{{ item.title }}</a>
+                        {% else %}
+                            <span class="ticker-item">{{ item.title }}</span>
+                        {% endif %}
                     {% else %}
                         <span class="ticker-item">{{ item }}</span>
                     {% endif %}
@@ -228,6 +232,6 @@
 <script>
 window.SITE_CONFIG = {{ site_config | tojson }};
 </script>
-<script src="/static/js/app.js?v=20260906_2"></script>
+<script src="/static/js/app.js?v=20260906_3"></script>
 </body>
 </html>
