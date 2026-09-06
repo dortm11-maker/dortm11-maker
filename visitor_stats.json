@@ -1,10 +1,39 @@
 {
-  "total_uv": 6,
-  "total_pv": 15,
+  "total_uv": 11,
+  "total_pv": 23,
   "daily": {
     "2026-09-06": {
-      "uv": 6,
-      "pv": 15
+      "uv": 11,
+      "pv": 23
+    }
+  },
+  "visitor_logs": {
+    "211.234.120.45": {
+      "ip": "211.234.120.45",
+      "device": "📱 모바일",
+      "visit_count": 2,
+      "first_seen": "16:45:52",
+      "last_seen": "16:45:52",
+      "last_seen_ts": 1788680752.864785,
+      "last_page": "📰 기사 상세 읽는 중"
+    },
+    "125.133.40.78": {
+      "ip": "125.133.40.78",
+      "device": "💻 PC",
+      "visit_count": 1,
+      "first_seen": "16:45:53",
+      "last_seen": "16:45:53",
+      "last_seen_ts": 1788680753.196714,
+      "last_page": "📰 기사 상세 읽는 중"
+    },
+    "127.0.0.1": {
+      "ip": "127.0.0.1",
+      "device": "💻 PC",
+      "visit_count": 5,
+      "first_seen": "17:06:22",
+      "last_seen": "17:53:41",
+      "last_seen_ts": 1788684821.92742,
+      "last_page": "🌐 메인 뉴스 홈"
     }
   }
 }

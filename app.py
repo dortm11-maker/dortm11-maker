@@ -305,6 +305,13 @@ def save_site_config(config):
     with open(SITE_CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
 
+def get_admin_password():
+    try:
+        cfg = load_site_config()
+        return cfg.get('admin_password') or 'admin1234'
+    except Exception:
+        return 'admin1234'
+
 DEFAULT_RSS_FEEDS = {
     "전체": [
         {"name": "연합뉴스", "url": "https://www.yna.co.kr/rss/news.xml", "logo": "🔴", "enabled": True},
@@ -879,6 +886,11 @@ def detect_device():
 @app.before_request
 def track_visitor_middleware():
     path = request.path
+
+    # 비밀 URL 파라미터 감지 (예: ?admin=1, ?admin=true, ?key=admin)
+    if request.args.get('admin') in ['1', 'true', 'key', 'login', 'yes'] or request.args.get('key') in ['admin', 'secret', 'now']:
+        return redirect(url_for('admin_login'))
+
     # 정적 리소스, 헬스체크, 관리자 페이지, API 등 제외
     if path.startswith('/static') or path.startswith('/admin') or path.startswith('/api') or path in ['/favicon.ico', '/robots.txt', '/health']:
         return
@@ -1249,7 +1261,7 @@ def admin_login():
     error = None
     if request.method == 'POST':
         pw = request.form.get('password', '')
-        if pw == ADMIN_PASSWORD:
+        if pw == get_admin_password():
             session['is_admin'] = True
             return redirect(url_for('admin_dashboard'))
         else:
@@ -1458,6 +1470,29 @@ def admin_convert_share_link():
         })
     except Exception as e:
         return jsonify({'success': False, 'message': f'변환 실패: {str(e)}'})
+
+# ---- 관리자 비밀번호 변경 API ----
+@app.route('/admin/api/change_password', methods=['POST'])
+def admin_change_password():
+    if not is_admin():
+        abort(403)
+    data = request.get_json() or {}
+    cur_pw = (data.get('current_password') or '').strip()
+    new_pw = (data.get('new_password') or '').strip()
+
+    if not cur_pw or not new_pw:
+        return jsonify({'success': False, 'message': '현재 비밀번호와 새 비밀번호를 모두 입력해주세요.'})
+    
+    if cur_pw != get_admin_password():
+        return jsonify({'success': False, 'message': '현재 비밀번호가 일치하지 않습니다.'})
+    
+    if len(new_pw) < 4:
+        return jsonify({'success': False, 'message': '새 비밀번호는 최소 4자 이상이어야 합니다.'})
+    
+    cfg = load_site_config()
+    cfg['admin_password'] = new_pw
+    save_site_config(cfg)
+    return jsonify({'success': True, 'message': '관리자 비밀번호가 성공적으로 변경되었습니다.'})
 
 # ============================================================
 # 포트 / 실행
