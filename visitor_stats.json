@@ -1,6 +1,8 @@
 {
   "total_uv": 11,
   "total_pv": 23,
+  "current_date": "2026-09-06",
+  "today_vids": [],
   "daily": {
     "2026-09-06": {
       "uv": 11,
@@ -40,7 +42,7 @@
     "by_type_total": {
       "left": 1,
       "right": 0,
-      "center": 1,
+      "center": 2,
       "popup": 1,
       "link": 0,
       "auto_redirect": 1
@@ -48,10 +50,23 @@
     "by_type_today": {
       "left": 1,
       "right": 0,
-      "center": 1,
+      "center": 2,
       "popup": 1,
       "link": 0,
       "auto_redirect": 1
+    },
+    "daily": {
+      "2026-09-06": {
+        "pure_total": 1,
+        "by_type": {
+          "left": 0,
+          "right": 0,
+          "center": 1,
+          "popup": 0,
+          "link": 0,
+          "auto_redirect": 0
+        }
+      }
     },
     "recent_logs": [
       {
@@ -89,6 +104,15 @@
         "label": "자동 자리이동",
         "page": "기사 상세",
         "ts": 1788692790.7266483
+      },
+      {
+        "time": "21:28:55",
+        "ip": "127.0.0.1",
+        "device": "📱 모바일",
+        "ad_type": "center",
+        "label": "정면 본문 배너",
+        "page": "기사 상세",
+        "ts": 1788697735.0133898
       }
     ]
   }

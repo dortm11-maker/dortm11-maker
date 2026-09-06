@@ -1261,5 +1261,140 @@ body.is-mobile-device .mobile-sticky-ad-bar,
     margin-top: 16px;
 }
 
+/* ============ 9. 본문 데이터 테이블 (프로야구 순위표, 경기전적 등 원형 보존) ============ */
+.article-table-responsive {
+    width: 100%;
+    margin: 28px 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.article-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14.5px;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.article-data-table th,
+.article-data-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid #f1f5f9;
+    border-right: 1px solid #f1f5f9;
+    white-space: nowrap;
+}
+
+.article-data-table th:last-child,
+.article-data-table td:last-child {
+    border-right: none;
+}
+
+.article-data-table tr:first-child,
+.article-data-table thead tr {
+    background: #f8fafc;
+    font-weight: 700;
+    color: #1e293b;
+    border-bottom: 2px solid #cbd5e1;
+}
+
+.article-data-table tbody tr:hover {
+    background: #f1f5f9;
+}
+
+.article-data-table tr:nth-child(even) {
+    background: #fafbfc;
+}
+
+/* ============ 10. 모바일 화면 하단 플로팅 고정 배너 (스크롤 따라오기) ============ */
+.mobile-sticky-ad-bar {
+    display: none; /* PC 기본 화면에서는 숨김 */
+}
+
+@media (max-width: 1024px) {
+    body.is-mobile-device .mobile-sticky-ad-bar,
+    body .mobile-sticky-ad-bar {
+        display: block !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        z-index: 99999 !important;
+        box-shadow: 0 -4px 25px rgba(15, 23, 42, 0.15) !important;
+        border-top: 2px solid #2563eb !important;
+        padding: 6px 8px 8px !important;
+        animation: stickySlideUp 0.3s ease !important;
+    }
+
+    body.has-mobile-ad {
+        padding-bottom: 190px !important;
+    }
+
+    .mobile-sticky-ad-inner {
+        position: relative;
+        max-width: 720px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .mobile-sticky-ad-close {
+        position: absolute;
+        top: -22px;
+        right: 4px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #0f172a;
+        color: #ffffff;
+        border: 2px solid #ffffff;
+        font-size: 11px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 100000;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .mobile-sticky-header {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 4px;
+        font-size: 11px;
+    }
+
+    .mobile-sticky-body {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+        min-height: 100px;
+    }
+
+    .mobile-sticky-footer {
+        font-size: 10px;
+        color: #94a3b8;
+        text-align: center;
+        margin-top: 3px;
+        line-height: 1.2;
+    }
+}
+
+@keyframes stickySlideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
 
 

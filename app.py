@@ -57,12 +57,15 @@ class VisitorTracker:
         self.ad_clicks = {
             'by_type_total': {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0},
             'by_type_today': {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0},
+            'daily': {},         # {date_str: {'pure_total': int, 'by_type': {...}}}
             'recent_logs': []
         }
         self.last_saved = time.time()
         self.load()
 
     def load(self):
+        today = get_kst_today_str()
+        self.current_date = today
         if os.path.exists(VISITOR_STATS_FILE):
             try:
                 with open(VISITOR_STATS_FILE, 'r', encoding='utf-8') as f:
@@ -71,25 +74,28 @@ class VisitorTracker:
                     self.total_pv = data.get('total_pv', 0)
                     self.daily = data.get('daily', {})
                     self.visitor_logs = data.get('visitor_logs', {})
+                    if data.get('current_date') == today:
+                        self.today_vids = set(data.get('today_vids', []))
                     if 'ad_clicks' in data:
                         ac = data['ad_clicks']
-                        if 'by_type_total' in ac:
-                            self.ad_clicks = ac
-                        else:
-                            # 구버전 구조 마이그레이션
-                            old_bt = ac.get('by_type', {})
-                            self.ad_clicks = {
-                                'by_type_total': dict(old_bt),
-                                'by_type_today': dict(old_bt),
-                                'recent_logs': ac.get('recent_logs', [])
-                            }
+                        self.ad_clicks = {
+                            'by_type_total': ac.get('by_type_total', {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}),
+                            'by_type_today': ac.get('by_type_today', {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}),
+                            'daily': ac.get('daily', {}),
+                            'recent_logs': ac.get('recent_logs', [])
+                        }
             except Exception as e:
                 print(f"[Stats] Load error: {e}")
         
-        today = get_kst_today_str()
-        self.current_date = today
         if today not in self.daily:
             self.daily[today] = {"uv": 0, "pv": 0}
+        if 'daily' not in self.ad_clicks:
+            self.ad_clicks['daily'] = {}
+        if today not in self.ad_clicks['daily']:
+            self.ad_clicks['daily'][today] = {
+                'pure_total': 0,
+                'by_type': {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}
+            }
 
     def save(self):
         try:
@@ -98,11 +104,14 @@ class VisitorTracker:
             data = {
                 'total_uv': self.total_uv,
                 'total_pv': self.total_pv,
+                'current_date': self.current_date,
+                'today_vids': list(self.today_vids),
                 'daily': self.daily,
                 'visitor_logs': saved_logs,
                 'ad_clicks': {
                     'by_type_total': self.ad_clicks.get('by_type_total', {}),
                     'by_type_today': self.ad_clicks.get('by_type_today', {}),
+                    'daily': self.ad_clicks.get('daily', {}),
                     'recent_logs': saved_ad_logs
                 }
             }
@@ -115,6 +124,19 @@ class VisitorTracker:
     def _check_date_rollover(self):
         today = get_kst_today_str()
         if today != self.current_date:
+            yesterday = self.current_date
+            PURE_AD_KEYS = ['center', 'left', 'right', 'popup', 'link', 'sticky', 'mobile']
+            
+            # 어제(전날) 클릭수 확실히 daily에 영구 보존 기록
+            if 'daily' not in self.ad_clicks:
+                self.ad_clicks['daily'] = {}
+            if yesterday and yesterday not in self.ad_clicks['daily']:
+                bt_y = dict(self.ad_clicks.get('by_type_today', {}))
+                self.ad_clicks['daily'][yesterday] = {
+                    'pure_total': sum(bt_y.get(k, 0) for k in PURE_AD_KEYS),
+                    'by_type': bt_y
+                }
+
             self.current_date = today
             self.today_vids.clear()
             for v in self.visitor_logs.values():
@@ -123,6 +145,11 @@ class VisitorTracker:
                 self.daily[today] = {"uv": 0, "pv": 0}
             if 'by_type_today' in self.ad_clicks:
                 self.ad_clicks['by_type_today'] = {k: 0 for k in self.ad_clicks['by_type_today']}
+            if today not in self.ad_clicks['daily']:
+                self.ad_clicks['daily'][today] = {
+                    'pure_total': 0,
+                    'by_type': {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}
+                }
             self.save()
 
     def record_ad_click(self, ip, device, ad_type, page_name):
@@ -132,25 +159,42 @@ class VisitorTracker:
             'left': '좌측 날개 배너',
             'right': '우측 날개 배너',
             'center': '정면 본문 배너',
+            'sticky': '모바일 하단 고정 배너',
             'popup': '중앙 팝업 배너',
             'link': '쿠팡 파트너스 링크',
             'auto_redirect': '자동 자리이동'
         }
         ad_label = label_map.get(ad_type, f'광고 배너 ({ad_type})')
+        PURE_AD_KEYS = ['center', 'left', 'right', 'popup', 'link', 'sticky', 'mobile']
+
         with self.lock:
             self._check_date_rollover()
+            today = self.current_date
+
             if 'by_type_total' not in self.ad_clicks:
                 self.ad_clicks['by_type_total'] = {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}
             if 'by_type_today' not in self.ad_clicks:
                 self.ad_clicks['by_type_today'] = {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}
+            if 'daily' not in self.ad_clicks:
+                self.ad_clicks['daily'] = {}
+            if today not in self.ad_clicks['daily']:
+                self.ad_clicks['daily'][today] = {
+                    'pure_total': 0,
+                    'by_type': {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}
+                }
             if 'recent_logs' not in self.ad_clicks:
                 self.ad_clicks['recent_logs'] = []
 
             bt_tot = self.ad_clicks['by_type_total']
             bt_today = self.ad_clicks['by_type_today']
+            day_entry = self.ad_clicks['daily'][today]
+            day_bt = day_entry.setdefault('by_type', {})
 
             bt_tot[ad_type] = bt_tot.get(ad_type, 0) + 1
             bt_today[ad_type] = bt_today.get(ad_type, 0) + 1
+            day_bt[ad_type] = day_bt.get(ad_type, 0) + 1
+
+            day_entry['pure_total'] = sum(day_bt.get(k, 0) for k in PURE_AD_KEYS)
 
             self.ad_clicks['recent_logs'].append({
                 'time': now_str,
@@ -238,10 +282,37 @@ class VisitorTracker:
             realtime_count = sum(1 for ts in self.active_users.values() if ts >= cutoff_5m)
             today_stat = self.daily.get(today, {"uv": 0, "pv": 0})
             
-            sorted_dates = sorted(self.daily.keys(), reverse=True)[:7]
-            recent_daily = [{"date": d, "uv": self.daily[d].get('uv', 0), "pv": self.daily[d].get('pv', 0)} for d in sorted_dates]
+            # 쿠팡 광고 클릭 통계 (순수 광고 배너 클릭 집계)
+            PURE_AD_KEYS = ['center', 'left', 'right', 'popup', 'link', 'sticky', 'mobile']
+            bt_tot = self.ad_clicks.get('by_type_total', {})
+            bt_today = self.ad_clicks.get('by_type_today', {})
 
-            # 최근 방문자 IP 리스트 생성 (실시간 라이브 우선, 그 다음 최신 접속시간 순)
+            # 1. 오늘 순수 클릭수 & 누적 총 클릭수
+            pure_today = sum(bt_today.get(k, 0) for k in PURE_AD_KEYS)
+            pure_total = sum(bt_tot.get(k, 0) for k in PURE_AD_KEYS)
+            today_uv = today_stat.get('uv', 0)
+            pure_ctr = round((pure_today / max(1, today_uv)) * 100, 1) if today_uv > 0 else 0.0
+
+            # 2. 어제(전날) 클릭수 산출
+            yesterday_date = (datetime.now(KST) - timedelta(days=1)).strftime('%Y-%m-%d')
+            yesterday_ad = self.ad_clicks.get('daily', {}).get(yesterday_date, {})
+            by_type_yesterday = yesterday_ad.get('by_type', {})
+            pure_yesterday = yesterday_ad.get('pure_total', sum(by_type_yesterday.get(k, 0) for k in PURE_AD_KEYS))
+
+            # 3. 최근 7일간 일별 방문자 및 일별 쿠팡 배너 클릭수 내역
+            sorted_dates = sorted(self.daily.keys(), reverse=True)[:7]
+            recent_daily = []
+            for d in sorted_dates:
+                d_ad = self.ad_clicks.get('daily', {}).get(d, {})
+                d_pure_ad = d_ad.get('pure_total', sum(d_ad.get('by_type', {}).get(k, 0) for k in PURE_AD_KEYS))
+                recent_daily.append({
+                    "date": d,
+                    "uv": self.daily[d].get('uv', 0),
+                    "pv": self.daily[d].get('pv', 0),
+                    "ad_clicks": d_pure_ad
+                })
+
+            # 최근 방문자 IP 리스트 생성
             v_list = []
             for ip, info in self.visitor_logs.items():
                 last_ts = info.get('last_seen_ts', 0)
@@ -259,18 +330,7 @@ class VisitorTracker:
             
             v_list.sort(key=lambda x: (1 if x['is_live'] else 0, x['last_ts']), reverse=True)
 
-            # 쿠팡 광고 클릭 통계 (자리이동 auto_redirect 제외하여 순수 광고 배너 클릭만 집계!)
-            PURE_AD_KEYS = ['center', 'left', 'right', 'popup', 'link']
-            bt_tot = self.ad_clicks.get('by_type_total', {})
-            bt_today = self.ad_clicks.get('by_type_today', {})
-
-            # 1. 순수 쿠팡 광고 배너 클릭수 (정면, 좌측, 우측, 팝업, 직링크)
-            pure_today = sum(bt_today.get(k, 0) for k in PURE_AD_KEYS)
-            pure_total = sum(bt_tot.get(k, 0) for k in PURE_AD_KEYS)
-            today_uv = today_stat.get('uv', 0)
-            pure_ctr = round((pure_today / max(1, today_uv)) * 100, 1) if today_uv > 0 else 0.0
-
-            # 2. 자리이동 (자동 리다이렉트 이동) 별도 분리 집계
+            # 자리이동(자동 리다이렉트) 분리 집계
             redirect_today = bt_today.get('auto_redirect', 0)
             redirect_total = bt_tot.get('auto_redirect', 0)
 
@@ -286,15 +346,19 @@ class VisitorTracker:
                 'visitor_list': v_list[:50],
                 'ad_stats': {
                     'pure_today': pure_today,
+                    'pure_yesterday': pure_yesterday,
                     'pure_total': pure_total,
                     'pure_ctr': pure_ctr,
-                    'today': pure_today,       # 하위 호환
-                    'total': pure_total,       # 하위 호환
-                    'ctr': pure_ctr,           # 하위 호환
-                    'by_type_total': bt_tot,   # 위치별 누적 클릭수
-                    'by_type_today': bt_today, # 위치별 오늘 클릭수
-                    'redirect': {              # 자리이동(자동 리다이렉트) 별도 통계
+                    'today': pure_today,           # 하위 호환
+                    'yesterday': pure_yesterday,   # 어제(전날) 클릭수
+                    'total': pure_total,           # 하위 호환
+                    'ctr': pure_ctr,               # 하위 호환
+                    'by_type_total': bt_tot,       # 위치별 누적 클릭수
+                    'by_type_today': bt_today,     # 위치별 오늘 클릭수
+                    'by_type_yesterday': by_type_yesterday, # 위치별 어제 클릭수
+                    'redirect': {                  # 자리이동 통계
                         'today': redirect_today,
+                        'yesterday': by_type_yesterday.get('auto_redirect', 0),
                         'total': redirect_total
                     },
                     'recent_logs': recent_ad_logs
@@ -623,11 +687,25 @@ def clean_html(text):
 
 IMAGE_CACHE = {}
 
-# 언론사 기본 로고 또는 플레이스홀더 이미지 블랙리스트
+# 언론사 기본 로고 또는 플레이스홀더, 배너 광고, 기자 프로필 이미지 블랙리스트
 BAD_IMG_KEYWORDS = [
-    'facebook_mknews', 'mai-property-main-img', 'l_mlogoky', 'ic_mai_w', 'trans_30x13',
-    'logo.png', 'logo.jpg', 'default_thumb', 'blank.gif', 'spacer.gif', 'icon'
+    'yonhapnews_logo', 'yna_logo', 'r.yna.co.kr', 'logo_1200x800',
+    'facebook_mknews', 'mk_logo', 'mk_sns', 'mai-property-main-img', 'l_mlogoky', 'ic_mai_w', 'trans_30x13',
+    'hankyung_logo', 'hk_logo', 'chosun_logo', 'donga_logo', 'ytn_logo', 'sbs_logo', 'kbs_logo', 'mbc_logo',
+    'default_thumb', 'default_img', 'no_image', 'noimage', 'blank.gif', 'spacer.gif', 'share_default',
+    'reporter', 'journalist', 'profile', 'author', 'reporter_img', 'byline',
+    'gsshop', 'criteo', 'google_ad', 'advert', 'banner', 'ad_banner', 'ad-banner',
+    'logo.png', 'logo.jpg', 'logo.svg', 'logo.webp', 'icon', 'btn_', 'button'
 ]
+
+def normalize_img_url(img_url):
+    """상대경로 및 // 프로토콜 생략 URL을 완전한 절대 URL로 정규화"""
+    if not img_url or not isinstance(img_url, str):
+        return ''
+    img_url = img_url.strip()
+    if img_url.startswith('//'):
+        return 'https:' + img_url
+    return img_url
 
 # 사진이 전혀 없는 단신 기사를 위한 고화질 테마 이미지 풀
 REALESTATE_FALLBACK_IMAGES = [
@@ -679,10 +757,13 @@ NEWS_THEME_FALLBACKS = {
 }
 
 def is_invalid_image(img_url):
-    """유효하지 않은 이미지(비어있거나 언론사 로고 플레이트)인지 검사"""
-    if not img_url or not str(img_url).startswith('http'):
+    """유효하지 않은 이미지(비어있거나 언론사 로고 플레이트, 배너 광고, 기자 사진)인지 검사"""
+    if not img_url:
         return True
-    low = str(img_url).lower()
+    img_url = normalize_img_url(img_url)
+    if not img_url.startswith('http'):
+        return True
+    low = img_url.lower()
     return any(bad in low for bad in BAD_IMG_KEYWORDS)
 
 def get_og_image(url, category=None):
@@ -948,22 +1029,12 @@ def fetch_article_detail(url):
                         break
         author = repair_text(author)
 
-        # 5. 메인 이미지 (이미 파싱된 soup에서 즉시 추출하여 중복 HTTP 요청 제거)
-        main_img = ''
-        og_img = soup.find('meta', attrs={'property': 'og:image'}) or soup.find('meta', attrs={'name': 'twitter:image'})
-        if og_img and og_img.get('content'):
-            main_img = og_img['content'].strip()
-        if not main_img or is_invalid_image(main_img):
-            first_img = soup.find('img')
-            if first_img and first_img.get('src') and not is_invalid_image(first_img['src']):
-                main_img = first_img['src']
-            else:
-                main_img = ''
-
-        # 6. 본문 컨테이너 탐색 (국내 주요 언론사 전수 대응)
+        # 5. 본문 컨테이너 탐색 (국내 주요 언론사 전수 대응)
         candidates = [
             soup.find('article', class_='story-news'),
             soup.find('div', class_='story-news'),
+            soup.find(class_='story-news'),
+            soup.find(id='articleWrap'),
             soup.find(class_='news_view'),
             soup.find('section', class_='news_view'),
             soup.find(id='news_view'),
@@ -989,29 +1060,65 @@ def fetch_article_detail(url):
         ]
         body_elem = next((c for c in candidates if c), None)
 
-        paragraphs = []
+        # 6. 메인 이미지 & 보도사진 추출 (로고 플레이스홀더 및 광고 배너 철저 배제)
+        main_img = ''
         lead_img_caption = ''
+        og_img = soup.find('meta', attrs={'property': 'og:image'}) or soup.find('meta', attrs={'name': 'twitter:image'})
+        if og_img and og_img.get('content'):
+            cand = normalize_img_url(og_img['content'].strip())
+            if not is_invalid_image(cand):
+                main_img = cand
 
         if body_elem:
-            # 이미지 캡션 탐색
-            fig_cap = body_elem.find(['figcaption', '.caption', '.img-desc', '.desc-con'])
-            if fig_cap:
-                lead_img_caption = repair_text('\n'.join([line.strip() for line in fig_cap.get_text('\n').splitlines() if line.strip()]))
-                fig_cap.decompose()
+            # 본문 내부 figure 및 보도 사진 정밀 탐색
+            if not main_img:
+                for fig in body_elem.find_all('figure'):
+                    im = fig.find('img')
+                    if im:
+                        src = normalize_img_url(im.get('src') or im.get('data-src') or '')
+                        if src and not is_invalid_image(src):
+                            main_img = src
+                            cap = fig.find(['figcaption', '.caption', '.img-desc', '.desc-con'])
+                            if cap:
+                                lead_img_caption = repair_text(cap.get_text(strip=True))
+                            break
 
-            # 불필요한 태그/광고/스크립트/버튼/댓글/송고 제거
+            if not main_img:
+                for im in body_elem.find_all('img'):
+                    src = normalize_img_url(im.get('src') or im.get('data-src') or '')
+                    if src and not is_invalid_image(src):
+                        main_img = src
+                        break
+
+            # 메인 이미지 캡션 탐색 (아직 캡션이 없는 경우)
+            if not lead_img_caption:
+                fig_cap = body_elem.find(['figcaption', '.caption', '.img-desc', '.desc-con'])
+                if fig_cap:
+                    lead_img_caption = repair_text('\n'.join([line.strip() for line in fig_cap.get_text('\n').splitlines() if line.strip()]))
+
+        # 7. 본문 내 데이터 테이블(프로야구 순위표, 전적, 통계표 등) 원형 보존 처리
+        table_blocks = []
+        if body_elem:
+            for i, tbl in enumerate(body_elem.find_all('table')):
+                # 표 스타일 정돈 및 반응형 컨테이너 감싸기
+                tbl['class'] = 'article-data-table'
+                for el in tbl.find_all(['tr', 'th', 'td']):
+                    el.attrs = {k: v for k, v in el.attrs.items() if k in ['colspan', 'rowspan']}
+                    if el.string:
+                        el.string = repair_text(el.string)
+                thtml = f'<div class="article-table-responsive">{str(tbl)}</div>'
+                ph = f'###ARTICLE_TABLE_PLACEHOLDER_{i}###'
+                table_blocks.append((ph, thtml))
+                tbl.replace_with(soup.new_string(f'\n{ph}\n'))
+
+            # 불필요한 태그/광고/스크립트/버튼/댓글/송고 제거 (보도사진 컨테이너 .image-zone01은 보존)
             for tag in body_elem(['script', 'style', 'aside', 'button', 'iframe', 'form', 'noscript', 
                                   '.ad', '.ad-box', '.share-box', '.sns_area', '.reporter_area', 
                                   '.relation_news', '.article_sns', '.txt-copyright', '.adrs', 
-                                  '.writer-zone01', '.image-zone01', '.comp-box', '.byline-zone', 
-                                  '.article-copyright', '.btn_zoom', '.caption_area']):
+                                  '.writer-zone01', '.comp-box', '.byline-zone', 
+                                  '.article-copyright', '.btn_zoom', '.caption_area', 'figcaption']):
                 tag.decompose()
 
-            # 테이블 표 및 구분 태그 간격/개행 처리 (프로야구 순위표, 경기전적 등 깨짐 방지)
-            for td in body_elem.find_all(['td', 'th']):
-                td.append(' ')
-            for tr in body_elem.find_all('tr'):
-                tr.append('\n')
             for div in body_elem.find_all(['div', 'p', 'li']):
                 div.append('\n')
             for br in body_elem.find_all('br'):
@@ -1021,12 +1128,23 @@ def fetch_article_detail(url):
             bad_keywords = ['저작권자', '무단전재', '무단 전재', '카카오톡', '제보하기', '구독신청', '기자의 다른 기사', 
                             'All rights reserved', 'DB 금지', '재판매 및 DB', '송고', 'okjebo', 'AI 학습 및 활용', 'AI 학습', '크게보기']
 
+            paragraphs = []
             for p in raw_lines:
                 p = repair_text(p)
-                if len(p) > 15 and not any(k in p for k in bad_keywords) and not re.search(r'\d{4}[/.-]\d{2}[/.-]\d{2}.*송고', p):
+                # 데이터 테이블 블록 복원
+                if '###ARTICLE_TABLE_PLACEHOLDER_' in p:
+                    for ph, thtml in table_blocks:
+                        if ph in p and thtml not in paragraphs:
+                            paragraphs.append(thtml)
+                    continue
+
+                # 본문 문단 정제
+                if len(p) >= 10 and not any(k in p for k in bad_keywords) and not re.search(r'\d{4}[/.-]\d{2}[/.-]\d{2}.*송고', p):
                     if not re.match(r'^\s*\[.*(?:제공|사진|출처|그래픽).*\]\s*$', p):
                         if p not in paragraphs:
                             paragraphs.append(p)
+        else:
+            paragraphs = []
 
         # 단신/속보 사진 기사 등 본문이 없는 경우 캡션(사진 설명) 또는 og:description으로 보완
         if not paragraphs:

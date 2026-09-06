@@ -1424,7 +1424,7 @@
                         <span class="vm-unit">회</span>
                     </div>
                     <div class="vm-card-sub" style="margin-bottom: 6px;">
-                        누적: <strong id="valAdTotal" style="color:#1e293b;">0</strong>회 · 오늘 CTR: <strong id="valAdCtr" style="color:#ea580c;">0.0</strong>%
+                        어제(전날): <strong id="valAdYesterday" style="color:#2563eb;">0</strong>회 · 누적: <strong id="valAdTotal" style="color:#1e293b;">0</strong>회 · 오늘 CTR: <strong id="valAdCtr" style="color:#ea580c;">0.0</strong>%
                     </div>
                     
                     <!-- 위치별 누적 & 오늘 클릭수 (정면/좌측/우측/팝업 비교) -->
@@ -1454,10 +1454,10 @@
                 </div>
             </div>
 
-            <!-- 최근 7일 일별 방문자 미니 테이블 (토글) -->
+            <!-- 최근 7일 일별 방문자 & 쿠팡 배너 클릭 현황 미니 테이블 (토글) -->
             <div class="vm-history-wrap" id="vmHistoryWrap">
                 <div style="font-size:13px; font-weight:700; color:#334155; margin-bottom:10px;">
-                    📅 최근 일별 방문자 현황 (최근 7일)
+                    📅 최근 일별 방문자 & 쿠팡 배너 클릭 현황 (최근 7일)
                 </div>
                 <table class="vm-history-table">
                     <thead>
@@ -1465,11 +1465,12 @@
                             <th>날짜</th>
                             <th>순방문자 (UV)</th>
                             <th>페이지뷰 (PV)</th>
+                            <th>쿠팡 배너 클릭 (전날/일별 기록)</th>
                         </tr>
                     </thead>
                     <tbody id="vmHistoryTbody">
                         <tr>
-                            <td colspan="3" style="text-align:center; color:#94a3b8;">통계 데이터를 불러오는 중...</td>
+                            <td colspan="4" style="text-align:center; color:#94a3b8;">통계 데이터를 불러오는 중...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -3358,7 +3359,10 @@
                         const pureTotal = ads.pure_total !== undefined ? ads.pure_total : (ads.total || 0);
                         const pureCtr = ads.pure_ctr !== undefined ? ads.pure_ctr : (ads.ctr || '0.0');
 
+                        const pureYesterday = ads.pure_yesterday !== undefined ? ads.pure_yesterday : (ads.yesterday || 0);
+
                         updateStatValue('valAdToday', pureToday);
+                        updateStatValue('valAdYesterday', pureYesterday);
                         updateStatValue('valAdTotal', pureTotal);
 
                         const ctrEl = document.getElementById('valAdCtr');
@@ -3403,7 +3407,7 @@
                         updateStatValue('valClickOther', totRedirect);
 
                         const adBadge = document.getElementById('vmAdClickTotalBadge');
-                        if (adBadge) adBadge.textContent = `순수 배너 누적 ${Number(pureTotal).toLocaleString()}회 (오늘 ${Number(pureToday).toLocaleString()}회)`;
+                        if (adBadge) adBadge.textContent = `순수 배너 누적 ${Number(pureTotal).toLocaleString()}회 (오늘 ${Number(pureToday).toLocaleString()}회, 어제 ${Number(pureYesterday).toLocaleString()}회)`;
 
                         // 최다 클릭 1위 위치 하이라이트 표시
                         const positions = [
@@ -3430,7 +3434,7 @@
                     renderVisitorIpsTable(s.visitor_list || []);
 
                     if (showToastFlag) {
-                        showToast(`🔄 통계 갱신 완료 (실시간: ${s.realtime_now}명 / 광고클릭 오늘: ${s.ad_stats ? s.ad_stats.today : 0}회)`);
+                        showToast(`🔄 통계 갱신 완료 (실시간: ${s.realtime_now}명 / 오늘 클릭: ${s.ad_stats ? s.ad_stats.today : 0}회 / 어제 클릭: ${s.ad_stats ? s.ad_stats.yesterday : 0}회)`);
                     }
                 }
             } catch (e) {
@@ -3453,7 +3457,7 @@
             const tbody = document.getElementById('vmHistoryTbody');
             if (!tbody) return;
             if (!dailyList || dailyList.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#94a3b8;">집계된 내역이 없습니다.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#94a3b8;">집계된 내역이 없습니다.</td></tr>';
                 return;
             }
             tbody.innerHTML = dailyList.map(item => `
@@ -3461,6 +3465,7 @@
             <td style="font-weight:600; color:#0f172a;">📅 ${esc(item.date)}</td>
             <td style="color:#2563eb; font-weight:700;">${Number(item.uv || 0).toLocaleString()} 명</td>
             <td style="color:#64748b;">${Number(item.pv || 0).toLocaleString()} 회</td>
+            <td style="color:#ea580c; font-weight:700;">🛒 ${Number(item.ad_clicks || 0).toLocaleString()} 회</td>
         </tr>
     `).join('');
         }

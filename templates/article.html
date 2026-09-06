@@ -235,7 +235,11 @@
         <!-- 기사 본문 텍스트 문단 -->
         <section class="article-view-content">
             {% for p in article.paragraphs %}
-            <p class="article-para" style="white-space: pre-line;">{{ p }}</p>
+                {% if p.startswith('<div class="article-table') or p.startswith('<table') or p.startswith('<figure') %}
+                    {{ p | safe }}
+                {% else %}
+                    <p class="article-para" style="white-space: pre-line;">{{ p }}</p>
+                {% endif %}
             {% endfor %}
         </section>
 
