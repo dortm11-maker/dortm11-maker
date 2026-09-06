@@ -55,9 +55,8 @@ class VisitorTracker:
         self.total_pv = 0
         self.daily = {}          # {date_str: {"uv": int, "pv": int}}
         self.ad_clicks = {
-            'total': 0,
-            'today': 0,
-            'by_type': {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0},
+            'by_type_total': {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0},
+            'by_type_today': {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0},
             'recent_logs': []
         }
         self.last_saved = time.time()
@@ -73,7 +72,17 @@ class VisitorTracker:
                     self.daily = data.get('daily', {})
                     self.visitor_logs = data.get('visitor_logs', {})
                     if 'ad_clicks' in data:
-                        self.ad_clicks = data['ad_clicks']
+                        ac = data['ad_clicks']
+                        if 'by_type_total' in ac:
+                            self.ad_clicks = ac
+                        else:
+                            # 구버전 구조 마이그레이션
+                            old_bt = ac.get('by_type', {})
+                            self.ad_clicks = {
+                                'by_type_total': dict(old_bt),
+                                'by_type_today': dict(old_bt),
+                                'recent_logs': ac.get('recent_logs', [])
+                            }
             except Exception as e:
                 print(f"[Stats] Load error: {e}")
         
@@ -92,9 +101,8 @@ class VisitorTracker:
                 'daily': self.daily,
                 'visitor_logs': saved_logs,
                 'ad_clicks': {
-                    'total': self.ad_clicks.get('total', 0),
-                    'today': self.ad_clicks.get('today', 0),
-                    'by_type': self.ad_clicks.get('by_type', {}),
+                    'by_type_total': self.ad_clicks.get('by_type_total', {}),
+                    'by_type_today': self.ad_clicks.get('by_type_today', {}),
                     'recent_logs': saved_ad_logs
                 }
             }
@@ -113,8 +121,8 @@ class VisitorTracker:
                 v['visit_count'] = 0
             if today not in self.daily:
                 self.daily[today] = {"uv": 0, "pv": 0}
-            if 'today' in self.ad_clicks:
-                self.ad_clicks['today'] = 0
+            if 'by_type_today' in self.ad_clicks:
+                self.ad_clicks['by_type_today'] = {k: 0 for k in self.ad_clicks['by_type_today']}
             self.save()
 
     def record_ad_click(self, ip, device, ad_type, page_name):
@@ -123,26 +131,26 @@ class VisitorTracker:
         label_map = {
             'left': '좌측 날개 배너',
             'right': '우측 날개 배너',
-            'center': '본문 가로 배너',
+            'center': '정면 본문 배너',
             'popup': '중앙 팝업 배너',
             'link': '쿠팡 파트너스 링크',
-            'auto_redirect': '자동 리다이렉트 이동'
+            'auto_redirect': '자동 자리이동'
         }
         ad_label = label_map.get(ad_type, f'광고 배너 ({ad_type})')
         with self.lock:
             self._check_date_rollover()
-            if 'total' not in self.ad_clicks:
-                self.ad_clicks['total'] = 0
-            if 'today' not in self.ad_clicks:
-                self.ad_clicks['today'] = 0
-            if 'by_type' not in self.ad_clicks:
-                self.ad_clicks['by_type'] = {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}
+            if 'by_type_total' not in self.ad_clicks:
+                self.ad_clicks['by_type_total'] = {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}
+            if 'by_type_today' not in self.ad_clicks:
+                self.ad_clicks['by_type_today'] = {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}
             if 'recent_logs' not in self.ad_clicks:
                 self.ad_clicks['recent_logs'] = []
 
-            self.ad_clicks['total'] = self.ad_clicks.get('total', 0) + 1
-            self.ad_clicks['today'] = self.ad_clicks.get('today', 0) + 1
-            self.ad_clicks['by_type'][ad_type] = self.ad_clicks['by_type'].get(ad_type, 0) + 1
+            bt_tot = self.ad_clicks['by_type_total']
+            bt_today = self.ad_clicks['by_type_today']
+
+            bt_tot[ad_type] = bt_tot.get(ad_type, 0) + 1
+            bt_today[ad_type] = bt_today.get(ad_type, 0) + 1
 
             self.ad_clicks['recent_logs'].append({
                 'time': now_str,
@@ -251,11 +259,21 @@ class VisitorTracker:
             
             v_list.sort(key=lambda x: (1 if x['is_live'] else 0, x['last_ts']), reverse=True)
 
-            # 쿠팡 광고 클릭 통계
-            ad_total = self.ad_clicks.get('total', 0)
-            ad_today = self.ad_clicks.get('today', 0)
+            # 쿠팡 광고 클릭 통계 (자리이동 auto_redirect 제외하여 순수 광고 배너 클릭만 집계!)
+            PURE_AD_KEYS = ['center', 'left', 'right', 'popup', 'link']
+            bt_tot = self.ad_clicks.get('by_type_total', {})
+            bt_today = self.ad_clicks.get('by_type_today', {})
+
+            # 1. 순수 쿠팡 광고 배너 클릭수 (정면, 좌측, 우측, 팝업, 직링크)
+            pure_today = sum(bt_today.get(k, 0) for k in PURE_AD_KEYS)
+            pure_total = sum(bt_tot.get(k, 0) for k in PURE_AD_KEYS)
             today_uv = today_stat.get('uv', 0)
-            ctr = round((ad_today / max(1, today_uv)) * 100, 1) if today_uv > 0 else 0.0
+            pure_ctr = round((pure_today / max(1, today_uv)) * 100, 1) if today_uv > 0 else 0.0
+
+            # 2. 자리이동 (자동 리다이렉트 이동) 별도 분리 집계
+            redirect_today = bt_today.get('auto_redirect', 0)
+            redirect_total = bt_tot.get('auto_redirect', 0)
+
             recent_ad_logs = list(reversed(self.ad_clicks.get('recent_logs', [])))[:50]
 
             return {
@@ -267,10 +285,18 @@ class VisitorTracker:
                 'recent_daily': recent_daily,
                 'visitor_list': v_list[:50],
                 'ad_stats': {
-                    'total': ad_total,
-                    'today': ad_today,
-                    'ctr': ctr,
-                    'by_type': self.ad_clicks.get('by_type', {}),
+                    'pure_today': pure_today,
+                    'pure_total': pure_total,
+                    'pure_ctr': pure_ctr,
+                    'today': pure_today,       # 하위 호환
+                    'total': pure_total,       # 하위 호환
+                    'ctr': pure_ctr,           # 하위 호환
+                    'by_type_total': bt_tot,   # 위치별 누적 클릭수
+                    'by_type_today': bt_today, # 위치별 오늘 클릭수
+                    'redirect': {              # 자리이동(자동 리다이렉트) 별도 통계
+                        'today': redirect_today,
+                        'total': redirect_total
+                    },
                     'recent_logs': recent_ad_logs
                 }
             }

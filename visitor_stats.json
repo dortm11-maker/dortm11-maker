@@ -37,15 +37,21 @@
     }
   },
   "ad_clicks": {
-    "total": 3,
-    "today": 3,
-    "by_type": {
+    "by_type_total": {
       "left": 1,
       "right": 0,
       "center": 1,
       "popup": 1,
       "link": 0,
-      "auto_redirect": 0
+      "auto_redirect": 1
+    },
+    "by_type_today": {
+      "left": 1,
+      "right": 0,
+      "center": 1,
+      "popup": 1,
+      "link": 0,
+      "auto_redirect": 1
     },
     "recent_logs": [
       {
@@ -74,6 +80,15 @@
         "label": "중앙 팝업 배너",
         "page": "메인 홈",
         "ts": 1788691813.58705
+      },
+      {
+        "time": "20:06:30",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "기사 상세",
+        "ts": 1788692790.7266483
       }
     ]
   }
