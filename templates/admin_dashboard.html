@@ -1353,6 +1353,119 @@
             <p class="page-sub">카카오톡이나 페이스북, X(트위터) 등에 사이트 주소를 공유할 때 나타나는 카드 썸네일, 제목, 설명글을 실제 언론사 뉴스처럼 설정할 수 있습니다.</p>
         </div>
 
+        <!-- ========================================================================= -->
+        <!-- [핵심 기능] 카톡 전송용 네이버 우회 링크 변환기 (PC 전용 원클릭 도구) -->
+        <!-- ========================================================================= -->
+        <div class="ticker-config-card" style="background:linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%); border:2px solid #86efac; box-shadow:0 4px 16px rgba(16, 185, 129, 0.08); margin-bottom: 28px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:26px;">🔗</span>
+                    <div>
+                        <h2 style="font-size:18px; font-weight:800; color:#065f46; margin:0;">
+                            카톡 전송용 네이버 우회 링크 & 텍스트 변환기
+                        </h2>
+                        <span style="font-size:12px; color:#047857;">
+                            스마트폰 네이버 앱을 켤 필요 없이, PC에서 기사 원본 링크만 넣으면 네이버 우회 링크와 카톡 전송 문구를 원클릭 생성합니다!
+                        </span>
+                    </div>
+                </div>
+                <span style="background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; font-size:11px; font-weight:700; padding:4px 12px; border-radius:20px;">
+                    🟢 네이버(link.naver.com) 공식 우회
+                </span>
+            </div>
+
+            <!-- 입력 폼 -->
+            <div style="display:flex; gap:10px; margin-bottom:10px; flex-wrap:wrap;">
+                <input type="text" id="convertInputUrl" class="form-input" style="flex:1; min-width:320px; font-size:14px;" 
+                       placeholder="여기에 원본 뉴스 기사 URL을 붙여넣으세요 (예: https://www.mk.co.kr/news/realestate/12145283 또는 naver.me 링크)"
+                       onkeydown="if(event.key==='Enter') convertShareLink()">
+                <button type="button" class="btn primary" onclick="convertShareLink()" id="btnConvertLink" style="padding:10px 24px; font-size:14px; font-weight:700; display:flex; align-items:center; gap:6px; background:#059669; border-color:#059669;">
+                    <span>⚡</span> <span>링크 & 카톡 텍스트 변환</span>
+                </button>
+            </div>
+            <div style="font-size:12px; color:#64748b; margin-bottom:6px;">
+                💡 매일경제, 연합뉴스, 조선, 동아 등 모든 언론사 기사 링크 및 우리 사이트 주소, naver.me 링크까지 모두 지원합니다.
+            </div>
+
+            <!-- 변환 결과 박스 (기본 숨김 -> 변환 성공 시 표시) -->
+            <div id="convertResultBox" style="display:none; margin-top:18px; background:#fff; border:1px solid #bbf7d0; border-radius:10px; padding:20px; box-shadow:0 4px 12px rgba(0,0,0,0.04);">
+                
+                <!-- 상단: 기사 정보 -->
+                <div style="display:flex; gap:14px; margin-bottom:16px; padding-bottom:14px; border-bottom:1px solid #f1f5f9; align-items:center;">
+                    <img id="resArticleImg" src="" style="width:80px; height:56px; object-fit:cover; border-radius:6px; background:#f8fafc; border:1px solid #e2e8f0;">
+                    <div style="flex:1; min-width:0;">
+                        <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;">
+                            <span style="font-size:11px; font-weight:700; color:#059669; background:#ecfdf5; padding:1px 6px; border-radius:4px;" id="resArticlePub">언론사</span>
+                            <span style="font-size:11px; color:#94a3b8;">분석 완료</span>
+                        </div>
+                        <div style="font-size:15px; font-weight:700; color:#0f172a; line-height:1.4; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" id="resArticleTitle">-</div>
+                    </div>
+                </div>
+
+                <!-- 1. 카톡 전송용 완성 텍스트 (모바일 네이버 공유 규격) -->
+                <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:14px; margin-bottom:16px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
+                        <span style="font-size:13px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:6px;">
+                            <span>💬</span> <span>카카오톡 전송 완성 문구 (네이버 모바일 공유와 100% 동일 포맷)</span>
+                        </span>
+                        <button type="button" class="btn" onclick="copyKakaoText()" style="background:#2563eb; color:#fff; font-size:13px; font-weight:700; padding:7px 16px; border-radius:6px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                            <span>📋</span> <span>카톡 텍스트 원클릭 복사</span>
+                        </button>
+                    </div>
+                    <pre id="resKakaoText" style="margin:0; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:12px; font-family:'Noto Sans KR', sans-serif; font-size:13.5px; color:#0f172a; line-height:1.6; white-space:pre-wrap; word-break:break-all; font-weight:600;"></pre>
+                    <div style="margin-top:8px; font-size:11px; color:#64748b;">
+                        👉 복사한 뒤 PC 카카오톡 대화방에 <strong>[Ctrl + V]</strong>로 붙여넣고 전송하시면, 상단 텍스트와 함께 하단에 <strong>네이버 공식 링크 카드(link.naver.com)</strong>가 자동으로 뜹니다!
+                    </div>
+                </div>
+
+                <!-- 2. 링크 세부 목록 (상황에 맞게 선택 복사 가능) -->
+                <div style="display:grid; grid-template-columns: 1fr; gap:10px;">
+                    <!-- A. 네이버 공식 브릿지 링크 -->
+                    <div style="display:flex; align-items:center; justify-content:space-between; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:6px; padding:10px 14px; gap:10px;">
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:12px; font-weight:700; color:#15803d; margin-bottom:2px; display:flex; align-items:center; gap:6px;">
+                                <span>🟢 네이버 공식 브릿지 링크</span>
+                                <span style="font-size:10px; background:#dcfce7; color:#166534; padding:1px 6px; border-radius:4px; font-weight:600;">추천 (카톡에 link.naver.com 도메인 표시)</span>
+                            </div>
+                            <div id="resBridgeUrl" style="font-size:12px; color:#334155; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">-</div>
+                        </div>
+                        <button type="button" class="btn btn-test" onclick="copyTextById('resBridgeUrl')" style="font-size:11px; padding:6px 12px; white-space:nowrap;">
+                            링크만 복사
+                        </button>
+                    </div>
+
+                    <!-- B. 초단축 링크 -->
+                    <div id="resShortUrlRow" style="display:flex; align-items:center; justify-content:space-between; background:#faf5ff; border:1px solid #e9d5ff; border-radius:6px; padding:10px 14px; gap:10px;">
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:12px; font-weight:700; color:#7e22ce; margin-bottom:2px; display:flex; align-items:center; gap:6px;">
+                                <span>⚡ 초단축 URL</span>
+                                <span style="font-size:10px; background:#f3e8ff; color:#6b21a8; padding:1px 6px; border-radius:4px; font-weight:600;">링크 주소를 아주 짧게 보낼 때</span>
+                            </div>
+                            <div id="resShortUrl" style="font-size:12px; color:#334155; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">-</div>
+                        </div>
+                        <button type="button" class="btn" onclick="copyShortKakaoText()" style="font-size:11px; padding:6px 12px; white-space:nowrap; background:#7e22ce; color:#fff; border:none; border-radius:6px; cursor:pointer;">
+                            단축 문구 복사
+                        </button>
+                    </div>
+
+                    <!-- C. 우리 사이트 직통 링크 -->
+                    <div style="display:flex; align-items:center; justify-content:space-between; background:#eff6ff; border:1px solid #bfdbfe; border-radius:6px; padding:10px 14px; gap:10px;">
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:12px; font-weight:700; color:#1d4ed8; margin-bottom:2px; display:flex; align-items:center; gap:6px;">
+                                <span>🌐 뉴스NOW 뷰어 직통 링크</span>
+                                <span style="font-size:10px; background:#dbeafe; color:#1e40af; padding:1px 6px; border-radius:4px; font-weight:600;">자동 이동 & 쿠팡 광고 탑재</span>
+                            </div>
+                            <div id="resOurUrl" style="font-size:12px; color:#334155; font-family:monospace; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">-</div>
+                        </div>
+                        <button type="button" class="btn btn-test" onclick="copyTextById('resOurUrl')" style="font-size:11px; padding:6px 12px; white-space:nowrap;">
+                            직통 링크 복사
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
         <div style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: start; margin-bottom: 24px;">
             
             <!-- 좌측: 설정 입력 폼 -->
@@ -2156,6 +2269,134 @@ async function saveShareConfig() {
     } catch(e) {
         showToast('저장 에러: ' + e);
     }
+}
+
+// ============================================================
+// 카톡 전송용 네이버 우회 링크 변환기 로직
+// ============================================================
+let lastConvertedData = null;
+
+async function convertShareLink() {
+    const inputEl = document.getElementById('convertInputUrl');
+    const btn = document.getElementById('btnConvertLink');
+    const resultBox = document.getElementById('convertResultBox');
+    const url = inputEl?.value.trim();
+
+    if (!url) {
+        showToast('⚠️ 변환할 기사 URL을 입력해주세요.');
+        inputEl?.focus();
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> <span>기사 분석 및 우회 링크 생성 중...</span>';
+
+    try {
+        const resp = await fetch('/admin/api/convert_share_link', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: url })
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+            lastConvertedData = data;
+
+            // 기사 정보 렌더링
+            document.getElementById('resArticleTitle').textContent = data.title;
+            document.getElementById('resArticlePub').textContent = data.publisher || '언론사';
+            const imgEl = document.getElementById('resArticleImg');
+            if (imgEl) {
+                imgEl.src = data.image || '/static/img/og_image.jpg';
+            }
+
+            // 카톡 완성 텍스트
+            document.getElementById('resKakaoText').textContent = data.kakao_text_bridge;
+
+            // 세부 링크들
+            document.getElementById('resBridgeUrl').textContent = data.naver_bridge_url;
+            document.getElementById('resOurUrl').textContent = data.our_article_url;
+
+            const shortRow = document.getElementById('resShortUrlRow');
+            const shortEl = document.getElementById('resShortUrl');
+            if (data.short_url) {
+                shortEl.textContent = data.short_url;
+                shortRow.style.display = 'flex';
+            } else {
+                shortRow.style.display = 'none';
+            }
+
+            // 우측 카카오톡 시뮬레이터 카드도 즉시 반영!
+            const pTitle = document.getElementById('previewKakaoTitle');
+            const pDesc = document.getElementById('previewKakaoDesc');
+            const pImg = document.getElementById('previewKakaoImg');
+            const pHost = document.getElementById('previewKakaoHost');
+            if (pTitle) pTitle.textContent = data.title;
+            if (pDesc) pDesc.textContent = `${data.publisher} 공식 보도 기사입니다.`;
+            if (pImg && data.image) pImg.src = data.image;
+            if (pHost) pHost.innerHTML = `<span>link.naver.com</span>`;
+
+            resultBox.style.display = 'block';
+            resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            showToast('✅ 네이버 우회 링크 및 카톡 문구가 생성되었습니다!');
+        } else {
+            showToast('❌ ' + (data.message || '변환 실패'));
+        }
+    } catch(e) {
+        showToast('통신 오류: ' + e);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>⚡</span> <span>링크 & 카톡 텍스트 변환</span>';
+    }
+}
+
+function copyKakaoText() {
+    const text = document.getElementById('resKakaoText')?.textContent;
+    if (!text) {
+        showToast('복사할 문구가 없습니다.');
+        return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 카카오톡 전송 문구가 클립보드에 복사되었습니다! 카톡에 [Ctrl+V] 하세요.');
+    }).catch(() => {
+        copyFallback(text, '카톡 문구가 복사되었습니다.');
+    });
+}
+
+function copyShortKakaoText() {
+    if (!lastConvertedData || !lastConvertedData.kakao_text_short) return;
+    const text = lastConvertedData.kakao_text_short;
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 단축 URL 카톡 문구가 복사되었습니다!');
+    }).catch(() => {
+        copyFallback(text, '단축 카톡 문구가 복사되었습니다.');
+    });
+}
+
+function copyTextById(elemId) {
+    const text = document.getElementById(elemId)?.textContent?.trim();
+    if (!text || text === '-') return;
+    navigator.clipboard.writeText(text).then(() => {
+        showToast('📋 링크가 복사되었습니다: ' + text);
+    }).catch(() => {
+        copyFallback(text, '링크가 복사되었습니다.');
+    });
+}
+
+function copyFallback(text, successMsg) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+        document.execCommand('copy');
+        showToast('📋 ' + successMsg);
+    } catch(e) {
+        prompt('아래 문구를 복사하세요:', text);
+    }
+    document.body.removeChild(ta);
 }
 
 // ============================================================

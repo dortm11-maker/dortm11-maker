@@ -15,6 +15,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta, timezone
 import hashlib
 import re
+import urllib.parse
 
 # Windows 인코딩 안전 설정
 if sys.platform == 'win32':
@@ -1373,6 +1374,90 @@ def admin_fetch_live_ticker():
         return jsonify({'success': True, 'items': items})
     except Exception as e:
         return jsonify({'success': False, 'message': str(e), 'items': []})
+
+# ---- 네이버 우회 링크 및 카톡 전송 텍스트 변환 API ----
+@app.route('/admin/api/convert_share_link', methods=['POST'])
+def admin_convert_share_link():
+    if not is_admin():
+        abort(403)
+    data = request.get_json() or {}
+    raw_url = (data.get('url') or '').strip()
+    if not raw_url:
+        return jsonify({'success': False, 'message': '변환할 뉴스 기사 URL을 입력해주세요.'})
+
+    try:
+        # 1. naver.me 단축 링크인 경우 실제 목적지 추적
+        if 'naver.me/' in raw_url:
+            try:
+                head_resp = requests.get(raw_url, allow_redirects=True, timeout=5, headers={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+                })
+                raw_url = head_resp.url
+            except Exception:
+                pass
+
+        # 2. 우리 사이트 기사 URL(/article?url=xxx)인지, 외부 원본 URL인지 판별
+        target_news_url = raw_url
+        if '/article?url=' in raw_url:
+            parsed = urllib.parse.urlparse(raw_url)
+            qs = urllib.parse.parse_qs(parsed.query)
+            if 'url' in qs:
+                target_news_url = qs['url'][0]
+        elif 'link.naver.com/bridge?url=' in raw_url:
+            parsed = urllib.parse.urlparse(raw_url)
+            qs = urllib.parse.parse_qs(parsed.query)
+            if 'url' in qs:
+                inner_url = qs['url'][0]
+                if '/article?url=' in inner_url:
+                    inner_parsed = urllib.parse.urlparse(inner_url)
+                    inner_qs = urllib.parse.parse_qs(inner_parsed.query)
+                    if 'url' in inner_qs:
+                        target_news_url = inner_qs['url'][0]
+                else:
+                    target_news_url = inner_url
+
+        # 3. 기사 상세 정보 파싱 (제목, 언론사, 대표 이미지)
+        article_data = fetch_article_detail(target_news_url)
+        title = article_data.get('title') or '최신 주요 뉴스 속보'
+        publisher = article_data.get('publisher') or '언론사'
+        image = article_data.get('main_img') or ''
+
+        # 4. 우리 사이트 배포 URL 기준 뷰어 링크 구성
+        base_host = "https://news-now-82jg.onrender.com"
+        our_article_url = f"{base_host}/article?url={urllib.parse.quote(target_news_url)}"
+
+        # 5. 네이버 공식 우회 브릿지 링크 (link.naver.com)
+        naver_bridge_url = f"https://link.naver.com/bridge?url={urllib.parse.quote(our_article_url)}"
+
+        # 6. 초단축 URL (TinyURL) 옵션 생성
+        short_url = ''
+        try:
+            t_resp = requests.get(f"https://tinyurl.com/api-create.php?url={urllib.parse.quote(naver_bridge_url)}", timeout=3)
+            if t_resp.status_code == 200 and t_resp.text.startswith('http'):
+                short_url = t_resp.text.strip()
+        except Exception:
+            pass
+
+        # 7. 카카오톡 전송용 포맷 텍스트 완성
+        kakao_text_bridge = f"{title}\n - {naver_bridge_url}"
+        kakao_text_short = f"{title}\n - {short_url}" if short_url else kakao_text_bridge
+        kakao_text_direct = f"{title}\n - {our_article_url}"
+
+        return jsonify({
+            'success': True,
+            'title': title,
+            'publisher': publisher,
+            'image': image,
+            'target_news_url': target_news_url,
+            'our_article_url': our_article_url,
+            'naver_bridge_url': naver_bridge_url,
+            'short_url': short_url,
+            'kakao_text_bridge': kakao_text_bridge,
+            'kakao_text_short': kakao_text_short,
+            'kakao_text_direct': kakao_text_direct
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'message': f'변환 실패: {str(e)}'})
 
 # ============================================================
 # 포트 / 실행
