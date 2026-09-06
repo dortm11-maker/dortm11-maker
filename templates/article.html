@@ -226,8 +226,8 @@
         {% if article.main_img %}
         <figure class="article-view-hero-figure">
             <img src="{{ article.main_img }}" alt="{{ article.title }}" class="article-hero-img" referrerpolicy="no-referrer" onerror="this.parentElement.style.display='none'">
-            {% if article.caption %}
-            <figcaption class="article-hero-caption">{{ article.caption }}</figcaption>
+            {% if article.caption and (not article.paragraphs or article.paragraphs[0] != article.caption) %}
+            <figcaption class="article-hero-caption" style="white-space: pre-line;">{{ article.caption }}</figcaption>
             {% endif %}
         </figure>
         {% endif %}
@@ -235,7 +235,7 @@
         <!-- 기사 본문 텍스트 문단 -->
         <section class="article-view-content">
             {% for p in article.paragraphs %}
-            <p class="article-para">{{ p }}</p>
+            <p class="article-para" style="white-space: pre-line;">{{ p }}</p>
             {% endfor %}
         </section>
 

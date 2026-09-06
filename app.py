@@ -723,37 +723,48 @@ def fetch_article_detail(url):
         lead_img_caption = ''
 
         if body_elem:
-            # 불필요한 태그/광고/스크립트 제거
-            for tag in body_elem(['script', 'style', 'aside', 'button', 'iframe', 'form', 'noscript', '.ad', '.ad-box', '.share-box', '.sns_area', '.reporter_area', '.relation_news', '.article_sns']):
-                tag.decompose()
-
-            # 이미지 캡션 탐색
-            fig_cap = body_elem.find(['figcaption', '.caption', '.img-desc'])
+            # 이미지 캡션 탐색 (줄바꿈 보존 추출 후 본문 중복 방지를 위해 decompose)
+            fig_cap = body_elem.find(['figcaption', '.caption', '.img-desc', '.desc-con'])
             if fig_cap:
-                lead_img_caption = fig_cap.get_text(strip=True)
+                lead_img_caption = '\n'.join([line.strip() for line in fig_cap.get_text('\n').splitlines() if line.strip()])
+                fig_cap.decompose()
+
+            # 불필요한 태그/광고/스크립트/송고/저작권 요소 제거
+            for tag in body_elem(['script', 'style', 'aside', 'button', 'iframe', 'form', 'noscript', 
+                                  '.ad', '.ad-box', '.share-box', '.sns_area', '.reporter_area', 
+                                  '.relation_news', '.article_sns', '.txt-copyright', '.adrs', 
+                                  '.writer-zone01', '.image-zone01', '.comp-box', '.byline-zone', '.article-copyright']):
+                tag.decompose()
 
             # <br> 태그를 개행 문자로 변환
             for br in body_elem.find_all('br'):
                 br.replace_with('\n')
 
-            p_tags = [p.get_text(strip=True) for p in body_elem.find_all('p') if len(p.get_text(strip=True)) > 20]
+            p_tags = [p.get_text(strip=True) for p in body_elem.find_all('p') if len(p.get_text(strip=True)) > 15]
             if len(p_tags) >= 2:
                 candidate_paras = p_tags
             else:
-                candidate_paras = [line.strip() for line in body_elem.get_text().split('\n') if len(line.strip()) > 20]
+                candidate_paras = [line.strip() for line in body_elem.get_text().split('\n') if len(line.strip()) > 15]
+
+            bad_keywords = ['저작권자', '무단전재', '무단 전재', '카카오톡', '제보하기', '구독신청', '기자의 다른 기사', 
+                            'All rights reserved', 'DB 금지', '재판매 및 DB', '송고', 'okjebo', 'AI 학습 및 활용', 'AI 학습']
 
             for p in candidate_paras:
-                if not any(k in p for k in ['저작권자', '무단전재 및 재배포', '무단 전재', '카카오톡', '제보하기', '구독신청', '기자의 다른 기사', 'All rights reserved', 'DB 금지', '재판매 및 DB']):
+                if not any(k in p for k in bad_keywords) and not re.search(r'\d{4}[/.-]\d{2}[/.-]\d{2}.*송고', p):
                     if not re.match(r'^\s*\[.*(?:제공|사진|출처|그래픽).*\]\s*$', p):
                         if p not in paragraphs:
                             paragraphs.append(p)
 
+        # 단신/속보 사진 기사 등 본문이 없는 경우 캡션(사진 설명) 또는 og:description으로 보완
         if not paragraphs:
-            og_desc = soup.find('meta', attrs={'property': 'og:description'})
-            if og_desc and og_desc.get('content'):
-                paragraphs.append(og_desc['content'].strip())
+            if lead_img_caption:
+                paragraphs.append(lead_img_caption)
             else:
-                paragraphs.append("기사의 본문 내용을 불러오는 중입니다. 전문은 아래 언론사 원문 보기를 통해 확인하실 수 있습니다.")
+                og_desc = soup.find('meta', attrs={'property': 'og:description'})
+                if og_desc and og_desc.get('content') and not any(k in og_desc['content'] for k in ['송고', '저작권자']):
+                    paragraphs.append(og_desc['content'].strip())
+                else:
+                    paragraphs.append("기사의 본문 내용을 불러오는 중입니다. 전문은 아래 언론사 원문 보기를 통해 확인하실 수 있습니다.")
 
         result = {
             'title': title or '최신 뉴스',
