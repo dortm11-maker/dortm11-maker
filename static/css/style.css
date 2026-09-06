@@ -1228,7 +1228,24 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 }
 
 /* 모바일 접속 감지 시 또는 1024px 이하 태블릿/모바일 */
-body.is-mobile-device .mobile-sticky-ad-bar,
+body.is-mobile-device .mobile-sticky-ad-bar {
+    display: block !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    background: #ffffff !important;
+    z-index: 99999 !important;
+    box-shadow: 0 -4px 25px rgba(15, 23, 42, 0.15) !important;
+    border-top: 2px solid #2563eb !important;
+    padding: 6px 0 6px 0 !important;
+    box-sizing: border-box !important;
+    animation: stickySlideUp 0.3s ease !important;
+    overflow: hidden !important;
+}
+
 @media (max-width: 1024px) {
     .mobile-sticky-ad-bar {
         display: block !important;
@@ -1566,12 +1583,19 @@ body.is-mobile-device .mobile-sticky-ad-bar,
         padding-bottom: 155px !important;
     }
     .mobile-sticky-ad-bar {
-        padding: 4px 0 6px 0 !important;
-        width: 100% !important;
-        max-width: 100vw !important;
-        box-sizing: border-box !important;
+        display: block !important;
+        position: fixed !important;
+        bottom: 0 !important;
         left: 0 !important;
         right: 0 !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        background: #ffffff !important;
+        z-index: 99999 !important;
+        box-shadow: 0 -4px 25px rgba(15, 23, 42, 0.15) !important;
+        border-top: 2px solid #2563eb !important;
+        padding: 4px 0 6px 0 !important;
+        box-sizing: border-box !important;
         overflow: hidden !important;
     }
     .mobile-sticky-ad-inner {
