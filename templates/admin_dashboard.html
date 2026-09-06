@@ -533,6 +533,121 @@
             border-bottom: 1px solid #f1f5f9;
         }
 
+        /* 방문자 IP 상세 관제 테이블 */
+        .vm-ips-wrap {
+            padding: 16px 20px;
+            border-top: 1px solid #e2e8f0;
+            background: #ffffff;
+        }
+        .vm-ips-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .vm-ips-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .vm-ips-table-container {
+            overflow-x: auto;
+            max-height: 380px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #fff;
+        }
+        .vm-ips-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+        }
+        .vm-ips-table thead th {
+            position: sticky;
+            top: 0;
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            padding: 11px 14px;
+            border-bottom: 1px solid #cbd5e1;
+            white-space: nowrap;
+            z-index: 2;
+        }
+        .vm-ips-table tbody td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            vertical-align: middle;
+        }
+        .vm-ips-table tbody tr:hover {
+            background: #f8fafc;
+        }
+        .badge-live-user {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .badge-idle-user {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .badge-visit-count {
+            display: inline-block;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .badge-device {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+        }
+        .ip-text {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-weight: 700;
+            color: #0f172a;
+            font-size: 13px;
+        }
+        .page-text {
+            max-width: 320px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: inline-block;
+            color: #2563eb;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
         @media (max-width: 900px) {
             .ad-grid { grid-template-columns: 1fr; }
             .panel-grid { grid-template-columns: 1fr; }
@@ -662,6 +777,38 @@
                     <tr><td colspan="3" style="text-align:center; color:#94a3b8;">통계 데이터를 불러오는 중...</td></tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- 실시간 접속자 및 방문자 IP 상세 관제 테이블 -->
+        <div class="vm-ips-wrap" id="vmIpsWrap">
+            <div class="vm-ips-header">
+                <div class="vm-ips-title">
+                    <span>👥</span>
+                    <span>실시간 접속자 & 방문자 IP 상세 관제</span>
+                    <span id="vmIpsCountBadge" style="background:#e0e7ff; color:#3730a3; font-size:11px; padding:2px 8px; border-radius:10px; font-weight:700;">0명 추적 중</span>
+                </div>
+                <div style="font-size:12px; color:#64748b;">
+                    🟢 최근 5분 이내 활동 독자는 <strong>실시간 활동</strong> 뱃지 표시
+                </div>
+            </div>
+            <div class="vm-ips-table-container">
+                <table class="vm-ips-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 120px;">접속 상태</th>
+                            <th style="width: 150px;">방문자 IP</th>
+                            <th style="width: 100px;">기기</th>
+                            <th style="width: 110px;">오늘 방문수</th>
+                            <th style="width: 100px;">최초 접속</th>
+                            <th style="width: 100px;">최근 활동</th>
+                            <th>현재/최근 조회 페이지</th>
+                        </tr>
+                    </thead>
+                    <tbody id="vmIpsTbody">
+                        <tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">방문자 IP 데이터를 불러오는 중...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -2049,6 +2196,7 @@ async function fetchVisitorStats(showToastFlag = false) {
             updateStatValue('valTotalPv', s.total_pv);
 
             renderHistoryTable(s.recent_daily || []);
+            renderVisitorIpsTable(s.visitor_list || []);
 
             if (showToastFlag) {
                 showToast(`🔄 통계 갱신 완료 (실시간: ${s.realtime_now}명 / 오늘: ${s.today_uv}명)`);
@@ -2084,6 +2232,43 @@ function renderHistoryTable(dailyList) {
             <td style="color:#64748b;">${Number(item.pv || 0).toLocaleString()} 회</td>
         </tr>
     `).join('');
+}
+
+function renderVisitorIpsTable(visitorList) {
+    const tbody = document.getElementById('vmIpsTbody');
+    const badge = document.getElementById('vmIpsCountBadge');
+    if (!tbody) return;
+    if (badge) badge.textContent = `${(visitorList || []).length}명 추적 중`;
+
+    if (!visitorList || visitorList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:#94a3b8; padding:24px;">아직 방문자 기록이 없습니다. 사용자가 접속하면 실시간으로 IP와 활동이 표시됩니다.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = visitorList.map(v => {
+        const isLive = !!v.is_live;
+        const statusHtml = isLive
+            ? '<span class="badge-live-user"><span class="vm-live-pulse-dot" style="width:6px; height:6px;"></span> 실시간 활동</span>'
+            : '<span class="badge-idle-user">⚪ 최근 방문</span>';
+        
+        const deviceHtml = `<span class="badge-device">${esc(v.device || '💻 PC')}</span>`;
+        const count = Number(v.visit_count || 1);
+        const visitCountHtml = `<span class="badge-visit-count">${count.toLocaleString()}회</span>`;
+        const pageTitle = v.last_page || '메인 홈';
+        const pageHtml = `<span class="page-text" title="${escAttr(pageTitle)}">${esc(pageTitle)}</span>`;
+
+        return `
+            <tr style="${isLive ? 'background: #f0fdf4;' : ''}">
+                <td>${statusHtml}</td>
+                <td><span class="ip-text">${esc(v.ip)}</span></td>
+                <td>${deviceHtml}</td>
+                <td>${visitCountHtml}</td>
+                <td style="color:#64748b; font-size:12px;">${esc(v.first_seen || '-')}</td>
+                <td style="color:#0f172a; font-weight:600; font-size:12px;">${esc(v.last_seen || '-')}</td>
+                <td>${pageHtml}</td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function toggleHistoryTable() {

@@ -46,8 +46,9 @@ def get_kst_today_str():
 class VisitorTracker:
     def __init__(self):
         self.lock = threading.Lock()
-        self.active_users = {}   # {visitor_id: last_active_timestamp}
-        self.today_vids = set()  # 당일 고유 방문자 식별자 집합
+        self.active_users = {}   # {ip: last_active_timestamp}
+        self.today_vids = set()  # 당일 고유 IP 집합
+        self.visitor_logs = {}   # {ip: dict(ip, device, visit_count, first_seen, last_seen, last_seen_ts, last_page)}
         self.current_date = get_kst_today_str()
         self.total_uv = 0
         self.total_pv = 0
@@ -63,6 +64,7 @@ class VisitorTracker:
                     self.total_uv = data.get('total_uv', 0)
                     self.total_pv = data.get('total_pv', 0)
                     self.daily = data.get('daily', {})
+                    self.visitor_logs = data.get('visitor_logs', {})
             except Exception as e:
                 print(f"[Stats] Load error: {e}")
         
@@ -73,10 +75,12 @@ class VisitorTracker:
 
     def save(self):
         try:
+            saved_logs = dict(list(self.visitor_logs.items())[-100:])
             data = {
                 'total_uv': self.total_uv,
                 'total_pv': self.total_pv,
-                'daily': self.daily
+                'daily': self.daily,
+                'visitor_logs': saved_logs
             }
             with open(VISITOR_STATS_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
@@ -89,22 +93,25 @@ class VisitorTracker:
         if today != self.current_date:
             self.current_date = today
             self.today_vids.clear()
+            for v in self.visitor_logs.values():
+                v['visit_count'] = 0
             if today not in self.daily:
                 self.daily[today] = {"uv": 0, "pv": 0}
             self.save()
 
-    def record_visit(self, visitor_id, is_pageview=True):
+    def record_visit(self, ip, device, page_name, is_pageview=True):
         now = time.time()
+        now_str = datetime.now(KST).strftime('%H:%M:%S')
         with self.lock:
             self._check_date_rollover()
             today = self.current_date
             
             # 실시간 활성 사용자 갱신
-            self.active_users[visitor_id] = now
+            self.active_users[ip] = now
             
             # 당일 고유 방문자(UV) 여부
-            if visitor_id not in self.today_vids:
-                self.today_vids.add(visitor_id)
+            if ip not in self.today_vids:
+                self.today_vids.add(ip)
                 self.daily[today]['uv'] = self.daily[today].get('uv', 0) + 1
                 self.total_uv += 1
 
@@ -113,14 +120,41 @@ class VisitorTracker:
                 self.daily[today]['pv'] = self.daily[today].get('pv', 0) + 1
                 self.total_pv += 1
 
-            # 20초마다 자동 파일 저장
-            if now - self.last_saved > 20:
+            # IP별 상세 접속 로그 갱신
+            if ip not in self.visitor_logs:
+                self.visitor_logs[ip] = {
+                    'ip': ip,
+                    'device': device,
+                    'visit_count': 1 if is_pageview else 0,
+                    'first_seen': now_str,
+                    'last_seen': now_str,
+                    'last_seen_ts': now,
+                    'last_page': page_name
+                }
+            else:
+                log = self.visitor_logs[ip]
+                if is_pageview:
+                    log['visit_count'] = log.get('visit_count', 0) + 1
+                log['last_seen'] = now_str
+                log['last_seen_ts'] = now
+                log['device'] = device
+                if page_name:
+                    log['last_page'] = page_name
+
+            # 15초마다 자동 파일 저장
+            if now - self.last_saved > 15:
                 self.save()
 
-    def update_ping(self, visitor_id):
+    def update_ping(self, ip, page_name=''):
         now = time.time()
+        now_str = datetime.now(KST).strftime('%H:%M:%S')
         with self.lock:
-            self.active_users[visitor_id] = now
+            self.active_users[ip] = now
+            if ip in self.visitor_logs:
+                self.visitor_logs[ip]['last_seen_ts'] = now
+                self.visitor_logs[ip]['last_seen'] = now_str
+                if page_name:
+                    self.visitor_logs[ip]['last_page'] = page_name
 
     def get_stats(self):
         now = time.time()
@@ -128,7 +162,6 @@ class VisitorTracker:
             self._check_date_rollover()
             today = self.current_date
 
-            # 최근 5분(300초) 이내 활동 사용자를 실시간 접속자로 판정
             cutoff_5m = now - 300
             cutoff_10m = now - 600
 
@@ -142,13 +175,32 @@ class VisitorTracker:
             sorted_dates = sorted(self.daily.keys(), reverse=True)[:7]
             recent_daily = [{"date": d, "uv": self.daily[d].get('uv', 0), "pv": self.daily[d].get('pv', 0)} for d in sorted_dates]
 
+            # 최근 방문자 IP 리스트 생성 (실시간 라이브 우선, 그 다음 최신 접속시간 순)
+            v_list = []
+            for ip, info in self.visitor_logs.items():
+                last_ts = info.get('last_seen_ts', 0)
+                is_live = (now - last_ts < 300)
+                v_list.append({
+                    'ip': ip,
+                    'device': info.get('device', '💻 PC'),
+                    'visit_count': info.get('visit_count', 1),
+                    'first_seen': info.get('first_seen', '-'),
+                    'last_seen': info.get('last_seen', '-'),
+                    'last_page': info.get('last_page', '메인 홈'),
+                    'is_live': is_live,
+                    'last_ts': last_ts
+                })
+            
+            v_list.sort(key=lambda x: (1 if x['is_live'] else 0, x['last_ts']), reverse=True)
+
             return {
                 'realtime_now': realtime_count,
                 'today_uv': today_stat.get('uv', 0),
                 'today_pv': today_stat.get('pv', 0),
                 'total_uv': self.total_uv,
                 'total_pv': self.total_pv,
-                'recent_daily': recent_daily
+                'recent_daily': recent_daily,
+                'visitor_list': v_list[:50]
             }
 
 visitor_tracker = VisitorTracker()
@@ -804,6 +856,25 @@ def is_bot_or_crawler():
     ua = request.headers.get('User-Agent', '').lower()
     return any(b in ua for b in BOT_USER_AGENTS)
 
+def get_client_real_ip():
+    """Cloudflare / Render 리버스 프록시 실제 클라이언트 IP 추출"""
+    cf_ip = request.headers.get('CF-Connecting-IP')
+    if cf_ip and cf_ip.strip():
+        return cf_ip.strip()
+    xff = request.headers.get('X-Forwarded-For')
+    if xff and xff.strip():
+        return xff.split(',')[0].strip()
+    x_real = request.headers.get('X-Real-IP')
+    if x_real and x_real.strip():
+        return x_real.strip()
+    return request.remote_addr or '127.0.0.1'
+
+def detect_device():
+    ua = request.headers.get('User-Agent', '').lower()
+    if any(k in ua for k in ['iphone', 'ipad', 'android', 'mobile', 'blackberry', 'webos']):
+        return '📱 모바일'
+    return '💻 PC'
+
 @app.before_request
 def track_visitor_middleware():
     path = request.path
@@ -815,37 +886,25 @@ def track_visitor_middleware():
     if is_bot_or_crawler():
         return
 
-    # 방문자 ID 생성 (IP + User-Agent 해시 또는 쿠키)
-    vid = request.cookies.get('n_vid')
-    if not vid:
-        ip = request.headers.get('X-Forwarded-For', request.remote_addr or '')
-        if ',' in ip:
-            ip = ip.split(',')[0].strip()
-        ua = request.headers.get('User-Agent', '')
-        raw_key = f"{ip}_{ua}"
-        vid = hashlib.sha256(raw_key.encode('utf-8')).hexdigest()[:16]
-        request._set_nvid = vid
+    client_ip = get_client_real_ip()
+    device = detect_device()
 
-    # 방문 기록 (실시간 + UV + PV)
-    visitor_tracker.record_visit(vid, is_pageview=True)
+    if path == '/':
+        page_name = '🌐 메인 뉴스 홈'
+    elif path == '/article':
+        page_name = '📰 기사 상세 읽는 중'
+    else:
+        page_name = path
 
-@app.after_request
-def set_visitor_cookie(response):
-    if hasattr(request, '_set_nvid'):
-        response.set_cookie('n_vid', request._set_nvid, max_age=365*24*3600, httponly=True, samesite='Lax')
-    return response
+    # 방문 기록 (IP별 방문 횟수, 실시간 활성, UV, PV)
+    visitor_tracker.record_visit(client_ip, device, page_name, is_pageview=True)
 
 @app.route('/api/ping', methods=['POST', 'GET'])
 def api_ping():
     """체류 중 실시간 접속자 상태 유지용 가벼운 핑"""
-    vid = request.cookies.get('n_vid')
-    if not vid:
-        ip = request.headers.get('X-Forwarded-For', request.remote_addr or '')
-        if ',' in ip:
-            ip = ip.split(',')[0].strip()
-        ua = request.headers.get('User-Agent', '')
-        vid = hashlib.sha256(f"{ip}_{ua}".encode('utf-8')).hexdigest()[:16]
-    visitor_tracker.update_ping(vid)
+    client_ip = get_client_real_ip()
+    page = request.args.get('page', '')
+    visitor_tracker.update_ping(client_ip, page_name=page)
     return jsonify({'ok': True})
 
 # ============================================================

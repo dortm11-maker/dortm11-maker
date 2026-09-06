@@ -1,10 +1,10 @@
 {
-  "total_uv": 3,
-  "total_pv": 5,
+  "total_uv": 6,
+  "total_pv": 15,
   "daily": {
     "2026-09-06": {
-      "uv": 3,
-      "pv": 5
+      "uv": 6,
+      "pv": 15
     }
   }
 }
