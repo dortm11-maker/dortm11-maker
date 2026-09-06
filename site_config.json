@@ -21,6 +21,16 @@
       "tracking_code": "AF3197388",
       "width": 200
     },
+    "mobile": {
+      "coupang_id": 1026359,
+      "custom_html": "",
+      "enabled": true,
+      "height": 100,
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 360
+    },
     "popup": {
       "close_delay": 3,
       "coupang_id": 1026359,
@@ -43,36 +53,26 @@
       "sub_id": "dortm111",
       "tracking_code": "AF3197388",
       "width": 200
-    },
-    "mobile": {
-      "coupang_id": 1026359,
-      "custom_html": "",
-      "enabled": true,
-      "height": 100,
-      "mode": "coupang",
-      "sub_id": "dortm111",
-      "tracking_code": "AF3197388",
-      "width": 360
     }
   },
   "ai_rewrite": {
     "enabled": true,
-    "api_provider": "gemini",
-    "api_key": "",
-    "use_premium_images": true,
-    "image_safeguard": true,
+    "gemini_api_key": "",
     "rewrite_title": true,
-    "rewrite_body": true
+    "rewrite_body": true,
+    "use_premium_stock": true,
+    "image_safeguard": true,
+    "add_watermark": true
   },
   "auto_redirect": {
+    "apply_target": "article",
     "enabled": true,
+    "prevent_repeat": true,
+    "scroll_percent": 95,
     "target_url": "https://open.kakao.com/o/gTLTzqqd",
     "target_window": "_self",
-    "apply_target": "article",
-    "trigger_mode": "either",
     "time_seconds": 60,
-    "scroll_percent": 95,
-    "prevent_repeat": true
+    "trigger_mode": "either"
   },
   "share": {
     "description": "국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.",

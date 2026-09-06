@@ -1369,6 +1369,9 @@
                     <button type="button" class="vm-btn-refresh" onclick="toggleHistoryTable()" title="최근 7일 방문자 통계 보기">
                         📈 최근 7일 추이
                     </button>
+                    <button type="button" class="vm-btn-refresh" onclick="toggleDetailedLogs()" title="실시간 IP 및 광고 클릭 상세 관제 테이블 보기">
+                        👁️ 상세 로그 (IP/클릭)
+                    </button>
                 </div>
             </div>
 
@@ -1479,88 +1482,91 @@
                 </table>
             </div>
 
-            <!-- 실시간 접속자 및 방문자 IP 상세 관제 테이블 -->
-            <div class="vm-ips-wrap" id="vmIpsWrap">
-                <div class="vm-ips-header">
-                    <div class="vm-ips-title">
-                        <span>👥</span>
-                        <span>실시간 접속자 & 방문자 IP 상세 관제</span>
-                        <span id="vmIpsCountBadge"
-                            style="background:#e0e7ff; color:#3730a3; font-size:11px; padding:2px 8px; border-radius:10px; font-weight:700;">0명
-                            추적 중</span>
+            <!-- 실시간 접속자 및 쿠팡 광고 클릭 상세 관제 테이블 (기본 접힘) -->
+            <div id="vmDetailedLogsWrap" style="display: none; margin-top: 14px;">
+                <!-- 실시간 접속자 및 방문자 IP 상세 관제 테이블 -->
+                <div class="vm-ips-wrap" id="vmIpsWrap">
+                    <div class="vm-ips-header">
+                        <div class="vm-ips-title">
+                            <span>👥</span>
+                            <span>실시간 접속자 & 방문자 IP 상세 관제</span>
+                            <span id="vmIpsCountBadge"
+                                style="background:#e0e7ff; color:#3730a3; font-size:11px; padding:2px 8px; border-radius:10px; font-weight:700;">0명
+                                추적 중</span>
+                        </div>
+                        <div style="font-size:12px; color:#64748b;">
+                            🟢 최근 5분 이내 활동 독자는 <strong>실시간 활동</strong> 뱃지 표시
+                        </div>
                     </div>
-                    <div style="font-size:12px; color:#64748b;">
-                        🟢 최근 5분 이내 활동 독자는 <strong>실시간 활동</strong> 뱃지 표시
+                    <div class="vm-ips-table-container">
+                        <table class="vm-ips-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 120px;">접속 상태</th>
+                                    <th style="width: 150px;">방문자 IP</th>
+                                    <th style="width: 100px;">기기</th>
+                                    <th style="width: 110px;">오늘 방문수</th>
+                                    <th style="width: 100px;">최초 접속</th>
+                                    <th style="width: 100px;">최근 활동</th>
+                                    <th>현재/최근 조회 페이지</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vmIpsTbody">
+                                <tr>
+                                    <td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">방문자 IP 데이터를 불러오는
+                                        중...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="vm-ips-table-container">
-                    <table class="vm-ips-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 120px;">접속 상태</th>
-                                <th style="width: 150px;">방문자 IP</th>
-                                <th style="width: 100px;">기기</th>
-                                <th style="width: 110px;">오늘 방문수</th>
-                                <th style="width: 100px;">최초 접속</th>
-                                <th style="width: 100px;">최근 활동</th>
-                                <th>현재/최근 조회 페이지</th>
-                            </tr>
-                        </thead>
-                        <tbody id="vmIpsTbody">
-                            <tr>
-                                <td colspan="7" style="text-align:center; color:#94a3b8; padding:20px;">방문자 IP 데이터를 불러오는
-                                    중...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
 
-            <!-- 실시간 쿠팡 광고 & 링크 클릭 상세 관제 테이블 -->
-            <div class="vm-ips-wrap" id="vmAdClicksWrap" style="border-top: 1px dashed #fed7aa; background: #fffaf5;">
-                <div class="vm-ips-header">
-                    <div class="vm-ips-title" style="color: #9a3412;">
-                        <span>🛒</span>
-                        <span>실시간 쿠팡 배너 클릭 & 자리이동 모니터링</span>
-                        <span id="vmAdClickTotalBadge"
-                            style="background:#ffedd5; color:#c2410c; font-size:11px; padding:2px 8px; border-radius:10px; font-weight:700;">순수 배너 0회</span>
+                <!-- 실시간 쿠팡 광고 & 링크 클릭 상세 관제 테이블 -->
+                <div class="vm-ips-wrap" id="vmAdClicksWrap" style="border-top: 1px dashed #fed7aa; background: #fffaf5;">
+                    <div class="vm-ips-header">
+                        <div class="vm-ips-title" style="color: #9a3412;">
+                            <span>🛒</span>
+                            <span>실시간 쿠팡 배너 클릭 & 자리이동 모니터링</span>
+                            <span id="vmAdClickTotalBadge"
+                                style="background:#ffedd5; color:#c2410c; font-size:11px; padding:2px 8px; border-radius:10px; font-weight:700;">순수 배너 0회</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:12px;">
+                            <span
+                                style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">📰 정면:
+                                누적 <strong id="valClickCenter">0</strong>회</span>
+                            <span
+                                style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">👈 좌측:
+                                누적 <strong id="valClickLeft">0</strong>회</span>
+                            <span
+                                style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">👉 우측:
+                                누적 <strong id="valClickRight">0</strong>회</span>
+                            <span
+                                style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">💥 팝업:
+                                누적 <strong id="valClickPopup">0</strong>회</span>
+                            <span
+                                style="background:#f0fdf4; border:1px solid #86efac; padding:3px 8px; border-radius:6px; color:#166534;">⚡ 자리이동(별도):
+                                누적 <strong id="valClickOther">0</strong>회</span>
+                        </div>
                     </div>
-                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; font-size:12px;">
-                        <span
-                            style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">📰 정면:
-                            누적 <strong id="valClickCenter">0</strong>회</span>
-                        <span
-                            style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">👈 좌측:
-                            누적 <strong id="valClickLeft">0</strong>회</span>
-                        <span
-                            style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">👉 우측:
-                            누적 <strong id="valClickRight">0</strong>회</span>
-                        <span
-                            style="background:#fff; border:1px solid #fed7aa; padding:3px 8px; border-radius:6px; color:#7c2d12;">💥 팝업:
-                            누적 <strong id="valClickPopup">0</strong>회</span>
-                        <span
-                            style="background:#f0fdf4; border:1px solid #86efac; padding:3px 8px; border-radius:6px; color:#166534;">⚡ 자리이동(별도):
-                            누적 <strong id="valClickOther">0</strong>회</span>
+                    <div class="vm-ips-table-container">
+                        <table class="vm-ips-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px;">클릭 시간</th>
+                                    <th style="width: 140px;">방문자 IP</th>
+                                    <th style="width: 100px;">기기</th>
+                                    <th style="width: 160px;">클릭된 광고 위치</th>
+                                    <th>클릭 발생 페이지</th>
+                                </tr>
+                            </thead>
+                            <tbody id="vmAdClicksTbody">
+                                <tr>
+                                    <td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">아직 쿠팡 광고 클릭 기록이
+                                        없습니다. 독자가 배너나 링크를 클릭하면 실시간으로 IP와 위치가 기록됩니다.</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                </div>
-                <div class="vm-ips-table-container">
-                    <table class="vm-ips-table">
-                        <thead>
-                            <tr>
-                                <th style="width: 100px;">클릭 시간</th>
-                                <th style="width: 140px;">방문자 IP</th>
-                                <th style="width: 100px;">기기</th>
-                                <th style="width: 160px;">클릭된 광고 위치</th>
-                                <th>클릭 발생 페이지</th>
-                            </tr>
-                        </thead>
-                        <tbody id="vmAdClicksTbody">
-                            <tr>
-                                <td colspan="5" style="text-align:center; color:#94a3b8; padding:20px;">아직 쿠팡 광고 클릭 기록이
-                                    없습니다. 독자가 배너나 링크를 클릭하면 실시간으로 IP와 위치가 기록됩니다.</td>
-                            </tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
@@ -3923,6 +3929,12 @@
 
         function toggleHistoryTable() {
             const wrap = document.getElementById('vmHistoryWrap');
+            if (!wrap) return;
+            wrap.style.display = (wrap.style.display === 'none' || !wrap.style.display) ? 'block' : 'none';
+        }
+
+        function toggleDetailedLogs() {
+            const wrap = document.getElementById('vmDetailedLogsWrap');
             if (!wrap) return;
             wrap.style.display = (wrap.style.display === 'none' || !wrap.style.display) ? 'block' : 'none';
         }

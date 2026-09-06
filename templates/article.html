@@ -235,34 +235,97 @@
         </figure>
         {% endif %}
 
-        <!-- 기사 본문 텍스트 문단 -->
+        <!-- 기사 본문 텍스트 문단 및 AI 브리핑 영역 -->
         <section class="article-view-content">
-            {% for p in article.paragraphs %}
-                {% if p.startswith('<div class="article-table') or p.startswith('<table') or p.startswith('<figure') %}
-                    {{ p | safe }}
-                {% else %}
-                    <p class="article-para" style="white-space: pre-line;">{{ p }}</p>
+            {% if article.briefing and article.briefing.summary %}
+                <!-- 1. 핵심 요약 3선 -->
+                <div class="briefing-box summary-card" style="background:#f8fafc; border:1px solid #e2e8f0; border-left:4px solid #2563eb; border-radius:10px; padding:20px; margin-bottom:24px;">
+                    <div style="font-size:15px; font-weight:800; color:#1e3a8a; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+                        <span>📌</span> <span>핵심 팩트 요약 (3-Line Summary)</span>
+                    </div>
+                    <ul style="margin:0; padding-left:20px; font-size:15.5px; line-height:1.8; color:#1e293b;">
+                        {% for point in article.briefing.summary %}
+                        <li style="margin-bottom:8px;"><strong>{{ point }}</strong></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- 2. 이슈 배경 및 확인된 사실 관계 -->
+                {% if article.briefing.context %}
+                <div class="briefing-box context-card" style="margin-bottom:24px;">
+                    <div style="font-size:14.5px; font-weight:700; color:#0f172a; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <span>🔍</span> <span>이슈 배경 및 사실 관계</span>
+                    </div>
+                    <p class="article-para" style="font-size:15px; line-height:1.75; color:#334155; margin:0;">
+                        {{ article.briefing.context }}
+                    </p>
+                </div>
                 {% endif %}
-            {% endfor %}
+
+                <!-- 3. 시사점 및 왜 중요한가 -->
+                {% if article.briefing.importance %}
+                <div class="briefing-box importance-card" style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:18px; margin-bottom:24px;">
+                    <div style="font-size:14.5px; font-weight:700; color:#166534; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <span>💡</span> <span>시사점 및 왜 중요한가 (Why it Matters)</span>
+                    </div>
+                    <p style="font-size:14.5px; line-height:1.7; color:#14532d; margin:0;">
+                        {{ article.briefing.importance }}
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- 4. 관련 핵심 키워드 태그 -->
+                {% if article.keywords %}
+                <div class="briefing-tags-wrap" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:24px;">
+                    <span style="font-size:12px; font-weight:700; color:#64748b;">🏷️ 관련 키워드:</span>
+                    {% for kw in article.keywords %}
+                    <span style="background:#f1f5f9; color:#475569; font-size:12px; font-weight:600; padding:3px 10px; border-radius:14px; border:1px solid #e2e8f0;">#{{ kw }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- 5. 함께 보도한 언론사 출처 클러스터 -->
+                {% if article.cluster_sources and article.cluster_sources|length > 1 %}
+                <div class="cluster-sources-box" style="background:#faf5ff; border:1px solid #e9d5ff; border-radius:10px; padding:16px; margin-bottom:24px;">
+                    <div style="font-size:13px; font-weight:700; color:#6b21a8; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                        <span>📰</span> <span>동일 이슈를 함께 보도한 언론사 (총 {{ article.cluster_sources|length }}개 출처)</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:8px;">
+                        {% for src in article.cluster_sources %}
+                        <a href="{{ src.url }}" target="_blank" rel="noopener noreferrer" style="display:flex; align-items:center; justify-content:space-between; text-decoration:none; background:#fff; border:1px solid #e9d5ff; padding:8px 12px; border-radius:6px; font-size:13px; color:#1e293b; transition:all 0.2s;" onmouseover="this.style.borderColor='#a855f7'" onmouseout="this.style.borderColor='#e9d5ff'">
+                            <span style="font-weight:700; color:#7e22ce; min-width:80px;">{{ src.source_name }}</span>
+                            <span style="flex:1; margin:0 10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:#334155;">{{ src.title }}</span>
+                            <span style="font-size:11px; color:#94a3b8;">원문 보기 &rarr;</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            {% else %}
+                {% for p in article.paragraphs %}
+                    {% if p.startswith('<div class="article-table') or p.startswith('<table') or p.startswith('<figure') %}
+                        {{ p | safe }}
+                    {% else %}
+                        <p class="article-para" style="white-space: pre-line;">{{ p }}</p>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
         </section>
 
         <!-- 하단 원문 출처 및 저작권 박스 -->
         <div class="article-source-box">
             <div class="source-box-header">
                 <span class="source-icon">📰</span>
-                <span class="source-title">{{ article.publisher }} 원문 출처 및 저작권 안내</span>
+                <span class="source-title">{{ article.publisher }} 원문 출처 및 공식 링크</span>
             </div>
             <p class="source-desc">
-                {% if article.is_rewritten %}
-                본 기사는 언론사 공식 보도 사실(Fact)을 바탕으로 뉴스NOW AI가 독자적인 문체로 재구성한 2차 요약 보도물입니다. 기사의 원작자 저작권과 권리를 존중하며, 전체 원문 및 영상은 아래 언론사 공식 보도 보기를 통해 확인하실 수 있습니다.
-                {% else %}
-                본 기사의 저작권 및 모든 법적 권리는 <strong>{{ article.publisher }}</strong>에 있으며, 뉴스NOW는 RSS 및 공개 정보 제공 목적으로 기사를 전달합니다. 전문 및 관련 영상은 원문 페이지에서 확인하실 수 있습니다.
-                {% endif %}
+                본 콘텐츠는 저작권법 제28조(시사보도의 정당한 인용)에 따라 주요 언론사 공식 RSS의 공개 팩트를 기반으로 작성된 독자적 <strong>AI 뉴스 브리핑 리포트</strong>입니다. 원문 기사 전문, 세부 취재 내용 및 관련 사진/영상은 아래 언론사 공식 웹사이트에서 열람하실 수 있습니다.
             </p>
             <div class="source-action">
-                <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="source-link-btn">
-                    <span>{{ article.publisher }} 원문 기사 전문 보러가기</span>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <a href="{{ article.url }}" target="_blank" rel="noopener noreferrer" class="source-link-btn" style="background:#2563eb; color:#fff; font-weight:800; padding:14px 24px; border-radius:8px; display:inline-flex; align-items:center; gap:8px; text-decoration:none; font-size:15px; box-shadow:0 4px 12px rgba(37,99,235,0.25);">
+                    <span>👉 {{ article.publisher }} 공식 원문 기사 전문 보러가기</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="5" y1="12" x2="19" y2="12"></line>
                         <polyline points="12 5 19 12 12 19"></polyline>
                     </svg>

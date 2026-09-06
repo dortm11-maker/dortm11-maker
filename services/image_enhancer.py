@@ -85,6 +85,8 @@ PREMIUM_STOCK_IMAGES = {
     ]
 }
 
+NEWS_STOCK_CATALOG = PREMIUM_STOCK_IMAGES
+
 # 키워드 규칙 매핑 테이블
 KEYWORD_CATEGORY_RULES = [
     # 부동산 키워드

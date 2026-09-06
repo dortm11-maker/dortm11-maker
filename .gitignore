@@ -11,3 +11,5 @@ scratch_*.py
 Thumbs.db
 cloudflared.exe
 backup_*.zip
+visitor_stats-*.json
+static/cache_img/

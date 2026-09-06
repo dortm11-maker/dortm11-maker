@@ -1,12 +1,18 @@
 {
-  "total_uv": 11,
-  "total_pv": 23,
-  "current_date": "2026-09-06",
-  "today_vids": [],
+  "total_uv": 12,
+  "total_pv": 28,
+  "current_date": "2026-09-07",
+  "today_vids": [
+    "127.0.0.1"
+  ],
   "daily": {
     "2026-09-06": {
       "uv": 11,
       "pv": 23
+    },
+    "2026-09-07": {
+      "uv": 1,
+      "pv": 5
     }
   },
   "visitor_logs": {
@@ -31,10 +37,10 @@
     "127.0.0.1": {
       "ip": "127.0.0.1",
       "device": "💻 PC",
-      "visit_count": 5,
+      "visit_count": 10,
       "first_seen": "17:06:22",
-      "last_seen": "17:53:41",
-      "last_seen_ts": 1788684821.92742,
+      "last_seen": "08:42:32",
+      "last_seen_ts": 1788738152.5067601,
       "last_page": "🌐 메인 뉴스 홈"
     }
   },
@@ -45,7 +51,7 @@
       "center": 2,
       "popup": 1,
       "link": 0,
-      "auto_redirect": 1
+      "auto_redirect": 2
     },
     "by_type_today": {
       "left": 1,
@@ -53,7 +59,7 @@
       "center": 2,
       "popup": 1,
       "link": 0,
-      "auto_redirect": 1
+      "auto_redirect": 2
     },
     "daily": {
       "2026-09-06": {
@@ -65,6 +71,17 @@
           "popup": 0,
           "link": 0,
           "auto_redirect": 0
+        }
+      },
+      "2026-09-07": {
+        "pure_total": 0,
+        "by_type": {
+          "left": 0,
+          "right": 0,
+          "center": 0,
+          "popup": 0,
+          "link": 0,
+          "auto_redirect": 1
         }
       }
     },
@@ -113,6 +130,15 @@
         "label": "정면 본문 배너",
         "page": "기사 상세",
         "ts": 1788697735.0133898
+      },
+      {
+        "time": "08:41:58",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "[알림] 연합뉴스 콘텐츠 저작권 고지",
+        "ts": 1788738118.7642562
       }
     ]
   }

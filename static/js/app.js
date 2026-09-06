@@ -318,6 +318,9 @@ function onCardClick() {
 function createHeadlineCard(item) {
     const hasImg = item.image && item.image.trim() !== '';
     const targetUrl = getArticleUrl(item.link);
+    const clusterBadge = item.cluster_count && item.cluster_count > 1
+        ? `<span style="background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:700; padding:2px 7px; border-radius:10px; border:1px solid #bfdbfe; margin-left:6px;">🔥 ${item.cluster_count}개 언론사 보도</span>`
+        : '';
     return `
     <a class="headline-card" href="${targetUrl}"
        onmouseenter="prefetchArticle('${escAttr(item.link)}')"
@@ -334,6 +337,7 @@ function createHeadlineCard(item) {
             <div class="headline-source">
                 <span class="headline-source-dot"></span>
                 ${esc(item.source)}
+                ${clusterBadge}
             </div>
             <div class="headline-title">${esc(item.title)}</div>
             ${item.summary ? `<div class="headline-summary">${esc(item.summary)}</div>` : ''}
@@ -345,6 +349,9 @@ function createHeadlineCard(item) {
 function createNewsCard(item) {
     const hasImg = item.image && item.image.trim() !== '';
     const targetUrl = getArticleUrl(item.link);
+    const clusterBadge = item.cluster_count && item.cluster_count > 1
+        ? `<span style="background:#eff6ff; color:#1d4ed8; font-size:10px; font-weight:700; padding:1px 6px; border-radius:10px; border:1px solid #bfdbfe; margin-left:5px;">🔥 ${item.cluster_count}개사 보도</span>`
+        : '';
     return `
     <a class="news-card" href="${targetUrl}"
        onmouseenter="prefetchArticle('${escAttr(item.link)}')"
@@ -358,7 +365,7 @@ function createNewsCard(item) {
                 : `<div class="news-card-img-placeholder">📰</div>`}
         </div>
         <div class="news-card-body">
-            <div class="news-card-source">${esc(item.logo)} ${esc(item.source)}</div>
+            <div class="news-card-source">${esc(item.logo)} ${esc(item.source)} ${clusterBadge}</div>
             <div class="news-card-title">${esc(item.title)}</div>
             <div class="news-card-date">${esc(item.date)}</div>
         </div>
