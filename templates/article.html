@@ -29,9 +29,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- 쿠팡 파트너스 공식 SDK -->
     <script src="https://ads-partners.coupang.com/g.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260906_3">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260906_5">
 </head>
-<body class="article-page-body">
+<body class="article-page-body {% if is_mobile %}is-mobile-device{% endif %}">
 
 <!-- ===================== 1. 상단 이슈 전광판 (마퀴 티커) ===================== -->
 {% if site_config.ticker.enabled %}
@@ -315,6 +315,37 @@
     </div>
 </footer>
 
+<!-- ===================== 7-1. 모바일 화면 하단 플로팅 고정 배너 (스크롤 추적) ===================== -->
+{% if site_config.ads.center.enabled %}
+<aside class="mobile-sticky-ad-bar" id="mobileStickyAd" role="complementary" aria-label="모바일 추천 특가">
+    <div class="mobile-sticky-ad-inner">
+        <button type="button" class="mobile-sticky-ad-close" onclick="closeMobileStickyAd()" aria-label="광고 배너 닫기" title="닫기">✕</button>
+        <div class="ad-horizontal-header mobile-sticky-header">
+            <span class="ad-tag">쿠팡 추천</span>
+            <span class="ad-subtext">실시간 추천 특가 혜택</span>
+        </div>
+        <div class="ad-horizontal-body mobile-sticky-body">
+            {% if site_config.ads.center.mode == 'custom' and site_config.ads.center.custom_html %}
+                {{ site_config.ads.center.custom_html | safe }}
+            {% else %}
+                <script>
+                    new PartnersCoupang.G({
+                        "id": {{ site_config.ads.center.coupang_id or 1026359 }},
+                        "template": "carousel",
+                        "trackingCode": "{{ site_config.ads.center.tracking_code or 'AF3197388' }}",
+                        "subId": "{{ site_config.ads.center.sub_id or 'dortm111' }}",
+                        "width": "{{ site_config.ads.center.width or 680 }}",
+                        "height": "{{ site_config.ads.center.height or 140 }}",
+                        "tsource": ""
+                    });
+                </script>
+            {% endif %}
+        </div>
+        <div class="ad-horizontal-footer mobile-sticky-footer">이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+    </div>
+</aside>
+{% endif %}
+
 <!-- ===================== 8. 중앙 팝업 광고 ===================== -->
 {% if site_config.ads.popup.enabled %}
 <div class="popup-overlay" id="popupOverlay" style="display:none" onclick="onOverlayClick()">
@@ -457,6 +488,34 @@ window.SITE_CONFIG = {{ site_config | tojson }};
 <script src="/static/js/auto_redirect.js?v=20260906_1"></script>
 <script src="/static/js/admin_secret.js?v=20260906_1"></script>
 <script>
+// 모바일 하단 플로팅 고정 배너 닫기 및 초기화
+function closeMobileStickyAd() {
+    const el = document.getElementById('mobileStickyAd');
+    if (el) {
+        el.style.display = 'none';
+        document.body.classList.remove('has-mobile-ad');
+    }
+    try { sessionStorage.setItem('hideMobileStickyAd', '1'); } catch(e) {}
+}
+
+function initMobileStickyAd() {
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent)
+        || window.innerWidth <= 1024
+        || (window.screen && window.screen.width <= 1024)
+        || ('ontouchstart' in window && window.innerWidth <= 1280);
+
+    if (isMobileDevice) {
+        document.body.classList.add('is-mobile-device');
+        if (sessionStorage.getItem('hideMobileStickyAd') === '1') {
+            const el = document.getElementById('mobileStickyAd');
+            if (el) el.style.display = 'none';
+        } else {
+            document.body.classList.add('has-mobile-ad');
+        }
+    }
+}
+document.addEventListener('DOMContentLoaded', initMobileStickyAd);
+
 // 실시간 체류 접속자 상태 유지 (60초 간격 핑)
 setInterval(function() {
     try {

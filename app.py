@@ -509,14 +509,116 @@ def save_feeds_config(config):
         json.dump(config, f, ensure_ascii=False, indent=2)
 
 # ============================================================
-# RSS 수집 유틸
+# 인코딩 자동 보정 & 텍스트 정제 엔진 (한글 깨짐 완전 방지)
 # ============================================================
+def decode_html_bytes(content, headers=None):
+    """HTML 바이너리 데이터를 안전하게 디코딩 (UTF-8, CP949/EUC-KR, BOM, 메타태그 자동 판별)"""
+    if not content:
+        return ''
+        
+    # 1. UTF-8 BOM 서명 확인
+    if content.startswith(b'\xef\xbb\xbf'):
+        try:
+            return content.decode('utf-8-sig')
+        except Exception:
+            pass
+
+    # 2. HTML 내부 메타태그 인코딩 선언 확인 (<meta charset="..."> 또는 <meta http-equiv="...">)
+    meta_charset = None
+    m = re.search(rb'<meta[^>]+charset=["\']?([a-zA-Z0-9_-]+)', content[:4096], re.I)
+    if not m:
+        m = re.search(rb'charset=["\']?([a-zA-Z0-9_-]+)', content[:4096], re.I)
+    if m:
+        c_cand = m.group(1).decode('ascii', 'ignore').lower().strip()
+        if c_cand in ['utf-8', 'utf8']:
+            meta_charset = 'utf-8'
+        elif c_cand in ['euc-kr', 'euckr', 'cp949', 'ks_c_5601-1987', 'korean']:
+            meta_charset = 'cp949'
+
+    # 3. HTTP 응답 헤더 Content-Type 확인
+    header_charset = None
+    if headers and 'content-type' in headers:
+        ct = headers['content-type'].lower()
+        m = re.search(r'charset=["\']?([a-zA-Z0-9_-]+)', ct)
+        if m:
+            c_cand = m.group(1).strip()
+            if c_cand in ['utf-8', 'utf8']:
+                header_charset = 'utf-8'
+            elif c_cand in ['euc-kr', 'euckr', 'cp949', 'ks_c_5601-1987', 'korean']:
+                header_charset = 'cp949'
+
+    # 메타태그 또는 헤더에 선언된 우선 인코딩 시도
+    preferred = meta_charset or header_charset
+    if preferred:
+        try:
+            text = content.decode(preferred)
+            if re.search(r'[\uac00-\ud7a3]', text):
+                return text
+        except Exception:
+            pass
+
+    # 4. 국내 웹 99%인 UTF-8 우선 검증
+    try:
+        text = content.decode('utf-8')
+        if re.search(r'[\uac00-\ud7a3]', text):
+            return text
+    except UnicodeDecodeError:
+        pass
+
+    # 5. 레거시 언론사 EUC-KR / CP949 검증
+    try:
+        text = content.decode('cp949')
+        if re.search(r'[\uac00-\ud7a3]', text):
+            return text
+    except UnicodeDecodeError:
+        pass
+
+    # 6. BeautifulSoup UnicodeDammit 폴백
+    try:
+        from bs4 import UnicodeDammit
+        dammit = UnicodeDammit(content, is_html=True)
+        if dammit.unicode_markup:
+            return dammit.unicode_markup
+    except Exception:
+        pass
+
+    # 7. 최종 오류 대체 디코딩
+    return content.decode('utf-8', errors='replace')
+
+def repair_text(text):
+    """모지바케(깨진 문자), 특수 공백, HTML 엔티티를 완벽하게 정상 한글 텍스트로 복원"""
+    if not text or not isinstance(text, str):
+        return ""
+        
+    # UTF-8 바이트가 Latin-1/CP1252로 잘못 디코딩된 모지바케 복원 (예: Ã«Â³Â´ -> 한글)
+    if re.search(r'[ÃÂ][\x80-\xbf]', text):
+        try:
+            fixed = text.encode('latin1').decode('utf-8')
+            if re.search(r'[\uac00-\ud7a3]', fixed):
+                text = fixed
+        except Exception:
+            pass
+
+    # 제로너비 공백 및 특수 공백 제거
+    text = (text.replace('\xa0', ' ')
+                .replace('\u200b', '')
+                .replace('\ufeff', '')
+                .replace('\u3000', ' ')
+                .replace('\u200c', '')
+                .replace('\u200d', ''))
+
+    # HTML 엔티티(&quot;, &#39;, &amp;, &lt;, &gt; 등) 디코딩
+    text = html.unescape(text)
+    if '&' in text and re.search(r'&[a-zA-Z]+;|&#\d+;', text):
+        text = html.unescape(text)
+
+    return text.strip()
+
 def clean_html(text):
     if not text:
         return ""
     clean = re.sub(r'<[^>]+>', '', str(text))
-    clean = html.unescape(clean)
-    clean = clean.replace('&nbsp;', ' ')
+    clean = repair_text(clean)
     return clean.strip()
 
 IMAGE_CACHE = {}
@@ -707,9 +809,8 @@ def fetch_rss(feed_url, source_name, logo, max_items=15):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
-        resp = requests.get(feed_url, headers=headers, timeout=4)
-        resp.encoding = resp.apparent_encoding or 'utf-8'
-        feed = feedparser.parse(resp.text)
+        resp = requests.get(feed_url, headers=headers, timeout=5)
+        feed = feedparser.parse(resp.content)
         items = []
         for entry in feed.entries[:max_items]:
             title = clean_html(getattr(entry, 'title', ''))
@@ -761,9 +862,8 @@ def get_publisher_info(url, soup=None):
         'mk.co.kr': ('매일경제', '💹'),
         'hankyung.com': ('한국경제', '📈'),
         'mt.co.kr': ('머니투데이', '💰'),
-        'heraldcorp.com': ('헤럴드경제', '📊'),
-        'asiae.co.kr': ('아시아경제', '💹'),
-        'edaily.co.kr': ('이데일리', '🗞️'),
+        'asiae.co.kr': ('아시아경제', '🌐'),
+        'heraldcorp.com': ('헤럴드경제', '🗞️'),
         'etnews.com': ('전자신문', '💻')
     }
     for dom, (name, logo) in domain_map.items():
@@ -776,7 +876,7 @@ def get_publisher_info(url, soup=None):
     return '주요 언론사', '📰'
 
 def fetch_article_detail(url):
-    """기사 웹페이지를 분석하여 본문 문단, 메인 사진, 기자명, 발행시간 등을 추출"""
+    """기사 웹페이지를 분석하여 본문 문단, 메인 사진, 기자명, 발행시간 등을 추출 (한글 인코딩 깨짐 100% 방지)"""
     if not url or not url.startswith('http'):
         return None
         
@@ -787,19 +887,19 @@ def fetch_article_detail(url):
             return cached_data
 
     headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Accept-Language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
     }
 
     try:
-        resp = requests.get(url, headers=headers, timeout=3.5)
-        resp_content = resp.content
-        resp_encoding = resp.apparent_encoding or 'utf-8'
-        soup = BeautifulSoup(resp_content, 'html.parser', from_encoding=resp_encoding)
+        resp = requests.get(url, headers=headers, timeout=5)
+        html_text = decode_html_bytes(resp.content, resp.headers)
+        soup = BeautifulSoup(html_text, 'html.parser')
 
         # 1. 언론사 정보
         publisher, pub_logo = get_publisher_info(url, soup)
+        publisher = repair_text(publisher)
 
         # 2. 제목 추출
         og_title = soup.find('meta', attrs={'property': 'og:title'})
@@ -807,6 +907,7 @@ def fetch_article_detail(url):
         if not title and soup.find('h1'):
             title = soup.find('h1').get_text(strip=True)
         title = re.sub(r'\s*[-|:]\s*(?:연합뉴스|매일경제|한국경제|경향신문|동아일보|조선일보|한겨레|SBS|MBC|KBS|YTN|머니투데이|아시아경제).*$', '', title).strip()
+        title = repair_text(title)
 
         # 3. 작성일시 추출
         pub_date = ''
@@ -826,6 +927,7 @@ def fetch_article_detail(url):
                     break
         if not pub_date:
             pub_date = datetime.now().strftime('%Y.%m.%d %H:%M')
+        pub_date = repair_text(pub_date)
 
         # 4. 기자명 / 작성자
         author = ''
@@ -844,8 +946,9 @@ def fetch_article_detail(url):
                     elif len(txt) <= 15:
                         author = txt
                         break
+        author = repair_text(author)
 
-        # 5. 메인 이미지 (이미 파싱된 soup에서 즉시 추출하여 중복 HTTP 요청 100% 제거)
+        # 5. 메인 이미지 (이미 파싱된 soup에서 즉시 추출하여 중복 HTTP 요청 제거)
         main_img = ''
         og_img = soup.find('meta', attrs={'property': 'og:image'}) or soup.find('meta', attrs={'name': 'twitter:image'})
         if og_img and og_img.get('content'):
@@ -857,21 +960,31 @@ def fetch_article_detail(url):
             else:
                 main_img = ''
 
-        # 6. 본문 컨테이너 탐색
+        # 6. 본문 컨테이너 탐색 (국내 주요 언론사 전수 대응)
         candidates = [
             soup.find('article', class_='story-news'),
             soup.find('div', class_='story-news'),
+            soup.find(class_='news_view'),
+            soup.find('section', class_='news_view'),
+            soup.find(id='news_view'),
             soup.find(id='article-view-content-div'),
             soup.find(id='articletxt'),
             soup.find(id='articleBody'),
-            soup.find(id='news_view'),
             soup.find(class_='news_cnt_detail_wrap'),
             soup.find(class_='art_txt'),
             soup.find(class_='article-body'),
+            soup.find('section', class_='article-body'),
             soup.find(class_='article_txt'),
+            soup.find(id='article_body'),
+            soup.find(class_='article_body'),
             soup.find(class_='article_text'),
+            soup.find(class_='content_text'),
+            soup.find(class_='art_body'),
             soup.find(class_='main_text'),
             soup.find(id='dic_area'),
+            soup.find(id='textBody'),
+            soup.find(id='txt_area'),
+            soup.find(id='articleText'),
             soup.find('article'),
         ]
         body_elem = next((c for c in candidates if c), None)
@@ -880,34 +993,37 @@ def fetch_article_detail(url):
         lead_img_caption = ''
 
         if body_elem:
-            # 이미지 캡션 탐색 (줄바꿈 보존 추출 후 본문 중복 방지를 위해 decompose)
+            # 이미지 캡션 탐색
             fig_cap = body_elem.find(['figcaption', '.caption', '.img-desc', '.desc-con'])
             if fig_cap:
-                lead_img_caption = '\n'.join([line.strip() for line in fig_cap.get_text('\n').splitlines() if line.strip()])
+                lead_img_caption = repair_text('\n'.join([line.strip() for line in fig_cap.get_text('\n').splitlines() if line.strip()]))
                 fig_cap.decompose()
 
-            # 불필요한 태그/광고/스크립트/송고/저작권 요소 제거
+            # 불필요한 태그/광고/스크립트/버튼/댓글/송고 제거
             for tag in body_elem(['script', 'style', 'aside', 'button', 'iframe', 'form', 'noscript', 
                                   '.ad', '.ad-box', '.share-box', '.sns_area', '.reporter_area', 
                                   '.relation_news', '.article_sns', '.txt-copyright', '.adrs', 
-                                  '.writer-zone01', '.image-zone01', '.comp-box', '.byline-zone', '.article-copyright']):
+                                  '.writer-zone01', '.image-zone01', '.comp-box', '.byline-zone', 
+                                  '.article-copyright', '.btn_zoom', '.caption_area']):
                 tag.decompose()
 
-            # <br> 태그를 개행 문자로 변환
+            # 테이블 표 및 구분 태그 간격/개행 처리 (프로야구 순위표, 경기전적 등 깨짐 방지)
+            for td in body_elem.find_all(['td', 'th']):
+                td.append(' ')
+            for tr in body_elem.find_all('tr'):
+                tr.append('\n')
+            for div in body_elem.find_all(['div', 'p', 'li']):
+                div.append('\n')
             for br in body_elem.find_all('br'):
                 br.replace_with('\n')
 
-            p_tags = [p.get_text(strip=True) for p in body_elem.find_all('p') if len(p.get_text(strip=True)) > 15]
-            if len(p_tags) >= 2:
-                candidate_paras = p_tags
-            else:
-                candidate_paras = [line.strip() for line in body_elem.get_text().split('\n') if len(line.strip()) > 15]
-
+            raw_lines = [repair_text(line) for line in body_elem.get_text().split('\n')]
             bad_keywords = ['저작권자', '무단전재', '무단 전재', '카카오톡', '제보하기', '구독신청', '기자의 다른 기사', 
-                            'All rights reserved', 'DB 금지', '재판매 및 DB', '송고', 'okjebo', 'AI 학습 및 활용', 'AI 학습']
+                            'All rights reserved', 'DB 금지', '재판매 및 DB', '송고', 'okjebo', 'AI 학습 및 활용', 'AI 학습', '크게보기']
 
-            for p in candidate_paras:
-                if not any(k in p for k in bad_keywords) and not re.search(r'\d{4}[/.-]\d{2}[/.-]\d{2}.*송고', p):
+            for p in raw_lines:
+                p = repair_text(p)
+                if len(p) > 15 and not any(k in p for k in bad_keywords) and not re.search(r'\d{4}[/.-]\d{2}[/.-]\d{2}.*송고', p):
                     if not re.match(r'^\s*\[.*(?:제공|사진|출처|그래픽).*\]\s*$', p):
                         if p not in paragraphs:
                             paragraphs.append(p)
@@ -919,7 +1035,7 @@ def fetch_article_detail(url):
             else:
                 og_desc = soup.find('meta', attrs={'property': 'og:description'})
                 if og_desc and og_desc.get('content') and not any(k in og_desc['content'] for k in ['송고', '저작권자']):
-                    paragraphs.append(og_desc['content'].strip())
+                    paragraphs.append(repair_text(og_desc['content'].strip()))
                 else:
                     paragraphs.append("기사의 본문 내용을 불러오는 중입니다. 전문은 아래 언론사 원문 보기를 통해 확인하실 수 있습니다.")
 
@@ -1044,7 +1160,8 @@ def index():
     with RSS_CACHE_LOCK:
         cached = RSS_CACHE.get('전체')
         initial_news = cached.get('news', []) if cached else []
-    return render_template('index.html', categories=categories, site_config=site_cfg, initial_news=initial_news)
+    is_mobile = detect_device() == '📱 모바일'
+    return render_template('index.html', categories=categories, site_config=site_cfg, initial_news=initial_news, is_mobile=is_mobile)
 
 @app.route('/health')
 def health_check():
@@ -1068,11 +1185,13 @@ def article_page():
     if cached_all:
         related_news = [n for n in cached_all if n.get('link') != url][:8]
 
+    is_mobile = detect_device() == '📱 모바일'
     return render_template('article.html',
                            article=article_data,
                            site_config=site_cfg,
                            categories=categories,
-                           related_news=related_news)
+                           related_news=related_news,
+                           is_mobile=is_mobile)
 
 @app.route('/api/article')
 def api_article():
@@ -1469,7 +1588,7 @@ def admin_test_rss():
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
         resp = requests.get(url, headers=headers, timeout=8)
-        feed = feedparser.parse(resp.text)
+        feed = feedparser.parse(resp.content)
         count = len(feed.entries)
         title = feed.feed.get('title', '알 수 없음')
         return jsonify({'success': True, 'feed_title': title, 'item_count': count})

@@ -18,6 +18,7 @@
         { selector: '#adWingLeft, .ad-wing-banner.left', type: 'left', label: '좌측 날개 배너' },
         { selector: '#adWingRight, .ad-wing-banner.right', type: 'right', label: '우측 날개 배너' },
         { selector: '#adCenterBanner, .ad-banner-horizontal', type: 'center', label: '본문 가로 배너' },
+        { selector: '#mobileStickyAd, .mobile-sticky-ad-bar', type: 'center', label: '모바일 하단 고정 배너' },
         { selector: '#popupOverlay .popup-box, .popup-body', type: 'popup', label: '중앙 팝업 배너' }
     ];
 
