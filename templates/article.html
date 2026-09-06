@@ -502,6 +502,28 @@ function closeMobileStickyAd() {
     try { sessionStorage.setItem('hideMobileStickyAd', '1'); } catch(e) {}
 }
 
+function fitMobileStickyAd() {
+    const stickyAd = document.getElementById('mobileStickyAd');
+    if (!stickyAd || stickyAd.style.display === 'none') return;
+    const bodyEl = stickyAd.querySelector('.mobile-sticky-body');
+    if (!bodyEl) return;
+    const iframe = bodyEl.querySelector('iframe');
+    if (!iframe) return;
+
+    const screenW = window.innerWidth || document.documentElement.clientWidth;
+    const availableW = Math.min(screenW, 440) - 8;
+    const baseW = parseInt(iframe.getAttribute('width')) || 360;
+
+    if (availableW < baseW && availableW > 0) {
+        const scale = availableW / baseW;
+        iframe.style.transform = `scale(${scale})`;
+        iframe.style.transformOrigin = 'center center';
+    } else {
+        iframe.style.transform = 'none';
+        iframe.style.transformOrigin = 'center center';
+    }
+}
+
 function initMobileStickyAd() {
     const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent)
         || window.innerWidth <= 1024
@@ -517,8 +539,27 @@ function initMobileStickyAd() {
             document.body.classList.add('has-mobile-ad');
         }
     }
+
+    fitMobileStickyAd();
+    setTimeout(fitMobileStickyAd, 300);
+    setTimeout(fitMobileStickyAd, 800);
+    setTimeout(fitMobileStickyAd, 1500);
+    setTimeout(fitMobileStickyAd, 3000);
 }
-document.addEventListener('DOMContentLoaded', initMobileStickyAd);
+document.addEventListener('DOMContentLoaded', function() {
+    initMobileStickyAd();
+    const stickyEl = document.getElementById('mobileStickyAd');
+    if (stickyEl && window.MutationObserver) {
+        const mo = new MutationObserver(function() {
+            fitMobileStickyAd();
+        });
+        mo.observe(stickyEl, { childList: true, subtree: true, attributes: true });
+    }
+});
+window.addEventListener('resize', fitMobileStickyAd);
+window.addEventListener('orientationchange', function() {
+    setTimeout(fitMobileStickyAd, 200);
+});
 
 // 실시간 체류 접속자 상태 유지 (60초 간격 핑)
 setInterval(function() {
