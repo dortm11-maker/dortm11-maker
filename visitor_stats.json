@@ -1,6 +1,6 @@
 {
-  "total_uv": 12,
-  "total_pv": 50,
+  "total_uv": 17,
+  "total_pv": 63,
   "current_date": "2026-09-07",
   "today_vids": [
     "127.0.0.1"
@@ -11,8 +11,8 @@
       "pv": 23
     },
     "2026-09-07": {
-      "uv": 1,
-      "pv": 27
+      "uv": 6,
+      "pv": 40
     }
   },
   "visitor_logs": {

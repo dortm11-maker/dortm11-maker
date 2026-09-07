@@ -61,7 +61,103 @@ class VisitorTracker:
             'recent_logs': []
         }
         self.last_saved = time.time()
+        self.dirty = False
+        self.last_github_sync = time.time()
+        self._sync_from_github()  # Render 재배포/재부팅 시 GitHub에서 최신 통계 자동 복원
         self.load()
+        threading.Thread(target=self._auto_sync_loop, daemon=True).start()
+
+    def _sync_from_github(self):
+        """Render 재배포 후 시작될 때 GitHub에서 최신 visitor_stats.json을 다운로드하여 복원"""
+        token = os.environ.get('GITHUB_TOKEN', '').strip()
+        if not token:
+            return
+        try:
+            import base64
+            url = 'https://api.github.com/repos/dortm11-maker/dortm11-maker/contents/visitor_stats.json'
+            headers = {
+                'Authorization': f'token {token}',
+                'Accept': 'application/vnd.github.v3+json',
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+            resp = requests.get(url, headers=headers, timeout=8)
+            if resp.status_code == 200:
+                content_b64 = resp.json().get('content', '')
+                if content_b64:
+                    raw = base64.b64decode(content_b64).decode('utf-8')
+                    gh_data = json.loads(raw)
+                    should_write = True
+                    if os.path.exists(VISITOR_STATS_FILE):
+                        try:
+                            with open(VISITOR_STATS_FILE, 'r', encoding='utf-8') as f:
+                                local_data = json.load(f)
+                            if local_data.get('total_uv', 0) > gh_data.get('total_uv', 0):
+                                should_write = False
+                        except Exception:
+                            pass
+                    if should_write:
+                        with open(VISITOR_STATS_FILE, 'w', encoding='utf-8') as f:
+                            f.write(raw)
+                        print(f"[VisitorStats] GitHub에서 최신 통계 복원 완료 (UV: {gh_data.get('total_uv')}, PV: {gh_data.get('total_pv')})")
+        except Exception as e:
+            print(f"[VisitorStats] GitHub 복원 예외: {e}")
+
+    def _sync_to_github(self):
+        """visitor_stats.json을 GitHub에 커밋/푸시하여 영구 보존"""
+        token = os.environ.get('GITHUB_TOKEN', '').strip()
+        if not token:
+            return
+        try:
+            import base64
+            url = 'https://api.github.com/repos/dortm11-maker/dortm11-maker/contents/visitor_stats.json'
+            headers = {
+                'Authorization': f'token {token}',
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json',
+                'X-GitHub-Api-Version': '2022-11-28'
+            }
+            sha = None
+            get_resp = requests.get(url, headers=headers, timeout=8)
+            if get_resp.status_code == 200:
+                sha = get_resp.json().get('sha', '')
+
+            if not os.path.exists(VISITOR_STATS_FILE):
+                return
+            with open(VISITOR_STATS_FILE, 'r', encoding='utf-8') as f:
+                content_str = f.read()
+            content_b64 = base64.b64encode(content_str.encode('utf-8')).decode('ascii')
+
+            put_body = {
+                'message': f'[auto] sync visitor stats (UV: {self.total_uv}, PV: {self.total_pv})',
+                'content': content_b64,
+                'branch': 'main'
+            }
+            if sha:
+                put_body['sha'] = sha
+
+            put_resp = requests.put(url, headers=headers, json=put_body, timeout=10)
+            if put_resp.status_code in (200, 201):
+                self.dirty = False
+                self.last_github_sync = time.time()
+                print(f"[VisitorStats] GitHub 영구 보존 동기화 성공 ✅ (UV: {self.total_uv}, PV: {self.total_pv})")
+            else:
+                print(f"[VisitorStats] GitHub 동기화 응답: {put_resp.status_code}")
+        except Exception as e:
+            print(f"[VisitorStats] GitHub 동기화 예외: {e}")
+
+    def _auto_sync_loop(self):
+        """백그라운드에서 3분마다 변동사항이 있을 때 GitHub에 자동 동기화"""
+        while True:
+            time.sleep(30)
+            try:
+                should_sync = False
+                with self.lock:
+                    if self.dirty and (time.time() - self.last_github_sync >= 180):
+                        should_sync = True
+                if should_sync:
+                    self._sync_to_github()
+            except Exception:
+                pass
 
     def load(self):
         today = get_kst_today_str()
@@ -118,6 +214,7 @@ class VisitorTracker:
             with open(VISITOR_STATS_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             self.last_saved = time.time()
+            self.dirty = True
         except Exception as e:
             print(f"[Stats] Save error: {e}")
 
@@ -151,6 +248,7 @@ class VisitorTracker:
                     'by_type': {'left': 0, 'right': 0, 'center': 0, 'popup': 0, 'link': 0, 'auto_redirect': 0}
                 }
             self.save()
+            threading.Thread(target=self._sync_to_github, daemon=True).start()
 
     def record_ad_click(self, ip, device, ad_type, page_name):
         now = time.time()
@@ -1793,6 +1891,14 @@ def admin_visitor_stats():
     if not is_admin():
         abort(403)
     return jsonify({'success': True, 'stats': visitor_tracker.get_stats()})
+
+@app.route('/admin/api/visitor_stats/sync', methods=['POST'])
+def admin_sync_visitor_stats():
+    """관리자가 수동으로 방문자 통계를 GitHub에 즉시 백업/동기화"""
+    if not is_admin():
+        abort(403)
+    visitor_tracker._sync_to_github()
+    return jsonify({'success': True, 'message': '방문자 통계가 GitHub에 안전하게 동기화되었습니다.'})
 
 @app.route('/admin/api/feeds', methods=['GET'])
 def admin_get_feeds():

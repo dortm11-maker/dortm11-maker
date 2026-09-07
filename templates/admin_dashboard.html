@@ -1376,6 +1376,10 @@
                         title="지금 바로 통계 새로고침">
                         🔄 새로고침
                     </button>
+                    <button type="button" class="vm-btn-refresh" id="btnSyncStats" onclick="syncVisitorStatsNow()"
+                        title="누적 방문자 통계를 GitHub에 즉시 영구 저장(백업)합니다." style="border-color:#10b981; color:#059669; font-weight:600;">
+                        💾 영구 백업
+                    </button>
                     <button type="button" class="vm-btn-refresh" onclick="toggleHistoryTable()" title="최근 7일 방문자 통계 보기">
                         📈 최근 7일 추이
                     </button>
@@ -3737,6 +3741,31 @@
         // ============================================================
         // 실시간 방문자 모니터링 로직 (관리자 전용 비공개 통계)
         // ============================================================
+        async function syncVisitorStatsNow() {
+            const btn = document.getElementById('btnSyncStats');
+            const origText = btn ? btn.innerHTML : '💾 영구 백업';
+            if (btn) {
+                btn.innerHTML = '⏳ 백업 중...';
+                btn.disabled = true;
+            }
+            try {
+                const resp = await fetch('/admin/api/visitor_stats/sync', { method: 'POST' });
+                const data = await resp.json();
+                if (data.success) {
+                    showToast('✅ 누적 방문자 통계가 GitHub에 안전하게 영구 보존되었습니다!');
+                } else {
+                    showToast('⚠️ 동기화 실패: ' + (data.message || '오류 발생'));
+                }
+            } catch (err) {
+                showToast('❌ 네트워크 오류 발생');
+            } finally {
+                if (btn) {
+                    btn.innerHTML = origText;
+                    btn.disabled = false;
+                }
+            }
+        }
+
         async function fetchVisitorStats(showToastFlag = false) {
             try {
                 const resp = await fetch('/admin/api/visitor_stats');
