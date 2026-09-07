@@ -14,9 +14,10 @@ from services.image_enhancer import get_premium_stock_image
 
 def is_meaningless_news(title, summary="", text=""):
     """
-    실질적인 뉴스 가치가 없는 단순 방송 예고, 유튜브 알림, 운세, 부고, 인사, 게시판 공지 필터링
+    실질적인 뉴스 가치가 없는 단순 방송 예고, 유튜브 알림, 운세, 부고, 인사, 게시판 공지,
+    낚시성 클릭베이트, 유료 구독 홍보, 엽기·자극적 가십 단신 필터링
     """
-    full = f"{title} {summary} {text[:200]}".lower()
+    full = f"{title} {summary} {text[:300]}".lower()
 
     # 1. 유튜브 / 방송 프로그램 예고 및 시청 안내성 글 필터링
     if re.search(r'\[(?:뷰리핑|라이브|생방송|다시보기|풀영상|예고|영상|오디오|팟캐스트)\]', title, re.I):
@@ -38,6 +39,22 @@ def is_meaningless_news(title, summary="", text=""):
 
     # 4. 글자 수가 너무 적거나 단순 포토/그래픽 한 장 기사
     if re.search(r'^\[(?:포토|포토뉴스|카드뉴스|그래픽)\]', title) and len(full.strip()) < 80:
+        return True
+
+    # 5. 낚시성 클릭베이트(Clickbait) 및 가십성 자극 기사 차단
+    if re.search(r'단돈\s*\d+원|단돈\s*몇|단돈\s*오천|"단돈|\'단돈', title):
+        return True
+    if re.search(r'사람들\s*몰려\s*사갔다|몰려가\s*사갔다|오픈런\s*대란|품절\s*대란', title):
+        return True
+    if re.search(r'충격.*알고보니|경악한\s*이유|발칵\s*뒤집|눈물\s*펑펑|경악을\s*금치|충격\s*고백|경악케|초토화', title):
+        return True
+
+    # 6. 유료 구독 / 회원가입 유도 / 마케팅 프로모션 기사 차단
+    if re.search(r'당신의\s*지적\s*탐험|더중앙플러스|프리미엄\s*콘텐츠|아르떼|유료회원|멤버십\s*전용|스페셜\s*리포트', full):
+        return True
+
+    # 7. 엽기·자극적 사건사고 단순 가십 (냉동창고 시신, 토막 등) 차단
+    if re.search(r'냉동창고.*시신|토막\s*살인|숨진\s*채\s*발견.*경악|엽기\s*살인', full):
         return True
 
     return False
@@ -435,23 +452,30 @@ def extract_factual_data(url, title=""):
             for junk in soup.select('script, style, button, nav, header, footer, noscript, svg, form, input, select, textarea, .share_wrap, .sns_wrap, .byline, .reporter, .font_size, .btn_area, .util_area, .reply_area, .comment_area, .copyright, .article_relation, .recommend_news, .subscribe_wrap, .subscribe_box, .sns_area, .aside_wrap, .link_news, .ad_wrap, .vod_area, .vod_player'):
                 junk.decompose()
             
-            # 본문 컨테이너 영역 탐색
+            # 국내 주요 언론사 본문 컨테이너 정밀 탐색 (SBS, KBS, MBC, 연합, 조선, 중앙, 동아, 매경, 한경 등)
             body = (
-                soup.select_one('article._article_body') or
+                soup.select_one('.main_text') or             # SBS 뉴스 본문
+                soup.select_one('.article_cont') or          # SBS / 방송사 본문
+                soup.select_one('#cont_newstext') or         # KBS 뉴스 본문
+                soup.select_one('.detail-body') or           # KBS 상세 본문
+                soup.select_one('.news_content') or          # MBC 뉴스 본문
+                soup.select_one('article.story-news') or     # 연합뉴스 본문
+                soup.select_one('.story-news') or            # 연합뉴스
+                soup.select_one('section.article-body') or   # 조선일보 본문
+                soup.select_one('.article-body') or          # 조선/중앙 본문
+                soup.select_one('#dic_area') or              # 네이버 뉴스 본문
+                soup.select_one('#newsct_article') or        # 네이버 뉴스
+                soup.select_one('.art_txt') or               # 매일경제 / MBC
+                soup.select_one('#articletxt') or            # 한국경제
+                soup.select_one('.article_txt') or           # 동아일보
+                soup.select_one('#article_body') or          # 매경/중앙
+                soup.select_one('.article_view') or          # 다음 뉴스
+                soup.select_one('article._article_body') or  # 주요 포털
                 soup.select_one('article.comp_news_article') or
-                soup.select_one('#dic_area') or
-                soup.select_one('#newsct_article') or
                 soup.select_one('#articleWrap') or
-                soup.select_one('.story-news') or
-                soup.select_one('.article_view') or
-                soup.select_one('#articletxt') or 
-                soup.select_one('.article-body') or
-                soup.select_one('#article_body') or
                 soup.select_one('.news_cnt_detail_wrap') or
-                soup.select_one('.art_txt') or
                 soup.select_one('#articleBody') or
-                soup.find('article') or
-                soup.find('body')
+                soup.find('article')
             )
             
             raw_blocks = []
@@ -463,18 +487,16 @@ def extract_factual_data(url, title=""):
                     if t and len(t) >= 15 and t not in raw_blocks:
                         raw_blocks.append(t)
 
-                # p 태그가 2개 이하로 너무 적을 때만 div/li 보조 탐색
+                # p 태그가 2개 이하로 너무 적을 때만 div 보조 탐색 (단, 사이드바나 네비게이션은 철저히 제외)
                 if len(raw_blocks) < 3:
-                    for elem in body.find_all(['div', 'li', 'h2', 'h3', 'h4']):
+                    for elem in body.find_all(['div', 'h2', 'h3', 'h4']):
                         cl = ' '.join(elem.get('class', []))
                         id_name = elem.get('id', '')
-                        if any(k in f"{cl} {id_name}".lower() for k in ['share', 'sns', 'byline', 'font', 'subscri', 'util', 'btn', 'foot', 'head', 'comment', 'recommend']):
+                        if any(k in f"{cl} {id_name}".lower() for k in ['share', 'sns', 'byline', 'font', 'subscri', 'util', 'btn', 'foot', 'head', 'comment', 'recommend', 'banner', 'ad', 'vod', 'relation', 'popular', 'side']):
                             continue
                         t = elem.get_text().strip()
                         if t and len(t) >= 20 and t not in raw_blocks:
                             raw_blocks.append(t)
-            else:
-                raw_blocks = resp.text.split('\n')
 
             for raw_line in raw_blocks:
                 cleaned = clean_news_line(raw_line)
@@ -502,6 +524,15 @@ def extract_factual_data(url, title=""):
                             break
                 if len(facts) >= 80:
                     break
+
+            # 제목과 내용 간의 교차 연관성 검증 (사이드바 추천 기사나 엉뚱한 광고성 텍스트가 긁혔는지 방어)
+            if title and facts:
+                keywords = [w for w in re.findall(r'[가-힣a-zA-Z0-9]{2,}', title) if w not in ['속보', '단독', '종합', '기자', '뉴스', '오늘', '실시간']]
+                if keywords:
+                    has_match = any(any(k in f for k in keywords) for f in facts)
+                    if not has_match:
+                        # 기사 제목의 핵심 키워드가 본문에 단 하나도 없으면 사이드바 찌꺼기로 판명하고 전량 폐기
+                        facts = []
 
     except Exception as e:
         print(f"[Fact Extraction Warning] {e}")
