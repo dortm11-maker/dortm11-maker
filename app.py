@@ -1312,16 +1312,28 @@ def fetch_article_detail(url):
         orig_t = clean_news_title(existing.get('original_title', ''))
         current_ai_t = existing.get('ai_title', '')
         
-        from services.ai_rewriter import is_meaningless_news
+        from services.ai_rewriter import is_meaningless_news, is_promotional_or_junk_line
+        has_promo_junk = (
+            any(is_promotional_or_junk_line(p) for p in paras) or
+            any(is_promotional_or_junk_line(s) for s in summary_pts) or
+            any(re.search(r'매경플러스|더중앙플러스|아르떼|QR코드|QR\s*코드|스마트폰으로\s*찍으면|매일경제신문|한국경제신문|네이버에서.*검색|기사\s*전문은', p) for p in paras) or
+            any(re.search(r'매경플러스|더중앙플러스|아르떼|QR코드|QR\s*코드|스마트폰으로\s*찍으면|매일경제신문|한국경제신문|네이버에서.*검색|기사\s*전문은', s) for s in summary_pts)
+        )
         has_caption_junk = any(re.search(r'촬영|제공|재판매|DB\s*금지|송고시간|송고|\d{4}년\s*\d{1,2}월\s*\d{1,2}일\s*\d{1,2}시', p) for p in paras)
         has_host_junk = any(re.search(r'진행\s*[:：]|출연\s*[:：]|한겨레\s*정치팀|시청\s*바랍니다|시청바랍니다', p) for p in paras)
         has_web_junk = any(re.search(r'폰트\s*\d단계|\d+px|글자크기|본문\s*글자\s*크기|구독\s*구독중|심민규|북마크|공유하기|카카오톡|페이스북|메신저|네이버\s*밴드|URL\s*복사|프린트|제보', p) for p in paras) or any(re.search(r'폰트\s*\d단계|글자크기|북마크|카카오톡|페이스북|URL\s*복사', s) for s in summary_pts)
-        has_bracket_tag = bool(re.search(r'^\[[^\]]+\]', current_ai_t)) or any('촬영' in s for s in summary_pts)
+        has_bracket_tag = bool(re.search(r'\[[^\]]+\]', current_ai_t)) or any('촬영' in s for s in summary_pts)
         has_awkward_title = '고부가 제품군' in current_ai_t and '고부가' not in orig_t
         has_duplicate_summary = len(summary_pts) > 1 and len(summary_pts) != len(set(summary_pts))
         is_abstract_template = any('단순한 일회성 현상에 그치지 않고' in p for p in paras)
         has_double_dot = any('..' in p for p in paras)
-        is_same_as_raw = (current_ai_t == existing.get('original_title')) or (current_ai_t == orig_t)
+        clean_cur_t = clean_news_title(current_ai_t)
+        is_same_as_raw = (
+            (current_ai_t == existing.get('original_title')) or
+            (current_ai_t == orig_t) or
+            (clean_cur_t == orig_t) or
+            (clean_cur_t == clean_news_title(existing.get('original_title', '')))
+        )
         is_meaningless = is_meaningless_news(existing.get('original_title', ''), text=" ".join(paras))
         is_too_short = sum(len(p) for p in paras) < 500 or len(paras) < 8
         has_incomplete_summary = any(
@@ -1332,8 +1344,8 @@ def fetch_article_detail(url):
             for s in summary_pts
         )
 
-        # 결함(웹 찌꺼기 텍스트, 방송 출연진, 너무 짧은 볼륨, 불완전 요약, 원문과 동일한 제목 등) 감지 시 재구성 실행
-        if has_web_junk or has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or has_double_dot or is_same_as_raw or is_meaningless or is_too_short or has_incomplete_summary:
+        # 결함(플랫폼 홍보 문구, 웹 찌꺼기 텍스트, 방송 출연진, 너무 짧은 볼륨, 불완전 요약, 원문과 동일한 제목 등) 감지 시 재구성 실행
+        if has_promo_junk or has_web_junk or has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or has_double_dot or is_same_as_raw or is_meaningless or is_too_short or has_incomplete_summary:
             pass # 건너뛰어 아래 3단계 build_full_news_article 실행
         else:
             publisher = existing.get('source_name')
@@ -2026,7 +2038,8 @@ def admin_add_custom_news():
             build_full_news_article,
             rewrite_news_title,
             clean_news_summary,
-            clean_news_title
+            clean_news_title,
+            is_promotional_or_junk_line
         )
         from services.image_enhancer import get_premium_stock_image
 
@@ -2045,8 +2058,9 @@ def admin_add_custom_news():
         raw_title = (og_t.get('content') if og_t else '') or (soup.title.string if soup.title else '')
         raw_title = clean_html(raw_title)
         raw_title = re.sub(r'\s*[-|ㅣ].*$', '', raw_title).strip()
+        clean_raw_t = clean_news_title(raw_title)
 
-        if not raw_title:
+        if not clean_raw_t:
             return jsonify({'success': False, 'message': '해당 링크에서 기사 제목을 추출할 수 없습니다.'})
 
         # 2. 언론사 추출
@@ -2056,30 +2070,34 @@ def admin_add_custom_news():
         og_img_tag = soup.find('meta', property='og:image') or soup.find('meta', attrs={'name': 'image'})
         raw_origin_img = normalize_img_url(og_img_tag.get('content')) if og_img_tag else ''
 
-        # 4. 본문 팩트 데이터 추출
-        fact_points = extract_factual_data(url, raw_title)
+        # 4. 본문 팩트 데이터 추출 (홍보 문구 완전 배제)
+        fact_points = extract_factual_data(url, clean_raw_t)
+        safe_facts = [fp for fp in fact_points if not is_promotional_or_junk_line(fp)]
 
         # 5. 카테고리 결정
         if selected_cat == 'auto' or not selected_cat or selected_cat == '전체':
-            body_sample = " ".join(fact_points[:5])
-            target_category = guess_news_category(raw_title, body_sample)
+            body_sample = " ".join(safe_facts[:5]) if safe_facts else clean_raw_t
+            target_category = guess_news_category(clean_raw_t, body_sample)
         else:
             target_category = selected_cat
 
-        # 6. AI 뉴스 기사 전면 빌드
+        # 6. AI 뉴스 기사 전면 빌드 (원문과 완전히 다른 독창적 헤드라인 보장)
         site_cfg = load_site_config()
-        art = build_full_news_article(raw_title, site_cfg=site_cfg, url=url, category=target_category, publisher_name=publisher, raw_paragraphs=fact_points)
+        art = build_full_news_article(clean_raw_t, site_cfg=site_cfg, url=url, category=target_category, publisher_name=publisher, raw_paragraphs=safe_facts)
 
         # 7. 기사 썸네일 & 시간
         final_thumb = art['main_img']
         now_date_str = datetime.now(KST).strftime('%m.%d %H:%M')
 
-        # 8. 요약문
+        # 8. 요약문 (홍보 문장 및 QR/검색 유도 문구 원천 차단)
         summary_text = ""
-        if art.get('summary_points'):
-            summary_text = " ".join(art['summary_points'][:2])
-        elif fact_points:
-            summary_text = " ".join(fact_points[:2])
+        valid_sums = [s for s in art.get('summary_points', []) if not is_promotional_or_junk_line(s)]
+        if valid_sums:
+            summary_text = " ".join(valid_sums[:2])
+        elif safe_facts:
+            summary_text = " ".join(safe_facts[:2])
+        else:
+            summary_text = f"{art['title']} 관련 핵심 지표 및 시장 영향 심층 브리핑입니다."
         if len(summary_text) > 150:
             summary_text = summary_text[:150] + '...'
 

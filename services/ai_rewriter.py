@@ -103,15 +103,51 @@ def clean_news_summary(text):
     t = re.sub(r'\.{2,}', '.', t)
     return t.strip(' \t-=\r\n')
 
+def is_promotional_or_junk_line(text):
+    """
+    언론사 유료/회원제 플랫폼 홍보(매경플러스, 더중앙플러스 등),
+    네이버/다음 검색 유도, QR코드 스캔 안내, 기사 전문/풀버전 확인 유도,
+    언론사명 노출 찌꺼기를 철저히 감지하여 100% 필터링 (기사 본문 및 요약 진입 원천 차단)
+    """
+    if not text:
+        return True
+    t = text.strip()
+
+    # 1. 언론사 유료/회원제 플랫폼 및 구독/앱 다운로드 홍보
+    if re.search(r'매경플러스|더중앙플러스|아르떼|프리미엄\s*재테크|콘텐츠\s*플랫폼|재테크\s*콘텐츠|유료회원|멤버십\s*전용|스페셜\s*리포트|지적\s*탐험|앱을\s*다운|다운로드|앱스토어|구글플레이|구독하시면|구독자\s*전용', t, re.I):
+        return True
+
+    # 2. 포털 검색창 유도 및 QR코드 스캔 유도
+    if re.search(r'네이버에서|다음에서|포털에서|검색창에|검색하거나|검색하면|검색해|QR코드|QR\s*코드|qr코드|스마트폰으로\s*찍으면|카메라로\s*찍으면|코드를\s*찍으면|코드를\s*스마트폰|코드를\s*스캔', t, re.I):
+        return True
+
+    # 3. 기사 전문 및 후속 링크/지면 확인 유도
+    if re.search(r'기사\s*전문은|전문은.*확인|자세한\s*내용은.*확인|풀버전은|풀버전|이어서\s*보기|자세한\s*분석은|다음\s*\d가지를\s*봐라|다음\s*\d가지를|아래\s*링크|본문\s*링크|웹사이트에서\s*확인|홈페이지에서\s*확인|지면에서|신문에서\s*확인', t):
+        return True
+
+    # 4. 특정 언론사 이름이 포함된 출처/홍보성 문장
+    if re.search(r'(?:매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|연합뉴스|뉴스1|뉴시스)(?:신문)?의\s*(?:프리미엄|콘텐츠|플랫폼|지면|보도|기사|웹사이트|독자|취재진)', t):
+        return True
+
+    # 5. 제보 및 소통 안내
+    if re.search(r'제보는\s*카카오톡|제보하기|독자\s*여러분의\s*제보|페이스북|인스타그램|유튜브\s*채널', t):
+        return True
+
+    return False
+
 def clean_news_line(text):
     """
-    언론사명, 바이라인, 이메일, 저작권 문구, 사진 촬영자 캡션, 방송 진행/출연자 안내 찌꺼기 철저 제거
+    언론사명, 플랫폼명, 바이라인, 이메일, 저작권 문구, 사진 촬영자 캡션, 방송 진행/출연자 안내 찌꺼기 철저 제거
     """
     if not text:
         return ""
     t = text.strip()
 
-    # 0. 방송 진행/출연/기자 안내 줄 완전 제거
+    # 0. 플랫폼 홍보 및 검색/QR 찌꺼기 라인은 통째로 즉시 삭제
+    if is_promotional_or_junk_line(t):
+        return ""
+
+    # 방송 진행/출연/기자 안내 줄 완전 제거
     if re.search(r'^(?:진행|출연|제작|연출|작가|앵커|사회|패널)\s*[:：]', t):
         return ""
     if re.search(r'한겨레\d*\s*취재\s*\d*팀|한겨레\s*정치팀|연합뉴스\s*취재본부', t):
@@ -122,12 +158,16 @@ def clean_news_line(text):
     # 1. clean_news_summary 룰 우선 적용 (바이라인, 기자명, 언론사명 100% 제거)
     t = clean_news_summary(t)
 
-    # 2. 송고 일시 제거
+    # 2. 본문 문장 내 잔여 언론사명 및 플랫폼명 완전 정제
+    t = re.sub(r'(?:매일경제신문|매일경제|한국경제신문|한국경제|조선일보|동아일보|중앙일보|한겨레신문|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문|아이뉴스24|파이낸셜뉴스|문화일보|세계일보|국민일보|서울신문|연합뉴스TV|연합뉴스|뉴스1|뉴시스)\s*(?:신문|뉴스)?', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'매경플러스|더중앙플러스', '', t, flags=re.IGNORECASE)
+
+    # 3. 송고 일시 제거
     t = re.sub(r'\d{4}년\s*\d{1,2}월\s*\d{1,2}일(?:\s*\d{1,2}시(?:\s*\d{1,2}분)?)?', '', t)
     t = re.sub(r'\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}(?:\s*\d{1,2}:\d{1,2}(?::\d{1,2})?)?', '', t)
     t = re.sub(r'송고시간\s*:?.*', '', t)
 
-    # 3. 웹페이지 버튼/UI 텍스트 및 구독/공유/글자크기 찌꺼기 강력 제거
+    # 4. 웹페이지 버튼/UI 텍스트 및 구독/공유/글자크기 찌꺼기 강력 제거
     t = re.sub(r'북마크\s*공유\s*공유하기.*?닫기', '', t)
     t = re.sub(r'URL이?\s*복사되었습니다\.?', '', t)
     t = re.sub(r'카카오톡\s*페이스북\s*X\s*페이스북\s*메신저\s*네이버\s*밴드\s*URL\s*복사\.?', '', t)
@@ -139,10 +179,10 @@ def clean_news_line(text):
     t = re.sub(r'[가-힣]{2,4}\s*기자\s*구독', '', t)
     t = re.sub(r'이선\s*다음', '', t)
 
-    # 4. 빈 괄호 제거
+    # 5. 빈 괄호 제거
     t = re.sub(r'\[\s*\]|\(\s*\)', '', t)
 
-    # 5. 연속 공백 단일화 및 연속 마침표 정리
+    # 6. 연속 공백 단일화 및 연속 마침표 정리
     t = re.sub(r'[ \t]{2,}', ' ', t)
     t = re.sub(r'\.{2,}', '.', t)
     t = t.replace('．', '.')
@@ -150,9 +190,12 @@ def clean_news_line(text):
 
 def is_valid_news_paragraph(line):
     """
-    찌꺼기 캡션, 촬영자 정보, 방송 출연진 안내, 단순 날짜 줄, 웹페이지 버튼/UI 텍스트를 걸러내고 순수한 본문 설명 문단만 판별
+    플랫폼 홍보, 검색/QR 유도, 찌꺼기 캡션, 촬영자 정보 등을 걸러내고 순수한 본문 설명 문단만 판별
     """
     if not line or len(line) < 15:
+        return False
+    # 플랫폼 홍보 및 검색/QR 유도 찌꺼기 검출 시 즉시 탈락
+    if is_promotional_or_junk_line(line):
         return False
     # 웹페이지 버튼, 폰트 조절, 공유, 구독, 북마크, 앱 다운로드 UI 쓰레기 검출
     if re.search(r'폰트\s*\d단계|\d+px|글자크기|본문\s*글자\s*크기|글자\s*크기|프린트|제보|인쇄|스크랩', line):
@@ -189,26 +232,27 @@ def is_valid_news_paragraph(line):
 
 def clean_news_title(title):
     """
-    헤드라인에서 [뷰리핑], [게시판], [인사], [부고], [단독] 등 모든 말머리 대괄호 태그 및 언론사명 꼬리표 100% 제거
+    헤드라인에서 [부동산 손자병법], [뷰리핑], [게시판], [인사], [부고], [단독] 등
+    제목 위치를 불문하고 모든 대괄호/소괄호 기획 코너명 및 언론사명 꼬리표 100% 제거
     """
     if not title:
         return ""
     t = title.strip()
     
-    # 1. 맨 앞의 모든 대괄호 태그 ([뷰리핑], [게시판], [속보], [단독], [현장] 등) 완전 제거
-    t = re.sub(r'^\[[^\]]+\]\s*', '', t)
-    t = re.sub(r'\[(?:종합|단독|속보|상보|포토|단신|특징주|기획|이슈)\]', '', t, flags=re.IGNORECASE)
-    t = re.sub(r'\[[0-9]{6}\]', '', t)  # 종목코드 제거
+    # 1. 제목 어디에 있든 모든 대괄호 태그 ([부동산 손자병법], [단독], [속보], [기획], [해설] 등) 완전 제거
+    t = re.sub(r'\[[^\]]*\]', '', t)
     
-    # 2. 언론사 접두어 및 꼬리표 제거
-    t = re.sub(r'[\s\-_\|]+(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문|아이뉴스24|파이낸셜뉴스)\s*$', '', t, flags=re.IGNORECASE)
-    t = re.sub(r'^\[[^\]]*(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN)[^\]]*\]\s*', '', t, flags=re.IGNORECASE)
-    t = re.sub(r'\([^\)]*(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN)[^\)]*\)\s*', '', t, flags=re.IGNORECASE)
+    # 2. 끝이나 앞에 붙은 소괄호 언론사명/기획명 제거 (예: (종합), (상보), (매일경제))
+    t = re.sub(r'\([^\)]*(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|종합|상보|속보|단독)[^\)]*\)', '', t, flags=re.IGNORECASE)
     
-    # 3. 문두 특수기호 제거
+    # 3. 언론사 접미어 및 플랫폼명 제거
+    t = re.sub(r'[\s\-_\|]+(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문|아이뉴스24|파이낸셜뉴스|매경플러스|더중앙플러스)\s*$', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'(?:매경플러스|더중앙플러스)', '', t, flags=re.IGNORECASE)
+
+    # 4. 문두 특수기호 제거
     t = re.sub(r'^[▲■◆●★▶▷☞\s]+', '', t)
     
-    # 4. 인위적으로 붙은 '동향 분석' 등 불필요한 꼬리표 100% 제거
+    # 5. 인위적으로 붙은 '동향 분석' 등 불필요한 꼬리표 제거
     t = re.sub(r'(?:…|\.\.\.|\s)*동향\s*분석', '', t)
     t = re.sub(r'(?:…|\.\.\.|\s)*시장\s*영향\s*분석', '', t)
     t = re.sub(r'(?:…|\.\.\.|\s)*배경과\s*전망', '', t)
@@ -220,13 +264,20 @@ def clean_news_title(title):
 def make_short_bullet(text, max_len=95):
     """
     본문의 핵심 맥락과 통계 수치를 충실히 담아 자연스럽고 완결된 핵심 브리핑 요약문 생성
+    (플랫폼 홍보 및 검색/QR 유도 문구는 원천 배제)
     """
+    if is_promotional_or_junk_line(text):
+        return ""
+
     s = text.strip()
     s = re.sub(r'^[▲■◆●★▶▷☞\s]+', '', s)
     s = re.sub(r'\(.*?\)|\[.*?\]', '', s)
     s = re.sub(r'^(?:증권가 분석에 따르면|전문가들은|업계 분석에 따르면|관계자에 따르면|보도에 따르면)\s*', '', s)
     s = re.sub(r'\s{2,}', ' ', s).strip(' .,~')
     s = s.replace('．', '.')
+
+    if is_promotional_or_junk_line(s):
+        return ""
 
     if len(s) > max_len:
         # 1. max_len 내에 온전한 마침표(?!)가 있으면 그 지점까지 취합
@@ -274,11 +325,12 @@ def make_short_bullet(text, max_len=95):
 def rewrite_news_title(title, paragraphs=None, category='전체'):
     """
     원문 뉴스의 실제 핵심 팩트(키워드, 주제, 수치)는 온전히 유지하되,
-    원문 제목과 100% 동일하지 않도록 저작권 안심 독창적 뉴스 브리핑 헤드라인으로 재구성
+    원문 제목과 100% 동일하지 않도록 저작권 안심 독창적 뉴스 브리핑 헤드라인으로 반드시 전면 재구성
     """
     if not title:
         return "실시간 주요 뉴스 브리핑"
         
+    orig_t = title.strip()
     t = clean_news_title(title)
     
     # 1. 취재원/인용원 접두어 자연스럽게 정돈
@@ -286,76 +338,103 @@ def rewrite_news_title(title, paragraphs=None, category='전체'):
     t = re.sub(r'^[가-힣]{2,4}\s*(?:기자|특파원|대표|장관|총리|위원장|부총리)\s*[\":\']\s*', '', t)
     t = t.strip('\"\' ')
 
-    # 2. 구분 기호(… 또는 ... 또는 - 또는 |)를 기준으로 분절 정돈
-    parts = re.split(r'…|\.\.\.', t)
-    
-    if len(parts) >= 2:
-        front = parts[0].strip().strip('\"\' ')
-        back = parts[1].strip().strip('\"\' ')
-        
-        # 앞부분 쉼표 등 정돈
-        front = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1, ', front)
-        
-        # 뒷부분 서술어 품격 있게 재구성
-        if back.endswith('확대'):
-            back_new = '혜택 대폭 확대' if '혜택' in front or '할인' in front else '대폭 확대 추진'
-        elif back.endswith('강화'):
-            back_new = '본격 강화 방침'
-        elif back.endswith('출시'):
-            back_new = '공식 출시 및 공급'
-        elif back.endswith('상향') or '목표가↑' in back:
-            back_new = '수익성 개선 기대감에 목표가 상향'
-        elif back.endswith('하향') or '목표가↓' in back:
-            back_new = '업황 둔화 우려에 목표가 조정'
-        elif any(w in back for w in ['차질', '난항', '비상']):
-            back_new = f'{back} 우려 확산' if not back.endswith('우려') else back
-        elif back.endswith('모색'):
-            back_new = '전략적 모색 및 추진'
-        elif back.endswith('반영'):
-            back_new = '적극 반영 방침'
-        elif back.endswith('촉구'):
-            back_new = '강력 촉구 입장'
-        elif back.endswith('제기'):
-            back_new = '문제점 공식 제기'
-        else:
-            back_new = back
-            
-        cand = f"{front}… {back_new}"
-    else:
-        # 단일 문장형 헤드라인 재구성
-        cand = t
-        cand = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1, ', cand)
-        
-        # 수치 지표형 헤드라인 (예: 지지율 37.4%, 물가 2.1% 등)
-        num_match = re.search(r'([가-힣\s]+)\s*(\d+(?:\.\d+)?%)', cand)
-        if num_match and (cand.endswith('%') or '지지율' in cand or '상승' in cand or '하락' in cand):
-            prefix_word = num_match.group(1).strip()
-            pct_val = num_match.group(2)
-            if '지지율' in cand:
-                cand = f"{prefix_word} {pct_val} 기록… 향후 추이 주목"
-            elif '상승' in cand or '오름세' in cand:
-                cand = f"{prefix_word} {pct_val} 상승세 기록… 시장 영향 분석"
-            elif '하락' in cand or '내림세' in cand:
-                cand = f"{prefix_word} {pct_val} 하락세 집계… 배경과 전망"
-            else:
-                cand = f"{cand} 기록… 공식 집계 발표"
-        elif cand.endswith('확대'):
-            cand = re.sub(r'확대$', '대폭 확대 추진', cand)
-        elif cand.endswith('강화'):
-            cand = re.sub(r'강화$', '본격 강화 방침', cand)
-        elif cand.endswith('출시'):
-            cand = re.sub(r'출시$', '공식 출시 발표', cand)
-        elif cand.endswith('점검'):
-            cand = re.sub(r'점검$', '현장 방문 점검', cand)
-        elif cand.endswith('개최'):
-            cand = re.sub(r'개최$', '공식 개최', cand)
-        elif cand.endswith('발표'):
-            cand = re.sub(r'발표$', '공식 입장 발표', cand)
+    cand = ""
 
-    # 원문 제목 정돈 및 불필요한 '동향 분석' 접미사 완전 배제
-    cand = re.sub(r'(?:…|\.\.\.|\s)*동향\s*분석', '', cand)
+    # 2. 의문형 헤드라인 변환 (~왜 오를까, ~어디로, ~이유는, ~꺾이나 등)
+    m_why = re.search(r'(.+?)\s*(?:왜\s*(?:오를까|올라|상승할까)|왜\s*(?:내릴까|떨어질까|하락할까)|왜\s*그럴까|어디로\s*가나|어떨까|가능할까|꺾이나|이유는|배경은)', t)
+    if m_why:
+        topic = m_why.group(1).strip()
+        topic = re.sub(r'줄어드는데', '감소세 속', topic)
+        topic = re.sub(r'늘어나는데', '증가세 속', topic)
+        topic = re.sub(r'오르는데', '상승세 속', topic)
+        topic = re.sub(r'내리는데', '하락세 속', topic)
+        topic = re.sub(r'[은는이가]$', '', topic).strip()
+        
+        if any(w in t for w in ['오를까', '올라', '상승']):
+            cand = f"{topic} 상승 배경과 원인 분석… 주요 변수 진단"
+        elif any(w in t for w in ['내릴까', '떨어질까', '하락', '꺾이나']):
+            cand = f"{topic} 하락 전환 가능성 진단… 시장 파급 효과 분석"
+        else:
+            cand = f"{topic} 핵심 쟁점과 향후 전망 분석"
+
+    # 3. 대립/조건형 헤드라인 (~는데, ~지만)
+    elif '는데' in t or '지만' in t:
+        parts = re.split(r'는데|지만', t, maxsplit=1)
+        front = parts[0].strip()
+        back = parts[1].strip()
+        front = re.sub(r'인구\s*줄어', '인구 감소세 속', front)
+        front = re.sub(r'경기\s*침체', '경기 둔화 속', front)
+        cand = f"{front}에도 {back} 지속… 주요 배경과 시장 진단"
+
+    # 4. 구분 기호(… 또는 ... 또는 - 또는 |)를 기준으로 분절 정돈
+    elif any(sep in t for sep in ['…', '...']):
+        parts = re.split(r'…|\.\.\.', t)
+        if len(parts) >= 2:
+            front = parts[0].strip().strip('\"\' ')
+            back = parts[1].strip().strip('\"\' ')
+            
+            # 앞부분 정돈
+            front = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1, ', front)
+            front = re.sub(r'오르자', '상승세에', front)
+            front = re.sub(r'치솟자', '급등세 지속에', front)
+            front = re.sub(r'내리자', '하락 전환에', front)
+            
+            # 뒷부분 서술어 품격 있게 재구성
+            if '집중' in back:
+                back_new = re.sub(r'집중$', '쏠림 현상 심화', back)
+            elif '급증' in back:
+                back_new = re.sub(r'급증$', '큰 폭 증가세 기록', back)
+            elif '비상' in back:
+                back_new = re.sub(r'비상$', '긴장감 고조', back)
+            elif back.endswith('확대'):
+                back_new = '대폭 확대 추진' if '대폭' not in back else '확대 추진 본격화'
+            elif back.endswith('강화'):
+                back_new = '본격 강화 방침'
+            elif back.endswith('출시'):
+                back_new = '공식 출시 및 공급'
+            elif back.endswith('상향') or '목표가↑' in back:
+                back_new = '수익성 개선 기대감에 목표가 상향'
+            elif back.endswith('하향') or '목표가↓' in back:
+                back_new = '업황 둔화 우려에 목표가 조정'
+            elif any(w in back for w in ['차질', '난항']):
+                back_new = f'{back} 우려 확산' if not back.endswith('우려') else back
+            elif back.endswith('모색'):
+                back_new = '전략적 모색 및 추진'
+            elif back.endswith('반영'):
+                back_new = '적극 반영 방침'
+            elif back.endswith('촉구'):
+                back_new = '강력 촉구 입장'
+            elif back.endswith('제기'):
+                back_new = '문제점 공식 제기'
+            else:
+                back_new = f"{back} 흐름 뚜렷"
+                
+            cand = f"{front}… {back_new}"
+
+    # 5. 수치 지표형 헤드라인 (예: 지지율 37.4%, 거래량 40% 등)
+    if not cand:
+        num_match = re.search(r'([가-힣\s]+)\s*(\d+(?:\.\d+)?(?:%|조|억|만|배))', t)
+        if num_match:
+            prefix_word = num_match.group(1).strip()
+            val = num_match.group(2).strip()
+            if any(w in t for w in ['상승', '급증', '오름세']):
+                cand = f"{prefix_word} {val} 상승세 기록… 시장 영향 분석"
+            elif any(w in t for w in ['하락', '급락', '내림세']):
+                cand = f"{prefix_word} {val} 하락세 집계… 배경과 전망"
+            else:
+                cand = f"{prefix_word} {val} 기록… 주요 배경과 시장 파급 전망"
+
+    # 6. 기본 변환: 원본과 100% 동일하지 않도록 저널리즘 분석 꼬리표 결합
+    if not cand or cand == orig_t or cand == t:
+        if t.endswith(('발표', '추진', '확대', '점검', '개최', '지속', '착수')):
+            cand = f"{t}… 세부 동향 및 향후 파급 전망"
+        else:
+            cand = f"{t}… 핵심 배경과 시장 파급 전망"
+
+    # 최종 정돈
     cand = re.sub(r'[…\.\s]+$', '', cand)
     return cand.strip()
+
 
 # 문장 어미 자연스러운 뉴스체 변환
 ENDING_RULES = [
@@ -583,27 +662,33 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
     """
     원문의 실제 알짜 정보(혜택, 통계 수치, 비율 %, 금액, 건수, 가구수, 당사자/전문가 발언 인용구)를
     과도하게 압축하거나 자르지 않고 온전히 살려 신문 원문과 대등한 풍성한 긴 호흡의 정통 기사(10~25문단) 및 완결된 3줄 핵심 요약 생성
+    (플랫폼 홍보, 검색/QR 유도 문구는 100% 원천 배제)
     """
-    clean_t = rewrite_news_title(title, category=category)
+    clean_t = clean_news_title(title)
     
     # 팩트 데이터가 있는 경우: 원문의 통계와 문맥을 살려 풍성한 문단으로 조립
     if fact_points and len(fact_points) >= 2:
-        # 1. 문장 단위 어미 정통 뉴스체 변환
+        # 1. 문장 단위 어미 정통 뉴스체 변환 (홍보 및 찌꺼기 라인 철저 배제)
         converted_sentences = []
         for f in fact_points:
-            p = f
+            if is_promotional_or_junk_line(f):
+                continue
+            p = clean_news_line(f)
+            if not p or len(p) < 15:
+                continue
             for pat, repl in ENDING_RULES:
                 p = re.sub(pat, repl, p)
             p = p.replace('．', '.')
-            if p and len(p) >= 15 and p not in converted_sentences:
+            if p and len(p) >= 15 and p not in converted_sentences and not is_promotional_or_junk_line(p):
                 converted_sentences.append(p)
 
         # 2. 실제 원문 신문 기사처럼 독자가 편하게 읽도록 1~2문장 및 발언 인용구 단위로 깔끔하게 문단(줄바꿈) 분리
-        #    (원문 기사의 긴 호흡과 세부 수치를 인위적으로 자르지 않고 최대 35문단까지 자연스럽게 유지)
         paras = []
         temp_chunk = []
 
         for sent in converted_sentences:
+            if is_promotional_or_junk_line(sent):
+                continue
             is_quote = any(q in sent for q in ['"', "'", '“', '”', '‘', '’']) or any(v in sent for v in ['라고 밝혔', '라고 말했', '라고 전했', '라며 ', '며 입장을', '며 강조'])
             has_stat = any(u in sent for u in ['대 1', '대1', '%', '배 ', '배로', '가구', '건의', '건이', '억원', '조원', '달러'])
             is_long = len(sent) >= 80
@@ -611,20 +696,26 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
             # 발언문이나 핵심 통계 수치가 있는 문장은 독립 문단으로 분리하여 가독성과 팩트 전달력 극대화
             if is_quote or (has_stat and is_long):
                 if temp_chunk:
-                    paras.append(" ".join(temp_chunk))
+                    chunk_text = " ".join(temp_chunk)
+                    if not is_promotional_or_junk_line(chunk_text):
+                        paras.append(chunk_text)
                     temp_chunk = []
                 paras.append(sent)
             else:
                 temp_chunk.append(sent)
                 if len(temp_chunk) >= 2:
-                    paras.append(" ".join(temp_chunk))
+                    chunk_text = " ".join(temp_chunk)
+                    if not is_promotional_or_junk_line(chunk_text):
+                        paras.append(chunk_text)
                     temp_chunk = []
 
             if len(paras) >= 35:
                 break
 
         if temp_chunk and len(paras) < 35:
-            paras.append(" ".join(temp_chunk))
+            chunk_text = " ".join(temp_chunk)
+            if not is_promotional_or_junk_line(chunk_text):
+                paras.append(chunk_text)
 
         # 문단 수가 부족할 경우(4개 이하), 맥락 보강 문단을 덧붙임
         if len(paras) < 5:
@@ -639,30 +730,40 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
             paras.append(cat_supplements.get(category, cat_supplements['전체']))
 
         # 3. 3줄 핵심 요약 구성 (각 50~85자 내외의 자연스러운 완결 문장)
-        #    1번: 발단 및 핵심 주제 / 2번: 본문 주요 수치·통계 / 3번: 당사자/전문가 입장 및 향후 전망
         summary = []
         seen_sum = set()
 
-        # 1) 첫 번째 요약: 핵심 발단/주제 (본문 첫 문장 또는 헤드라인 기반)
-        first_sent = converted_sentences[0] if converted_sentences else clean_t
-        s1 = make_short_bullet(first_sent, max_len=80)
-        summary.append(s1)
-        seen_sum.add(s1)
+        # 1) 첫 번째 요약: 핵심 발단/주제
+        first_sent = ""
+        for s in converted_sentences:
+            if not is_promotional_or_junk_line(s):
+                b = make_short_bullet(s, max_len=80)
+                if b and len(b) >= 20 and not is_promotional_or_junk_line(b):
+                    first_sent = b
+                    break
+        if not first_sent:
+            first_sent = make_short_bullet(clean_t, max_len=80)
+        summary.append(first_sent)
+        seen_sum.add(first_sent)
 
         # 2) 두 번째 요약: 구체적 수치 및 통계 데이터 (%, 배, 건, 가구, 대 1 등)
         mid_idx = len(converted_sentences) // 2
         for s in converted_sentences[1:]:
+            if is_promotional_or_junk_line(s):
+                continue
             if any(num in s for num in ['%', '배', '건', '가구', '대 1', '대1', '원', '억', '달러', '증가', '감소']):
                 bullet = make_short_bullet(s, max_len=85)
-                if len(bullet) >= 20 and bullet not in seen_sum:
+                if len(bullet) >= 20 and bullet not in seen_sum and not is_promotional_or_junk_line(bullet):
                     summary.append(bullet)
                     seen_sum.add(bullet)
                     break
 
         # 3) 세 번째 요약: 후반부 당사자/전문가 발언 또는 향후 시장 전망
         for s in reversed(converted_sentences[mid_idx:]):
+            if is_promotional_or_junk_line(s):
+                continue
             bullet = make_short_bullet(s, max_len=85)
-            if len(bullet) >= 20 and bullet not in seen_sum:
+            if len(bullet) >= 20 and bullet not in seen_sum and not is_promotional_or_junk_line(bullet):
                 summary.append(bullet)
                 seen_sum.add(bullet)
                 break
@@ -671,12 +772,16 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
         for s in converted_sentences:
             if len(summary) >= 3:
                 break
+            if is_promotional_or_junk_line(s):
+                continue
             b = make_short_bullet(s, max_len=80)
-            if len(b) >= 20 and b not in seen_sum:
+            if len(b) >= 20 and b not in seen_sum and not is_promotional_or_junk_line(b):
                 summary.append(b)
                 seen_sum.add(b)
 
         rewritten_title = rewrite_news_title(clean_t, paragraphs=paras, category=category)
+        if not rewritten_title or rewritten_title == title or rewritten_title == clean_t:
+            rewritten_title = f"{clean_t}… 핵심 배경과 시장 파급 전망"
 
         return {
             "ai_title": rewritten_title,
@@ -696,6 +801,8 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
     }
     target_area, impact_area, outlook_area = cat_focus.get(category, cat_focus['전체'])
     rewritten_title = rewrite_news_title(clean_t, category=category)
+    if not rewritten_title or rewritten_title == title or rewritten_title == clean_t:
+        rewritten_title = f"{clean_t}… 핵심 쟁점과 향후 파급 전망"
 
     # 제목에서 숫자나 핵심 단어 추출해 본문에 반영
     title_numbers = re.findall(r'\d+(?:\.\d+)?(?:%|배|건|가구|대|원|억|조)?', title)
@@ -741,43 +848,58 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
 def call_gemini_news_writer(api_key, title, category, fact_points=None):
     """
     Google Gemini를 활용하여 구체적인 수치 팩트를 반영한 정통 뉴스 심층 기사 작성
+    - 원문 제목 복제 절대 금지 (독창적 헤드라인 생성)
+    - 언론사명, 플랫폼명, QR코드, 포털 검색 유도 100% 원천 배제
     - 팩트 수치(경쟁률, 비율 %, 금액, 건수, 가구수 등)는 누락 없이 완벽 반영
     - 과도하게 압축하지 않고 풍성한 긴 호흡(6~10개 문단 이상)의 정통 뉴스 기사로 완성
     """
+    safe_facts = [
+        clean_news_line(fp) for fp in (fact_points or [])
+        if not is_promotional_or_junk_line(fp) and len(clean_news_line(fp)) >= 15
+    ]
     facts_context = ""
-    if fact_points and len(fact_points) > 0:
-        facts_context = "\n[핵심 팩트 및 공개 수치 데이터 (Fact Points)]\n" + "\n".join([f"- {fp}" for fp in fact_points])
+    if safe_facts:
+        facts_context = "\n[핵심 팩트 및 공개 수치 데이터 (Fact Points)]\n" + "\n".join([f"- {fp}" for fp in safe_facts[:45]])
 
-    prompt = f"""당신은 한국 경제/시사 전문 신문의 수석 저널리스트입니다.
-아래의 [이슈 헤드라인], [카테고리], 그리고 [핵심 팩트 및 공개 수치 데이터]를 바탕으로, 실제 정통 일간지 뉴스처럼 완성도 높은 심층 기사를 작성하십시오.
+    prompt = f"""당신은 대한민국 최고 수준의 경제/시사 전문 신문 수석 데스크 및 저널리스트입니다.
+제공된 [이슈 원문 제목], [카테고리], [핵심 팩트 및 공개 수치 데이터]를 면밀히 분석하여, 독자에게 신뢰와 통찰을 주는 완성도 높은 정통 뉴스 심층 기사를 작성하십시오.
 
-[이슈 헤드라인] {title}
+[이슈 원문 제목] {title}
 [카테고리] {category}
 {facts_context}
 
-[작성 수칙 - 저작권 완벽 준수 및 구체적 수치 반영]
-1. [구체적인 숫자/수치 필수 반영]: 제공된 팩트 데이터에 있는 구체적인 수치(경쟁률, 비율 %, 금액, 건수, 가구수, 기간, 통계 지표 등)를 본문 문단과 3줄 요약에 누락 없이 정확하게 자연스럽게 녹여서 서술하십시오. 뜬구름 잡는 추상적 표현을 지양하고, 구체적인 팩트와 데이터를 바탕으로 서술하십시오.
-2. [원문 복제/표현 표절 절대 금지]: 특정 언론사의 문장 표현을 그대로 베끼지 말고, 독자적인 전문 기자의 시각에서 원인, 시장 파급 효과, 수치 분석, 전문가 의견, 향후 전망으로 완전히 새롭게 재구성하십시오.
-3. [언론사명 및 기자 바이라인 완전 배제]: 특정 언론사나 기자 이름, 이메일, 저작권 문구는 일절 언급하지 마십시오.
-4. [풍성하고 긴 호흡의 정통 뉴스 문단 (6~10개 문단 이상)]: 너무 짧게 요약하거나 압축하지 마십시오. 독자가 충분한 정보를 얻을 수 있도록 기승전결을 갖추어 6~10개 문단 이상의 풍성한 분량(paragraphs)으로 작성하십시오.
-5. [3줄 핵심 요약]: 리포트 첫머리에 들어갈 명쾌한 3줄 요약(summary_points)을 작성하되, 핵심 수치가 포함되도록 하십시오.
-6. [문체]: 단정하고 신뢰할 수 있는 공인 뉴스 보도체(~했습니다, ~밝혔습니다, ~전망했습니다, ~집계됐습니다)로 일관되게 서술하십시오.
-7. 반드시 오직 유효한 JSON 형식으로만 응답하십시오:
+[필수 작성 원칙 - 위반 시 엄격히 반려됨]
+1. [ai_title 제목 전면 재창조 - 원문 제목 복제 절대 금지]:
+   - 원문 제목을 그대로 베끼거나 똑같이 출력하는 것은 절대 금지입니다.
+   - [부동산 손자병법], [단독], [속보] 등 대괄호 및 소괄호 코너명/태그는 100% 제거하십시오.
+   - 원문의 핵심 키워드와 통계적 의미를 살려, 완전히 새로운 독창적인 분석형/브리핑형 헤드라인(ai_title)으로 새로 작명하십시오.
+2. [언론사명, 유료 플랫폼명, QR코드, 포털 검색 유도 100% 원천 배제]:
+   - '매경플러스', '더중앙플러스', '아르떼' 등 모든 유료/멤버십 플랫폼명 언급 절대 금지.
+   - '네이버에서 검색', 'QR코드', '스마트폰으로 찍으면', '기사 전문은 확인' 등 홍보/유도 문구 일절 작성 금지.
+   - '매일경제신문', '매일경제', '한국경제', '조선일보' 등 특정 언론사 이름이나 기자 이름, 이메일, 저작권 문구는 제목, 요약, 본문 어디에도 단 1글자도 포함하지 마십시오.
+3. [구체적 수치/통계 지표 누락 없이 반영]:
+   - 팩트 데이터에 포함된 구체적인 수치(인구수, 가구수, 비율 %, 금액, 건수, 연도 등)를 본문과 3줄 요약에 정확하게 기술하십시오.
+4. [풍성하고 긴 호흡의 정통 뉴스 문단 (6~10개 문단 이상)]:
+   - 지나치게 요약하거나 압축하지 마십시오. 원인, 세부 지표 분석, 시장 파급 효과, 향후 전망을 단계별로 풍성하게 서술하십시오.
+5. [완결된 3줄 핵심 요약]:
+   - 기사 상단에 배치될 3줄 핵심 요약(summary_points)은 수치를 포함한 명확한 완결형 문장(~했습니다, ~집계됐습니다)으로 작성하십시오.
+6. [문체]:
+   - 단정하고 격조 있는 공인 보도체(~했습니다, ~밝혔습니다, ~전망했습니다, ~파악됐습니다)를 유지하십시오.
 
+반드시 유효한 JSON 형식으로만 응답하십시오:
 {{
-  "ai_title": "핵심 키워드와 수치가 조화된 정통 신문 기사 헤드라인",
+  "ai_title": "원문과 완전히 다른 독창적이고 심층적인 뉴스 헤드라인",
   "summary_points": [
-    "핵심 요약 1 (주요 수치 포함)",
-    "핵심 요약 2 (파급 효과 및 통계 지표)",
-    "핵심 요약 3 (전망 및 평가)"
+    "핵심 요약 1 (주요 배경 및 지표)",
+    "핵심 요약 2 (세부 수치 및 통계 데이터)",
+    "핵심 요약 3 (시장 영향 및 향후 전망)"
   ],
   "paragraphs": [
-    "문단 1 (사건 개요 및 핵심 수치 집계)",
-    "문단 2 (상세 지표 및 실적/경쟁률 분석)",
-    "문단 3 (세부 통계 비교 및 구체적 수치 서술)",
-    "문단 4 (시장 반응 및 배경 요인 분석)",
-    "문단 5 (관계자 및 전문가 시각/인용구)",
-    "문단 6 (향후 전망 및 시사점)"
+    "문단 1 (사안의 배경 및 핵심 수치 개요)",
+    "문단 2 (세부 통계 지표와 변화 추이)",
+    "문단 3 (시장 파급 영향과 구조적 요인 분석)",
+    "문단 4 (전문가 및 업계 분석 시각)",
+    "문단 5 (향후 전망 및 관전 포인트)"
   ]
 }}"""
 
@@ -798,7 +920,35 @@ def call_gemini_news_writer(api_key, title, category, fact_points=None):
                 raw_text = raw_text.replace('```json', '', 1).rstrip('`').strip()
             elif raw_text.startswith('```'):
                 raw_text = raw_text.replace('```', '', 1).rstrip('`').strip()
-            return json.loads(raw_text)
+            parsed = json.loads(raw_text)
+            
+            # 후처리 1: 제목 검증 및 정제
+            raw_ai_t = parsed.get('ai_title', '')
+            clean_ai_t = clean_news_title(raw_ai_t)
+            clean_orig_t = clean_news_title(title)
+            if not clean_ai_t or clean_ai_t == title or clean_ai_t == clean_orig_t:
+                clean_ai_t = rewrite_news_title(clean_orig_t, category=category)
+            parsed['ai_title'] = clean_ai_t
+
+            # 후처리 2: 3줄 요약 검증 (홍보 및 찌꺼기 원천 차단)
+            safe_sums = []
+            for s in parsed.get('summary_points', []):
+                if not is_promotional_or_junk_line(s):
+                    cs = clean_news_line(s)
+                    if cs and len(cs) >= 15:
+                        safe_sums.append(cs)
+            parsed['summary_points'] = safe_sums[:3]
+
+            # 후처리 3: 본문 문단 검증 (홍보 및 찌꺼기 원천 차단)
+            safe_paras = []
+            for p in parsed.get('paragraphs', []):
+                if not is_promotional_or_junk_line(p):
+                    cp = clean_news_line(p)
+                    if cp and len(cp) >= 15:
+                        safe_paras.append(cp)
+            parsed['paragraphs'] = safe_paras
+
+            return parsed
 
     raise Exception(f"Gemini API 오류 ({resp.status_code})")
 
@@ -807,6 +957,8 @@ def build_full_news_article(title, site_cfg=None, url="", category="전체", pub
     """
     저작권 안심 + 구체적 통계 및 수치 반영 정통 뉴스 기사 생성 엔진:
     - 원문 기사 복제/표절 ❌ (공개 팩트 기반 저작권 완벽 보호)
+    - 원문 제목과 100% 다른 독창적 뉴스 헤드라인 생성 ✅
+    - 언론사명, 유료 플랫폼명(매경플러스 등), QR코드, 검색 유도 100% 원천 배제 ✅
     - 기사의 공개 수치 팩트(Fact Points)를 폭넓게 추출하여 풍성하고 긴 호흡의 정통 기사로 재작성 ✅
     - 현대차 등 키워드 감지 시 법적 문제 없는 AI 대표 이미지 매칭 ✅
     """
@@ -815,10 +967,10 @@ def build_full_news_article(title, site_cfg=None, url="", category="전체", pub
 
     clean_raw_title = clean_news_title(title)
     
-    # 1. 기사에서 저작권 없는 순수 사실(Fact) 및 구체적 수치 지표 추출
+    # 1. 기사에서 저작권 없는 순수 사실(Fact) 및 구체적 수치 지표 추출 (홍보 문장 제외)
     fact_points = []
     if raw_paragraphs and len(raw_paragraphs) >= 2:
-        fact_points = raw_paragraphs
+        fact_points = [p for p in raw_paragraphs if not is_promotional_or_junk_line(p)]
     elif url:
         fact_points = extract_factual_data(url, clean_raw_title)
 
@@ -835,14 +987,27 @@ def build_full_news_article(title, site_cfg=None, url="", category="전체", pub
     if not article_result or not article_result.get('paragraphs'):
         article_result = local_generate_issue_briefing(clean_raw_title, category=category, fact_points=fact_points)
 
+    # 4. 최종 제목 정밀 검증 (원문과 절대 동일하지 않게 보장)
     final_title = article_result.get('ai_title') or rewrite_news_title(clean_raw_title, category=category)
+    final_title = clean_news_title(final_title)
+    if not final_title or final_title == clean_raw_title or final_title == title:
+        final_title = rewrite_news_title(clean_raw_title, category=category)
 
+    # 5. 본문 및 요약 2차 안심 필터링
+    clean_sums = [
+        clean_news_line(s) for s in article_result.get('summary_points', [])
+        if not is_promotional_or_junk_line(s) and len(clean_news_line(s)) >= 15
+    ]
+    clean_paras = [
+        clean_news_line(p) for p in article_result.get('paragraphs', [])
+        if not is_promotional_or_junk_line(p) and len(clean_news_line(p)) >= 15
+    ]
 
-    # 4. 대표 이미지 매칭 (현대차 키워드 시 AI 생성 법적 안심 현대차 이미지 최우선)
-    content_sample = " ".join(article_result.get('paragraphs', [])[:2])
+    # 6. 대표 이미지 매칭 (현대차 키워드 시 AI 생성 법적 안심 현대차 이미지 최우선)
+    content_sample = " ".join(clean_paras[:2])
     safe_img = get_premium_stock_image(final_title, text=f"{clean_raw_title} {content_sample}", category=category)
 
-    # 5. Curation DB에 저장 (원문 본문은 일절 저장하지 않고, 가공된 수치 기사만 보관)
+    # 7. Curation DB에 저장 (원문 본문은 일절 저장하지 않고, 가공된 수치 기사만 보관)
     record = {
         'source_name': publisher_name,
         'original_title': title,
@@ -852,8 +1017,8 @@ def build_full_news_article(title, site_cfg=None, url="", category="전체", pub
         'keywords': [],
         'ai_title': final_title,
         'ai_content': {
-            'summary_points': article_result.get('summary_points', []),
-            'paragraphs': article_result.get('paragraphs', [])
+            'summary_points': clean_sums,
+            'paragraphs': clean_paras
         },
         'ai_image': safe_img,
         'cluster_sources': []
@@ -863,8 +1028,8 @@ def build_full_news_article(title, site_cfg=None, url="", category="전체", pub
 
     return {
         'title': final_title,
-        'summary_points': article_result.get('summary_points', []),
-        'paragraphs': article_result.get('paragraphs', []),
+        'summary_points': clean_sums,
+        'paragraphs': clean_paras,
         'main_img': safe_img
     }
 
