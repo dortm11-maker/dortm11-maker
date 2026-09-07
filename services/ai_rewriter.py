@@ -486,21 +486,30 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
             if p and len(p) >= 15 and p not in converted_sentences:
                 converted_sentences.append(p)
 
-        # 2. 문장들을 2~3개씩 의미 단위로 결합하여 풍성한 볼륨 있는 문단(Paragraphs) 형성
+        # 2. 실제 원문 신문 기사처럼 독자가 편하게 읽도록 1~2문장 및 발언 인용구 단위로 깔끔하게 문단(줄바꿈) 분리
         paras = []
-        chunk_size = 2 if len(converted_sentences) <= 8 else 3
         temp_chunk = []
 
         for sent in converted_sentences:
-            temp_chunk.append(sent)
-            if len(temp_chunk) >= chunk_size:
-                combined_para = " ".join(temp_chunk)
-                paras.append(combined_para)
-                temp_chunk = []
-                if len(paras) >= 7:
-                    break
+            is_quote = any(q in sent for q in ['"', "'", '“', '”', '‘', '’']) or any(v in sent for v in ['라고 밝혔', '라고 말했', '라고 전했', '라며 ', '며 입장을', '며 강조'])
+            is_long = len(sent) >= 75
 
-        if temp_chunk and len(paras) < 7:
+            # 발언문이나 긴 핵심 문장은 독립된 문단으로 분리하여 가독성 극대화
+            if is_quote or is_long:
+                if temp_chunk:
+                    paras.append(" ".join(temp_chunk))
+                    temp_chunk = []
+                paras.append(sent)
+            else:
+                temp_chunk.append(sent)
+                if len(temp_chunk) >= 2:
+                    paras.append(" ".join(temp_chunk))
+                    temp_chunk = []
+
+            if len(paras) >= 12:
+                break
+
+        if temp_chunk and len(paras) < 12:
             paras.append(" ".join(temp_chunk))
 
         # 만약 문단 수가 3개 이하로 적으면, 맥락 보강 문단을 덧붙여 최소 4문단 이상의 큰 틀 확보
