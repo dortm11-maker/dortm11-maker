@@ -567,24 +567,39 @@ DEFAULT_SITE_CONFIG = {
 }
 
 def load_site_config():
+    cfg = DEFAULT_SITE_CONFIG.copy()
     if os.path.exists(SITE_CONFIG_FILE):
         try:
             with open(SITE_CONFIG_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
-                if 'auto_redirect' not in data:
-                    data['auto_redirect'] = DEFAULT_SITE_CONFIG['auto_redirect']
-                if 'share' not in data:
-                    data['share'] = DEFAULT_SITE_CONFIG['share']
-                if 'ai_rewrite' not in data:
-                    data['ai_rewrite'] = DEFAULT_SITE_CONFIG['ai_rewrite']
-                if 'ads' in data and 'mobile' not in data['ads']:
-                    data['ads']['mobile'] = DEFAULT_SITE_CONFIG['ads']['mobile']
-                return data
-        except:
-            pass
-    return DEFAULT_SITE_CONFIG.copy()
+                if isinstance(data, dict):
+                    # 혹시 'config' 키로 감싸져 들어온 경우 내부 키를 풀어서 병합
+                    if 'config' in data and isinstance(data['config'], dict):
+                        inner = data.pop('config')
+                        for k, v in inner.items():
+                            if k not in data:
+                                data[k] = v
+                    for k, v in DEFAULT_SITE_CONFIG.items():
+                        if k not in data or data[k] is None:
+                            data[k] = v.copy() if hasattr(v, 'copy') else v
+                    if 'ads' in data and isinstance(data['ads'], dict) and 'mobile' not in data['ads']:
+                        data['ads']['mobile'] = DEFAULT_SITE_CONFIG['ads']['mobile']
+                    return data
+        except Exception as e:
+            print(f"[load_site_config] Error: {e}")
+    return cfg
 
 def save_site_config(config):
+    # 중첩된 'config' 래핑 자동 제거 및 필수 키 보장
+    if isinstance(config, dict) and 'config' in config and isinstance(config['config'], dict):
+        inner = config.pop('config')
+        for k, v in inner.items():
+            if k not in config:
+                config[k] = v
+    for k, v in DEFAULT_SITE_CONFIG.items():
+        if k not in config or config[k] is None:
+            config[k] = v.copy() if hasattr(v, 'copy') else v
+
     with open(SITE_CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
     # 관리자가 저장할 때마다 GitHub에 자동 push (Render 재배포 시에도 설정 영구 유지)

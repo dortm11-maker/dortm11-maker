@@ -18,132 +18,105 @@
     "scroll_percent": 99,
     "prevent_repeat": true
   },
-  "config": {
-    "admin_password": "thfWlrgl12!@",
-    "ads": {
-      "center": {
-        "coupang_id": 1026359,
-        "custom_html": "",
-        "enabled": true,
-        "height": 140,
-        "mode": "coupang",
-        "sub_id": "dortm111",
-        "tracking_code": "AF3197388",
-        "width": 680
-      },
-      "left": {
-        "coupang_id": 1026359,
-        "custom_html": "",
-        "enabled": true,
-        "height": 600,
-        "mode": "coupang",
-        "sub_id": "dortm111",
-        "tracking_code": "AF3197388",
-        "width": 200
-      },
-      "mobile": {
-        "coupang_id": 1026359,
-        "custom_html": "",
-        "enabled": true,
-        "height": 100,
-        "mode": "coupang",
-        "sub_id": "dortm111",
-        "tracking_code": "AF3197388",
-        "width": 360
-      },
-      "popup": {
-        "close_delay": 3,
-        "coupang_id": 1026359,
-        "custom_html": "",
-        "delay": 30,
-        "enabled": true,
-        "height": 300,
-        "interval_minutes": 5,
-        "mode": "coupang",
-        "sub_id": "dortm111",
-        "tracking_code": "AF3197388",
-        "width": 300
-      },
-      "right": {
-        "coupang_id": 1026359,
-        "custom_html": "",
-        "enabled": true,
-        "height": 600,
-        "mode": "coupang",
-        "sub_id": "dortm111",
-        "tracking_code": "AF3197388",
-        "width": 200
-      }
-    },
-    "ai_rewrite": {
-      "add_watermark": true,
-      "enabled": true,
-      "gemini_api_key": "",
-      "image_safeguard": true,
-      "rewrite_body": true,
-      "rewrite_title": true,
-      "use_premium_stock": true
-    },
-    "auto_redirect": {
-      "apply_target": "article",
-      "enabled": true,
-      "prevent_repeat": true,
-      "scroll_percent": 95,
-      "target_url": "https://open.kakao.com/o/gTLTzqqd",
-      "target_window": "_self",
-      "time_seconds": 60,
-      "trigger_mode": "either"
-    },
-    "share": {
-      "description": "국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.",
-      "image_url": "https://news-now-82jg.onrender.com/static/img/og_image.jpg",
-      "site_name": "뉴스NOW",
-      "title": "뉴스NOW - 오늘의 실시간 주요 속보 종합"
-    },
-    "ticker": {
-      "badge": "🔴 실시간 이슈",
-      "enabled": true,
-      "items": [
-        {
-          "link": "https://www.yna.co.kr/view/AKR20260904160300530",
-          "title": "🔥 [속보] '건설 추락사고 예방' 아이디어 공모전…숏폼·정책제안 접수"
-        },
-        {
-          "link": "https://www.yna.co.kr/view/AKR20260904124200030",
-          "title": "🔥 [속보] 추석 앞두고 수산물 원산지 표시 특별 점검…성수품 집중 단속"
-        },
-        {
-          "link": "https://www.hani.co.kr/arti/society/society_general/1276423.html",
-          "title": "🔥 [속보] 법원, ‘의대 증원’ 반발 사직 전공의 제기 ‘입영대기 처분’ 취소소송 각하"
-        },
-        {
-          "link": "https://www.hani.co.kr/arti/economy/marketing/1276422.html",
-          "title": "🔥 [IFA 2026] 가전 넘어 일상으로…LG·삼성이 그린 ‘AI 홈’"
-        },
-        {
-          "link": "https://www.khan.co.kr/article/202609061107001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
-          "title": "🔥 [속보] ‘몸과 마음 치유’···경북, 7~13일 ‘웰니스 여행지’ 최대 반값 할인"
-        },
-        {
-          "link": "https://www.khan.co.kr/article/202609061101001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
-          "title": "🔥 [속보] ‘물고문·담뱃불에 성 착취물까지’ 10대 여학생들 집유 확정"
-        },
-        {
-          "link": "https://www.donga.com/news/Economy/article/all/20260904/134606351/2",
-          "title": "🔥 [속보] 日 청년 투자열풍 뒤엔 그림자…“하루 한 끼만 먹고 투자한다”"
-        },
-        {
-          "link": "https://www.donga.com/news/Economy/article/all/20260906/134611999/1",
-          "title": "🔥 [속보] 서학개미, 반도체 개별주는 팔고 3배 레버리지는 샀다"
-        }
-      ],
-      "speed": 30
-    }
-  },
   "share": {
     "description": "국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.",
     "image_url": "https://news-now-82jg.onrender.com/static/img/og_image.jpg",
     "site_name": "뉴스NOW",
     "title": "뉴스NOW - 오늘의 실시간 주요 속보 종합"
+  },
+  "admin_password": "thfWlrgl12!@",
+  "ads": {
+    "center": {
+      "coupang_id": 1026359,
+      "custom_html": "",
+      "enabled": true,
+      "height": 140,
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 680
+    },
+    "left": {
+      "coupang_id": 1026359,
+      "custom_html": "",
+      "enabled": true,
+      "height": 600,
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 200
+    },
+    "mobile": {
+      "coupang_id": 1026359,
+      "custom_html": "",
+      "enabled": true,
+      "height": 100,
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 360
+    },
+    "popup": {
+      "close_delay": 3,
+      "coupang_id": 1026359,
+      "custom_html": "",
+      "delay": 30,
+      "enabled": true,
+      "height": 300,
+      "interval_minutes": 5,
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 300
+    },
+    "right": {
+      "coupang_id": 1026359,
+      "custom_html": "",
+      "enabled": true,
+      "height": 600,
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 200
+    }
+  },
+  "ticker": {
+    "badge": "🔴 실시간 이슈",
+    "enabled": true,
+    "items": [
+      {
+        "link": "https://www.yna.co.kr/view/AKR20260904160300530",
+        "title": "🔥 [속보] '건설 추락사고 예방' 아이디어 공모전…숏폼·정책제안 접수"
+      },
+      {
+        "link": "https://www.yna.co.kr/view/AKR20260904124200030",
+        "title": "🔥 [속보] 추석 앞두고 수산물 원산지 표시 특별 점검…성수품 집중 단속"
+      },
+      {
+        "link": "https://www.hani.co.kr/arti/society/society_general/1276423.html",
+        "title": "🔥 [속보] 법원, ‘의대 증원’ 반발 사직 전공의 제기 ‘입영대기 처분’ 취소소송 각하"
+      },
+      {
+        "link": "https://www.hani.co.kr/arti/economy/marketing/1276422.html",
+        "title": "🔥 [IFA 2026] 가전 넘어 일상으로…LG·삼성이 그린 ‘AI 홈’"
+      },
+      {
+        "link": "https://www.khan.co.kr/article/202609061107001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
+        "title": "🔥 [속보] ‘몸과 마음 치유’···경북, 7~13일 ‘웰니스 여행지’ 최대 반값 할인"
+      },
+      {
+        "link": "https://www.khan.co.kr/article/202609061101001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
+        "title": "🔥 [속보] ‘물고문·담뱃불에 성 착취물까지’ 10대 여학생들 집유 확정"
+      },
+      {
+        "link": "https://www.donga.com/news/Economy/article/all/20260904/134606351/2",
+        "title": "🔥 [속보] 日 청년 투자열풍 뒤엔 그림자…“하루 한 끼만 먹고 투자한다”"
+      },
+      {
+        "link": "https://www.donga.com/news/Economy/article/all/20260906/134611999/1",
+        "title": "🔥 [속보] 서학개미, 반도체 개별주는 팔고 3배 레버리지는 샀다"
+      }
+    ],
+    "speed": 30
   }
 }
