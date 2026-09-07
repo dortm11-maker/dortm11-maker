@@ -1984,21 +1984,147 @@ def admin_toggle_feed():
         return jsonify({'success': True, 'enabled': config[category][idx]['enabled']})
     return jsonify({'success': False})
 
-@app.route('/admin/api/test_rss', methods=['POST'])
-def admin_test_rss():
+def guess_news_category(title, text=""):
+    combined = f"{title} {text}".lower()
+    if any(k in combined for k in ['아파트', '분양', '전세', '월세', '부동산', '재개발', '재건축', '청약', '국토부', '집값', '매매가', '공인중개사']):
+        return '부동산'
+    if any(k in combined for k in ['코스피', '코스닥', '나스닥', '증시', '주가', '목표가', '상한가', '하한가', '외국인 순매수', '기관 순매도', 'etf', '배당금', '공매도']):
+        return '증권'
+    if any(k in combined for k in ['금리', '환율', '물가', '한국은행', '기재부', '수출', '수입', '무역수지', '인플레이션', '성장률', '금융위', '소비자물가', '매출', '영업이익']):
+        return '경제'
+    if any(k in combined for k in ['대통령', '국회', '의원', '민주당', '국민의힘', '야당', '여당', '청문회', '특검', '국정감사', '당대표', '원내대표', '총선', '대선', '장관']):
+        return '정치'
+    if any(k in combined for k in ['ai', '인공지능', '반도체', '챗gpt', '스마트폰', '소프트웨어', '우주선', '로봇', '양자', '클라우드', '빅데이터', '통신사', '5g', '애플', '삼성전자']):
+        return 'IT/과학'
+    if any(k in combined for k in ['아이돌', '가수', '배우', '드라마', '영화', '음원', '콘서트', '빌보드', '스타', '결혼', '열애', '방탄소년단', 'bts', '블랙핑크', '예능']):
+        return '연예'
+    if any(k in combined for k in ['축구', '야구', '골프', '손흥민', '이강인', '김하성', '오타니', '올림픽', '월드컵', 'k리그', 'kbo', '메이저리그', '프리미어리그', '우승']):
+        return '스포츠'
+    if any(k in combined for k in ['경찰', '검찰', '법원', '재판', '구속', '사고', '화재', '날씨', '지진', '태풍', '침수', '병원', '복지', '노동자', '환경']):
+        return '사회'
+    return '전체'
+
+@app.route('/admin/api/custom_news/add', methods=['POST'])
+def admin_add_custom_news():
+    """
+    관리자가 원하는 뉴스 링크(URL)를 입력하면,
+    자동으로 기사를 수집/분석하고 AI 리라이팅을 거쳐 지정된 카테고리 및 홈페이지 최상단에 즉시 추가!
+    """
     if not is_admin():
         abort(403)
-    data = request.get_json()
-    url = data.get('url', '')
+
+    data = request.get_json(silent=True) or {}
+    url = (data.get('url') or '').strip()
+    selected_cat = (data.get('category') or 'auto').strip()
+
+    if not url or not url.startswith('http'):
+        return jsonify({'success': False, 'message': '올바른 뉴스 기사 URL(http:// 또는 https://)을 입력해주세요.'})
+
     try:
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-        resp = requests.get(url, headers=headers, timeout=8)
-        feed = feedparser.parse(resp.content)
-        count = len(feed.entries)
-        title = feed.feed.get('title', '알 수 없음')
-        return jsonify({'success': True, 'feed_title': title, 'item_count': count})
+        from services.ai_rewriter import (
+            extract_factual_data,
+            build_full_news_article,
+            rewrite_news_title,
+            clean_news_summary,
+            clean_news_title
+        )
+        from services.image_enhancer import get_premium_stock_image
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+        }
+        resp = requests.get(url, headers=headers, timeout=7.0)
+        if resp.status_code != 200:
+            return jsonify({'success': False, 'message': f'기사 페이지에 접속하지 못했습니다. (응답코드 {resp.status_code})'})
+
+        html_text = decode_html_bytes(resp.content, resp.headers)
+        soup = BeautifulSoup(html_text, 'html.parser')
+
+        # 1. 원문 제목 추출
+        og_t = soup.find('meta', property='og:title') or soup.find('meta', attrs={'name': 'title'})
+        raw_title = (og_t.get('content') if og_t else '') or (soup.title.string if soup.title else '')
+        raw_title = clean_html(raw_title)
+        raw_title = re.sub(r'\s*[-|ㅣ].*$', '', raw_title).strip()
+
+        if not raw_title:
+            return jsonify({'success': False, 'message': '해당 링크에서 기사 제목을 추출할 수 없습니다.'})
+
+        # 2. 언론사 추출
+        publisher, pub_logo = get_publisher_info(url, soup=soup)
+
+        # 3. 원문 대표 사진 (카카오톡/SNS 공유용)
+        og_img_tag = soup.find('meta', property='og:image') or soup.find('meta', attrs={'name': 'image'})
+        raw_origin_img = normalize_img_url(og_img_tag.get('content')) if og_img_tag else ''
+
+        # 4. 본문 팩트 데이터 추출
+        fact_points = extract_factual_data(url, raw_title)
+
+        # 5. 카테고리 결정
+        if selected_cat == 'auto' or not selected_cat or selected_cat == '전체':
+            body_sample = " ".join(fact_points[:5])
+            target_category = guess_news_category(raw_title, body_sample)
+        else:
+            target_category = selected_cat
+
+        # 6. AI 뉴스 기사 전면 빌드
+        site_cfg = load_site_config()
+        art = build_full_news_article(raw_title, site_cfg=site_cfg, url=url, category=target_category, publisher_name=publisher)
+
+        # 7. 기사 썸네일 & 시간
+        final_thumb = art['main_img']
+        now_date_str = datetime.now(KST).strftime('%m.%d %H:%M')
+
+        # 8. 요약문
+        summary_text = ""
+        if art.get('summary_points'):
+            summary_text = " ".join(art['summary_points'][:2])
+        elif fact_points:
+            summary_text = " ".join(fact_points[:2])
+        if len(summary_text) > 150:
+            summary_text = summary_text[:150] + '...'
+
+        new_item = {
+            'title': art['title'],
+            'original_title': raw_title,
+            'link': url,
+            'summary': summary_text,
+            'image': final_thumb,
+            'og_img': raw_origin_img or final_thumb,
+            'date': now_date_str,
+            'source': publisher,
+            'logo': pub_logo or '📰',
+            'category': target_category,
+            'is_custom': True
+        }
+
+        # 9. RSS_CACHE 최상단에 즉각 반영
+        with RSS_CACHE_LOCK:
+            if target_category not in RSS_CACHE:
+                RSS_CACHE[target_category] = {'timestamp': time.time(), 'news': [], 'count': 0, 'is_refreshing': False}
+            RSS_CACHE[target_category]['news'] = [n for n in RSS_CACHE[target_category].get('news', []) if n.get('link') != url]
+            RSS_CACHE[target_category]['news'].insert(0, new_item)
+            RSS_CACHE[target_category]['count'] = len(RSS_CACHE[target_category]['news'])
+            RSS_CACHE[target_category]['timestamp'] = time.time()
+
+            if '전체' not in RSS_CACHE:
+                RSS_CACHE['전체'] = {'timestamp': time.time(), 'news': [], 'count': 0, 'is_refreshing': False}
+            RSS_CACHE['전체']['news'] = [n for n in RSS_CACHE['전체'].get('news', []) if n.get('link') != url]
+            RSS_CACHE['전체']['news'].insert(0, new_item)
+            RSS_CACHE['전체']['count'] = len(RSS_CACHE['전체']['news'])
+            RSS_CACHE['전체']['timestamp'] = time.time()
+
+        # 10. 스냅샷 영구 저장
+        save_snapshot()
+
+        return jsonify({
+            'success': True,
+            'message': f'[{target_category}] 카테고리 및 전체 홈 최상단에 성공적으로 등록되었습니다!',
+            'item': new_item
+        })
+
     except Exception as e:
-        return jsonify({'success': False, 'message': str(e)})
+        print(f"[Custom News Add Error]: {e}")
+        return jsonify({'success': False, 'message': f'처리 중 오류가 발생했습니다: {str(e)}'})
 
 # ---- 사이트 설정 (광고·티커) ----
 @app.route('/admin/api/site_config', methods=['GET'])
