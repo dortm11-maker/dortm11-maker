@@ -1010,10 +1010,17 @@ def fetch_article_detail(url):
         has_double_dot = any('..' in p for p in paras)
         is_same_as_raw = (current_ai_t == existing.get('original_title')) or (current_ai_t == orig_t)
         is_meaningless = is_meaningless_news(existing.get('original_title', ''), text=" ".join(paras))
-        is_too_short = sum(len(p) for p in paras) < 280 or len(paras) < 4
+        is_too_short = sum(len(p) for p in paras) < 500 or len(paras) < 8
+        has_incomplete_summary = any(
+            re.search(r'[\s,]+(?:을|를|이|가|에|의|과|와|로|으로|는|은|도|며|고|서|이라는|라고)$', s.strip()) or
+            s.strip().endswith(('‘', '’', '“', '”', '\"', '\'')) or
+            ('”고' in s or '’고' in s or '을”' in s or '를”' in s) or
+            (not s.strip().endswith(('다', '다.', '요', '습니다', '했습니다', '밝혔습니다', '전했습니다', '분석했습니다', '강조했습니다', '말했습니다', '비판했습니다', '꼬집었습니다', '전망', '분석', '대책', '기록', '추진', '밝혀', '보고')))
+            for s in summary_pts
+        )
 
-        # 결함(웹 찌꺼기 텍스트, 방송 출연진, 너무 짧은 볼륨, 원문과 동일한 제목 등) 감지 시 재구성 실행
-        if has_web_junk or has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or has_double_dot or is_same_as_raw or is_meaningless or is_too_short:
+        # 결함(웹 찌꺼기 텍스트, 방송 출연진, 너무 짧은 볼륨, 불완전 요약, 원문과 동일한 제목 등) 감지 시 재구성 실행
+        if has_web_junk or has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or has_double_dot or is_same_as_raw or is_meaningless or is_too_short or has_incomplete_summary:
             pass # 건너뛰어 아래 3단계 build_full_news_article 실행
         else:
             publisher = existing.get('source_name')

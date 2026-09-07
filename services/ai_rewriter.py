@@ -159,36 +159,45 @@ def clean_news_title(title):
     t = re.sub(r'^[▲■◆●★▶▷☞\s]+', '', t)
     return t.strip()
 
-def make_short_bullet(text, max_len=45):
+def make_short_bullet(text, max_len=95):
     """
-    긴 문장에서 불필요한 서술어를 걷어내고 25~45자 내외의 명료하고 완결된 핵심 요약 불릿 생성
-    (문장 도중이나 조사가 잘리지 않도록 안전 종결 처리)
+    본문의 핵심 맥락을 충실히 담아 50~95자 내외의 자연스럽고 완결된 핵심 브리핑 요약문 생성
     """
     s = text.strip()
     s = re.sub(r'^[▲■◆●★▶▷☞\s]+', '', s)
     s = re.sub(r'\(.*?\)|\[.*?\]', '', s)
-    s = re.sub(r'^(?:증권가 분석에 따르면|전문가들은|업계 분석에 따르면|관계자에 따르면)\s*', '', s)
-    s = re.sub(r'(?:밝혔습니다|설명했습니다|전망했습니다|집계됐습니다|나타났습니다|전해졌습니다|확인됐습니다|알려졌습니다|보도했습니다)\.?', '', s)
-    s = re.sub(r'(?:밝혔다|설명했다|전망했다|집계됐다|나타났다|전했다|확인됐다)\.?', '', s)
-    s = re.sub(r'체결한다고\s*$', ' 협약 체결', s)
-    s = re.sub(r'지원한다고\s*$', ' 지원 본격화', s)
-    s = re.sub(r'확대한다고\s*$', ' 대폭 확대', s)
-    s = re.sub(r'강화한다고\s*$', ' 본격 강화', s)
-    s = re.sub(r'진행한다고\s*$', ' 진행', s)
-    s = re.sub(r'마련했다고\s*$', ' 마련', s)
-    s = re.sub(r'활용된다\.?$', ' 재원 투입', s)
-    s = re.sub(r'예정이다\.?$', ' 추진', s)
-    s = re.sub(r'한다\.?$', ' 추진', s)
-    s = re.sub(r'된다\.?$', ' 결정', s)
+    s = re.sub(r'^(?:증권가 분석에 따르면|전문가들은|업계 분석에 따르면|관계자에 따르면|보도에 따르면)\s*', '', s)
     s = re.sub(r'\s{2,}', ' ', s).strip(' .,~')
 
     if len(s) > max_len:
-        cut = s[:max_len].rsplit(' ', 1)[0]
-        # 잘린 끝부분이 어색한 조사(을/를/이/가/에/의/과/와/로 등)로 끝나면 정리
-        cut = re.sub(r'[\s,]+(?:을|를|이|가|에|의|과|와|로|으로|는|은|도|며|고|서)\s*$', '', cut)
-        if not cut.endswith(('추진', '기록', '분석', '발표', '전망', '강화', '확대', '주목', '집계', '선정', '마련')):
-            cut += ' 집중 분석'
-        s = cut
+        # 1. max_len 내에 온전한 마침표(?!)가 있으면 그 지점까지 취합
+        m = re.search(r'(?<=[.?!])\s+', s[:max_len])
+        if m and m.start() >= 35:
+            s = s[:m.start()].strip()
+        else:
+            cut = s[:max_len].rsplit(' ', 1)[0].strip()
+            # 끝부분 불필요한 조사 완벽 제거 (공백 유무 상관없이 단어 뒤 조사 제거)
+            cut = re.sub(r'(?:을|를|이|가|에|의|과|와|로|으로|는|은|도|며|고|서|이라는|이라며|라고)\s*$', '', cut).strip()
+            
+            # 따옴표 열리고 안 닫힌 경우 닫아줌
+            if cut.count('“') > cut.count('”'):
+                cut += '”'
+            if cut.count('‘') > cut.count('’'):
+                cut += '’'
+
+            # 종결 어미 보정
+            if not cut.endswith(('다', '다.', '습니다', '했습니다', '밝혔습니다', '전했습니다', '분석했습니다', '강조했습니다', '말했습니다', '비판했습니다', '꼬집었습니다')):
+                if cut.endswith(('비판', '꼬집', '지적', '반발')):
+                    cut += '했습니다'
+                elif cut.endswith(('밝혀', '전해', '알려')):
+                    cut += '졌습니다'
+                elif cut.endswith(('입장', '의견', '주장')):
+                    cut += '을 나타냈습니다'
+                elif cut.endswith(('”', '’', '"', "'")):
+                    cut += '라며 비판했습니다'
+                else:
+                    cut += '고 전했습니다'
+            s = cut
 
     return s.strip()
 
@@ -458,9 +467,9 @@ def extract_factual_data(url, title=""):
                     sent = clean_news_line(sent)
                     if is_valid_news_paragraph(sent) and sent not in facts:
                         facts.append(sent)
-                        if len(facts) >= 35:
+                        if len(facts) >= 80:
                             break
-                if len(facts) >= 35:
+                if len(facts) >= 80:
                     break
 
     except Exception as e:
@@ -470,12 +479,12 @@ def extract_factual_data(url, title=""):
 
 def local_generate_issue_briefing(title, category="전체", fact_points=None):
     """
-    원문의 실제 알짜 정보(혜택, 일정, 수치, 가이드, 사실)의 큰 틀을 온전히 살려
-    짜임새 있고 풍성한 5~7문단 정통 기사 및 완결된 3줄 핵심 요약 생성
+    원문의 실제 알짜 정보(혜택, 일정, 수치, 가이드, 사실, 당사자 입장)의 큰 틀과 세부 맥락을
+    과도하게 압축하지 않고 온전히 살려 신문 원문과 대등한 풍성한 정통 기사 및 완결된 3줄 핵심 요약 생성
     """
     clean_t = rewrite_news_title(title, category=category)
     
-    # 팩트 데이터가 있는 경우: 원문의 큰 틀과 핵심 정보를 풍성한 문단으로 조립
+    # 팩트 데이터가 있는 경우: 원문의 큰 틀과 세부 정황을 온전한 문단으로 조립
     if fact_points and len(fact_points) >= 2:
         # 1. 문장 단위 어미 정통 뉴스체 변환
         converted_sentences = []
@@ -487,12 +496,13 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
                 converted_sentences.append(p)
 
         # 2. 실제 원문 신문 기사처럼 독자가 편하게 읽도록 1~2문장 및 발언 인용구 단위로 깔끔하게 문단(줄바꿈) 분리
+        #    (원문 기사의 긴 호흡과 세부 내용을 인위적으로 자르지 않고 최대 30문단까지 자연스럽게 유지)
         paras = []
         temp_chunk = []
 
         for sent in converted_sentences:
             is_quote = any(q in sent for q in ['"', "'", '“', '”', '‘', '’']) or any(v in sent for v in ['라고 밝혔', '라고 말했', '라고 전했', '라며 ', '며 입장을', '며 강조'])
-            is_long = len(sent) >= 75
+            is_long = len(sent) >= 80
 
             # 발언문이나 긴 핵심 문장은 독립된 문단으로 분리하여 가독성 극대화
             if is_quote or is_long:
@@ -506,67 +516,68 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
                     paras.append(" ".join(temp_chunk))
                     temp_chunk = []
 
-            if len(paras) >= 12:
+            if len(paras) >= 30:
                 break
 
-        if temp_chunk and len(paras) < 12:
+        if temp_chunk and len(paras) < 30:
             paras.append(" ".join(temp_chunk))
 
-        # 만약 문단 수가 3개 이하로 적으면, 맥락 보강 문단을 덧붙여 최소 4문단 이상의 큰 틀 확보
-        if len(paras) < 4:
+        # 만약 문단 수가 4개 이하로 적으면, 맥락 보강 문단을 덧붙여 최소 5문단 이상의 큰 틀 확보
+        if len(paras) < 5:
             cat_supplements = {
-                '경제': "금융 전문가들은 이번 사안이 중장기적인 시장 흐름과 가계 재정 운용에 미치는 영향을 주시하고 있으며, 체계적인 대응 전략 마련이 필요한 시점이라고 강조했습니다.",
+                '경제': "금융 및 경제 전문가들은 이번 사안이 중장기적인 시장 흐름과 가계 재정 운용에 미치는 영향을 주시하고 있으며, 체계적인 대응 전략 마련이 필요한 시점이라고 강조했습니다.",
                 '부동산': "부동산 및 자산 관리 전문가들은 시장 변동성에 대비해 중장기적인 자산 배분과 실수요 관점의 신중한 접근이 요구된다고 조언했습니다.",
                 '증권': "증권가에서는 단기 수급 변화뿐만 아니라 기업의 펀더멘털과 대외 거시 경제 변수를 종합적으로 고려한 포트폴리오 다변화가 필요하다고 분석했습니다.",
+                '정치': "정치권 안팎에서는 이번 쟁점을 둘러싼 여야의 공방이 향후 정국 주도권과 정책 심의 과정 전반에 적지 않은 파장을 미칠 것으로 내다보고 있습니다.",
+                '사회': "사회 각계에서는 이번 사안이 제기한 제도적 미비점을 보완하고 공정한 사회적 신뢰를 회복하기 위한 실효성 있는 대책 마련을 촉구하고 있습니다.",
                 '전체': "전문가들은 이번 이슈가 시장 참여자들에게 중요한 시사점을 던져주고 있는 만큼, 향후 전개될 정책 변화와 관련 업계의 구체적인 후속 조치를 면밀히 살펴볼 필요가 있다고 제언했습니다."
             }
             paras.append(cat_supplements.get(category, cat_supplements['전체']))
 
-        # 3. 3줄 핵심 요약 구성 (각 25~45자 내외의 완결된 문장)
+        # 3. 3줄 핵심 요약 구성 (각 50~85자 내외의 자연스러운 완결 문장)
+        #    1번: 발단 및 핵심 주제 / 2번: 본문 주요 팩트·수치 / 3번: 당사자 입장 및 향후 전망
         summary = []
         seen_sum = set()
 
-        # 1) 첫 번째 요약: 핵심 사안
-        s1 = make_short_bullet(clean_t, max_len=40)
+        # 1) 첫 번째 요약: 핵심 발단/주제 (본문 첫 문장 또는 헤드라인 기반)
+        first_sent = converted_sentences[0] if converted_sentences else clean_t
+        s1 = make_short_bullet(first_sent, max_len=80)
         summary.append(s1)
         seen_sum.add(s1)
 
-        # 2) 두 번째 요약: 구체적 수치 및 핵심 데이터
-        for s in converted_sentences:
-            if any(num in s for num in ['%', '원', '억', '달러', '대', '세', '년', '월', '일', '명', '건', '배']):
-                bullet = make_short_bullet(s, max_len=45)
-                if len(bullet) >= 14 and bullet not in seen_sum:
+        # 2) 두 번째 요약: 구체적 수치 및 본문 핵심 데이터/쟁점
+        mid_idx = len(converted_sentences) // 2
+        for s in converted_sentences[1:mid_idx + 3]:
+            if any(num in s for num in ['%', '원', '억', '달러', '대', '세', '년', '월', '일', '명', '건', '배']) or len(s) >= 40:
+                bullet = make_short_bullet(s, max_len=85)
+                if len(bullet) >= 20 and bullet not in seen_sum:
                     summary.append(bullet)
                     seen_sum.add(bullet)
                     break
 
-        # 3) 세 번째 요약: 주요 대책 및 핵심 제언/전망
-        for s in reversed(converted_sentences):
-            bullet = make_short_bullet(s, max_len=45)
-            if len(bullet) >= 14 and bullet not in seen_sum:
+        # 3) 세 번째 요약: 후반부 당사자 입장, 반박 또는 향후 전망
+        for s in reversed(converted_sentences[mid_idx:]):
+            bullet = make_short_bullet(s, max_len=85)
+            if len(bullet) >= 20 and bullet not in seen_sum:
                 summary.append(bullet)
                 seen_sum.add(bullet)
                 break
 
-        # 부족할 경우 보강
-        fallback_summaries = [
-            f"{clean_t[:20]} 관련 주요 쟁점 및 현황 분석",
-            "세부 실행 방안 및 단계별 점검 사항 제시",
-            "향후 시장 파급 효과 및 전문가 제언 정리"
-        ]
-        for fs in fallback_summaries:
+        # 부족할 경우 순차 보강
+        for s in converted_sentences:
             if len(summary) >= 3:
                 break
-            if fs not in seen_sum:
-                summary.append(fs)
-                seen_sum.add(fs)
+            b = make_short_bullet(s, max_len=80)
+            if len(b) >= 20 and b not in seen_sum:
+                summary.append(b)
+                seen_sum.add(b)
 
         rewritten_title = rewrite_news_title(clean_t, paragraphs=paras, category=category)
 
         return {
             "ai_title": rewritten_title,
             "summary_points": summary[:3],
-            "paragraphs": paras[:7]
+            "paragraphs": paras
         }
 
     # 팩트 데이터가 없는 경우 (원문 접근 불가 시) 카테고리별 전문 분석 브리핑

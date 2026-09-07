@@ -1,6 +1,6 @@
 {
   "total_uv": 12,
-  "total_pv": 30,
+  "total_pv": 48,
   "current_date": "2026-09-07",
   "today_vids": [
     "127.0.0.1"
@@ -12,7 +12,7 @@
     },
     "2026-09-07": {
       "uv": 1,
-      "pv": 7
+      "pv": 25
     }
   },
   "visitor_logs": {
@@ -37,11 +37,11 @@
     "127.0.0.1": {
       "ip": "127.0.0.1",
       "device": "💻 PC",
-      "visit_count": 12,
+      "visit_count": 30,
       "first_seen": "17:06:22",
-      "last_seen": "08:46:53",
-      "last_seen_ts": 1788738413.0015094,
-      "last_page": "🌐 메인 뉴스 홈"
+      "last_seen": "10:57:48",
+      "last_seen_ts": 1788746268.1063354,
+      "last_page": "📰 기사 상세 읽는 중"
     }
   },
   "ad_clicks": {
@@ -51,7 +51,7 @@
       "center": 2,
       "popup": 1,
       "link": 0,
-      "auto_redirect": 2
+      "auto_redirect": 5
     },
     "by_type_today": {
       "left": 1,
@@ -59,7 +59,7 @@
       "center": 2,
       "popup": 1,
       "link": 0,
-      "auto_redirect": 2
+      "auto_redirect": 5
     },
     "daily": {
       "2026-09-06": {
@@ -81,7 +81,7 @@
           "center": 0,
           "popup": 0,
           "link": 0,
-          "auto_redirect": 1
+          "auto_redirect": 4
         }
       }
     },
@@ -139,6 +139,33 @@
         "label": "자동 자리이동",
         "page": "[알림] 연합뉴스 콘텐츠 저작권 고지",
         "ts": 1788738118.7642562
+      },
+      {
+        "time": "09:55:46",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "용혜인, 의원직 사퇴 여부에 \"청문회서 말씀… 각종 의혹엔 침묵… 동향 ",
+        "ts": 1788742546.0697966
+      },
+      {
+        "time": "10:18:08",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "HK이노엔, 케이캡으로 '환경성적표지' 획득… 동향 분석… 동향 분석",
+        "ts": 1788743888.3632474
+      },
+      {
+        "time": "10:44:23",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "치매환자 96시간 결박해 폐색전증 유발' 의사… 2심도 집행유예… 동향 ",
+        "ts": 1788745463.3622313
       }
     ]
   }
