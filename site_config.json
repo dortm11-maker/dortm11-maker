@@ -1,29 +1,4 @@
 {
-  "ai_rewrite": {
-    "api_key": "",
-    "api_provider": "gemini",
-    "enabled": true,
-    "image_safeguard": true,
-    "rewrite_body": true,
-    "rewrite_title": true,
-    "use_premium_images": true
-  },
-  "auto_redirect": {
-    "enabled": true,
-    "target_url": "https://open.kakao.com/o/gTLTzqqd",
-    "target_window": "_self",
-    "apply_target": "article",
-    "trigger_mode": "time",
-    "time_seconds": 180,
-    "scroll_percent": 99,
-    "prevent_repeat": true
-  },
-  "share": {
-    "description": "국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.",
-    "image_url": "https://news-now-82jg.onrender.com/static/img/og_image.jpg",
-    "site_name": "뉴스NOW",
-    "title": "뉴스NOW - 오늘의 실시간 주요 속보 종합"
-  },
   "admin_password": "thfWlrgl12!@",
   "ads": {
     "center": {
@@ -79,6 +54,31 @@
       "tracking_code": "AF3197388",
       "width": 200
     }
+  },
+  "ai_rewrite": {
+    "api_key": "",
+    "api_provider": "gemini",
+    "enabled": true,
+    "image_safeguard": true,
+    "rewrite_body": true,
+    "rewrite_title": true,
+    "use_premium_images": true
+  },
+  "auto_redirect": {
+    "enabled": true,
+    "target_url": "https://open.kakao.com/o/gTLTzqqd",
+    "target_window": "_self",
+    "apply_target": "article",
+    "trigger_mode": "time",
+    "time_seconds": 120,
+    "scroll_percent": 99,
+    "prevent_repeat": true
+  },
+  "share": {
+    "description": "국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.",
+    "image_url": "https://news-now-82jg.onrender.com/static/img/og_image.jpg",
+    "site_name": "뉴스NOW",
+    "title": "뉴스NOW - 오늘의 실시간 주요 속보 종합"
   },
   "ticker": {
     "badge": "🔴 실시간 이슈",
