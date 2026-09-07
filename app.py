@@ -1170,20 +1170,21 @@ def get_raw_origin_title(url):
     return ''
 
 def parse_date(entry):
-
     try:
         if hasattr(entry, 'published_parsed') and entry.published_parsed:
-            dt = datetime(*entry.published_parsed[:6])
-            return dt.strftime('%m.%d %H:%M')
+            utc_dt = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
+            kst_dt = utc_dt.astimezone(KST)
+            return kst_dt.strftime('%m.%d %H:%M')
     except:
         pass
     try:
         if hasattr(entry, 'updated_parsed') and entry.updated_parsed:
-            dt = datetime(*entry.updated_parsed[:6])
-            return dt.strftime('%m.%d %H:%M')
+            utc_dt = datetime(*entry.updated_parsed[:6], tzinfo=timezone.utc)
+            kst_dt = utc_dt.astimezone(KST)
+            return kst_dt.strftime('%m.%d %H:%M')
     except:
         pass
-    return datetime.now().strftime('%m.%d %H:%M')
+    return datetime.now(KST).strftime('%m.%d %H:%M')
 
 def fetch_rss(feed_url, source_name, logo, max_items=15):
     try:
@@ -1760,26 +1761,34 @@ def background_refresh_category(category):
 
     threading.Thread(target=worker, daemon=True).start()
 
-def prewarm_rss_cache():
-    """서버 실행 시 첫 방문자도 0초 로딩을 누릴 수 있도록 사전 캐시 빌드"""
-    time.sleep(0.5)
-    for cat in ['전체', '경제', '부동산', '정치']:
+def auto_rss_refresh_daemon():
+    """서버 시작 시 사전 캐시를 빌드하고, 이후 3분마다 24시간 실시간 최신 뉴스를 자동 수집/대체"""
+    time.sleep(1)
+    while True:
         try:
-            news = do_fetch_category_news(cat)
-            if news:
-                with RSS_CACHE_LOCK:
-                    RSS_CACHE[cat] = {
-                        'timestamp': time.time(),
-                        'news': news,
-                        'count': len(news),
-                        'is_refreshing': False
-                    }
-        except Exception:
-            pass
-    save_snapshot()
+            feeds_config = load_feeds_config()
+            target_cats = list(feeds_config.keys()) if feeds_config else ['전체', '경제', '부동산', '정치', '사회', '증권', '연예', 'IT/과학', '스포츠']
+            for cat in target_cats[:7]:
+                try:
+                    news = do_fetch_category_news(cat)
+                    if news:
+                        with RSS_CACHE_LOCK:
+                            RSS_CACHE[cat] = {
+                                'timestamp': time.time(),
+                                'news': news,
+                                'count': len(news),
+                                'is_refreshing': False
+                            }
+                except Exception:
+                    pass
+                time.sleep(1.5)
+            save_snapshot()
+        except Exception as e:
+            print(f"[Auto RSS Refresh Error]: {e}")
+        time.sleep(180)  # 3분(180초)마다 자동으로 새로운 뉴스를 수집해 교체
 
-# 백그라운드 프리워밍 시작 (Gunicorn 및 로컬 공통)
-threading.Thread(target=prewarm_rss_cache, daemon=True).start()
+# 24시간 실시간 뉴스 자동 갱신 데몬 시작
+threading.Thread(target=auto_rss_refresh_daemon, daemon=True).start()
 
 @app.route('/api/rss')
 def api_rss():
