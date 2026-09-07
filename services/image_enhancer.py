@@ -82,6 +82,17 @@ PREMIUM_STOCK_IMAGES = {
         'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=85',
         # 정부 청사 및 국회 스타일 회의장
         'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=85'
+    ],
+
+    # 6. 자동차 / 모빌리티 / 현대차 (AI 생성 법적 안심 이미지 및 4K 상업용 무료)
+    'auto': [
+        # 현대차 대표 AI 저작권 안심 생성 이미지 (아이오닉/세단)
+        '/static/img/ai/hyundai_car.jpg',
+        # 글로벌 모던 럭셔리 세단 및 전기차
+        'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=85'
     ]
 }
 
@@ -89,6 +100,8 @@ NEWS_STOCK_CATALOG = PREMIUM_STOCK_IMAGES
 
 # 키워드 규칙 매핑 테이블
 KEYWORD_CATEGORY_RULES = [
+    # 자동차/현대차/모빌리티 키워드 (최우선 판별)
+    (r'현대차|현대자동차|기아|자동차|완성차|제네시스|아이오닉|전기차|팰리세이드|아반떼|투싼|카니발|쏘나타|그랜저|모터스|파업.*생산|차량|모빌리티', 'auto'),
     # 부동산 키워드
     (r'부동산|아파트|분양|청약|전세|월세|매매|집값|주택|빌라|재개발|재건축|다세대|토지|오피스텔|건설|시행사|시공사|국토부|보증금|공동주택|단지', 'realestate'),
     # 증권 키워드
@@ -96,7 +109,7 @@ KEYWORD_CATEGORY_RULES = [
     # 경제 키워드
     (r'경제|금리|환율|인플레|물가|한국은행|기준금리|수출|수입|무역|gdp|소비자물가|재정|국채|금융|은행|외환|고용|경기침체|유가|원자재', 'economy'),
     # IT/과학 키워드
-    (r'인공지능|ai|챗gpt|클라우드|빅데이터|소프트웨어|스마트폰|로봇|모빌리티|자율주행|우주|양자|통신|사이버', 'tech'),
+    (r'인공지능|ai|챗gpt|클라우드|빅데이터|소프트웨어|스마트폰|로봇|우주|양자|통신|사이버', 'tech'),
     # 법조/재판/법원 키워드
     (r'법원|재판|판결|소송|검찰|기소|변호사|대법원|헌법재판소|항소|구속|영장|형사|민사', 'law_policy')
 ]
@@ -107,6 +120,10 @@ def detect_article_topic(title, text="", category=""):
     기사 제목, 본문, 카테고리를 종합 분석하여 가장 적합한 이미지 테마를 판별
     """
     full_text = f"{title} {category} {text[:300]}".lower()
+
+    # 현대차/완성차/자동차 키워드 최우선 검출
+    if re.search(r'현대차|현대자동차|기아|자동차|완성차|제네시스|아이오닉|전기차|팰리세이드|아반떼|투싼|카니발|쏘나타|그랜저|파업.*생산', full_text):
+        return 'auto'
 
     if category in ['부동산']:
         return 'realestate'
@@ -121,17 +138,24 @@ def detect_article_topic(title, text="", category=""):
         if re.search(pattern, full_text):
             return topic
 
-    return None
+    return 'economy'  # 기본값: 신뢰도 높은 금융/경제 테마
 
 
 def get_premium_stock_image(title, text="", category=""):
     """
     기사 내용에 맞는 초고화질 저작권 프리 스톡 이미지를 선별 반환.
-    동일 기사에는 항상 일관된 이미지가 선택되도록 제목 해시값 활용.
+    - 현대차 관련 기사일 경우 고화질 AI 현대차 이미지 우선 매칭
+    - 동일 기사에는 항상 일관된 이미지가 선택되도록 제목 해시값 활용
     """
+    full_text = f"{title} {category} {text[:300]}".lower()
+    
+    # 현대차 직접 연관 기사면 AI 생성 법적 안심 현대차 이미지 직결
+    if '현대차' in full_text or '현대자동차' in full_text:
+        return '/static/img/ai/hyundai_car.jpg'
+
     topic = detect_article_topic(title, text, category)
     if not topic or topic not in PREMIUM_STOCK_IMAGES:
-        return None
+        topic = 'economy'
 
     images = PREMIUM_STOCK_IMAGES[topic]
     # 기사 제목 기반 해시 인덱싱 -> 동일 기사는 항상 동일한 고급 이미지 유지

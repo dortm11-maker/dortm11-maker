@@ -1008,13 +1008,21 @@ def fetch_article_detail(url):
         ai_cnt = existing['ai_content']
         paras = ai_cnt.get('paragraphs', [])
         summary_pts = ai_cnt.get('summary_points', [])
-        if paras and len(paras) >= 2:
+        # 기존 글이 추상적 템플릿이거나 수치가 부족한 경우, 혹은 이미지가 없는 경우 최신 수치 반영 엔진으로 업그레이드
+        from services.image_enhancer import get_premium_stock_image
+        orig_t = clean_news_title(existing.get('original_title', ''))
+        has_numbers = any(re.search(r'\d+(?:[.,]\d+)?\s*(?:%|억원|조원|만대|만\s*대|대|원|만원|달러)', p) for p in paras)
+        is_abstract_template = any('단순한 일회성 현상에 그치지 않고' in p for p in paras)
+
+        # 수치가 없거나 추상 템플릿인 경우 새로 구체적 수치 반영 기사 생성
+        if not has_numbers or is_abstract_template:
+            pass # 건너뛰어 아래 3단계 build_full_news_article 실행
+        else:
             publisher = existing.get('source_name')
             if not publisher or publisher == '주요 언론사':
                 p_name, _ = get_publisher_info(url)
                 publisher = p_name if (p_name and p_name != '주요 언론사') else '주요 언론사'
 
-            orig_t = clean_news_title(existing.get('original_title', ''))
             current_ai_title = existing.get('ai_title', '')
             if not current_ai_title or current_ai_title == orig_t or current_ai_title == existing.get('original_title'):
                 final_title = rewrite_news_title(orig_t, category=existing.get('category', '전체'))
@@ -1024,6 +1032,10 @@ def fetch_article_detail(url):
             if summary_pts and (summary_pts[0] == orig_t or summary_pts[0] == existing.get('original_title')):
                 summary_pts[0] = final_title
 
+            current_img = existing.get('ai_image', '')
+            if not current_img or ('현대차' in orig_t and current_img != '/static/img/ai/hyundai_car.jpg'):
+                current_img = get_premium_stock_image(final_title, text=orig_t, category=existing.get('category', '전체'))
+
             result = {
                 'id': existing.get('id'),
                 'title': final_title,
@@ -1032,7 +1044,7 @@ def fetch_article_detail(url):
                 'pub_logo': '📰',
                 'pub_date': existing.get('published_at', ''),
                 'author': '',
-                'main_img': existing.get('ai_image', ''),
+                'main_img': current_img,
                 'caption': '',
                 'summary_points': summary_pts,
                 'paragraphs': paras,

@@ -1,6 +1,6 @@
 {
   "total_uv": 12,
-  "total_pv": 28,
+  "total_pv": 30,
   "current_date": "2026-09-07",
   "today_vids": [
     "127.0.0.1"
@@ -12,7 +12,7 @@
     },
     "2026-09-07": {
       "uv": 1,
-      "pv": 5
+      "pv": 7
     }
   },
   "visitor_logs": {
@@ -37,10 +37,10 @@
     "127.0.0.1": {
       "ip": "127.0.0.1",
       "device": "💻 PC",
-      "visit_count": 10,
+      "visit_count": 12,
       "first_seen": "17:06:22",
-      "last_seen": "08:42:32",
-      "last_seen_ts": 1788738152.5067601,
+      "last_seen": "08:46:53",
+      "last_seen_ts": 1788738413.0015094,
       "last_page": "🌐 메인 뉴스 홈"
     }
   },
