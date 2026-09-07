@@ -44,6 +44,10 @@ def clean_news_line(text):
 
     # 6. 빈 괄호 제거
     t = re.sub(r'\[\s*\]|\(\s*\)', '', t)
+
+    # 7. 연속 공백 단일화 및 연속 마침표 정리
+    t = re.sub(r'[ \t]{2,}', ' ', t)
+    t = re.sub(r'\.{2,}', '.', t)
     return t.strip(' \t-=\r\n')
 
 def is_valid_news_paragraph(line):
@@ -316,7 +320,7 @@ def extract_factual_data(url, title=""):
                 cleaned = cleaned.strip()
 
                 # 마침표 기준으로 여러 문장이 붙어 있는 경우 개별 문장으로 분리하여 수집
-                sub_sentences = [s.strip() + '.' for s in cleaned.split('. ') if len(s.strip()) >= 15]
+                sub_sentences = [s.strip().rstrip('.') + '.' for s in cleaned.split('. ') if len(s.strip()) >= 15]
                 if not sub_sentences:
                     sub_sentences = [cleaned]
 

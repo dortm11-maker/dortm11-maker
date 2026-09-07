@@ -1072,7 +1072,9 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); line
 .article-para {
     margin-bottom: 22px;
     word-break: keep-all;
-    text-align: justify;
+    text-align: left;
+    letter-spacing: -0.02em;
+    word-spacing: normal;
 }
 
 .article-source-box {

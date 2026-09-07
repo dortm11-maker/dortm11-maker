@@ -1018,10 +1018,10 @@ def fetch_article_detail(url):
         has_awkward_title = '고부가 제품군' in current_ai_t and '고부가' not in orig_t
         has_duplicate_summary = len(summary_pts) > 1 and len(summary_pts) != len(set(summary_pts))
         is_abstract_template = any('단순한 일회성 현상에 그치지 않고' in p for p in paras)
-        is_law_img_mismatch = existing.get('ai_image', '').find('photo-1589829545856') != -1 and '법' not in orig_t
+        has_double_dot = any('..' in p for p in paras)
 
         # 결함이 감지되면 새로 정밀 기사 생성으로 업그레이드
-        if has_caption_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or is_law_img_mismatch or len(paras) < 3:
+        if has_caption_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or is_law_img_mismatch or has_double_dot or len(paras) < 3:
             pass # 건너뛰어 아래 3단계 build_full_news_article 실행
         else:
             publisher = existing.get('source_name')
