@@ -37,6 +37,76 @@ def clean_news_title(title):
     t = re.sub(r'\([^\)]*(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN)[^\)]*\)\s*', '', t, flags=re.IGNORECASE)
     return t.strip()
 
+def rewrite_news_title(title, paragraphs=None, category='전체'):
+    """
+    원문 뉴스의 핵심 키워드(기업명, 인물, 주요 수치, 사건)는 보존하되,
+    원문과 동일/유사하지 않게 자연스러운 고유 헤드라인으로 재구성
+    """
+    if not title:
+        return "실시간 주요 뉴스 속보"
+        
+    t = clean_news_title(title)
+    
+    # 1. 인용원 / 증권사 / 취재원 접두어 자연스럽게 분리
+    t = re.sub(r'^[가-힣a-zA-Z0-9]+(?:증권|투자증권|연구원|연구위원)\s*[\":\']\s*', '', t)
+    t = re.sub(r'^[가-힣]{2,4}\s*(?:기자|특파원|대표|장관|총리|위원장|부총리)\s*[\":\']\s*', '', t)
+    t = t.strip('\"\' ')
+
+    # 2. 구분 기호(… 또는 ... 또는 - 또는 |)를 기준으로 분절 분석
+    parts = re.split(r'…|\.\.\.', t)
+    
+    if len(parts) >= 2:
+        front = parts[0].strip().strip('\"\' ')
+        back = parts[1].strip().strip('\"\' ')
+        
+        # 앞부분 정제 및 문맥 보강
+        front = re.sub(r'([가-힣a-zA-Z0-9]+),\s*파업', r'\1 파업 여파로', front)
+        front = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1 ', front)
+
+        # 뒷부분 서술어 재창작
+        if any(w in back for w in ['목표가↑', '목표가 ↑', '상향', '목표가상향']):
+            back_new = '수익성 개선 기대에 목표가 상향'
+        elif any(w in back for w in ['목표가↓', '목표가 ↓', '하향']):
+            back_new = '업황 둔화 우려에 목표가 하향 조정'
+        elif any(w in back for w in ['차질', '비상', '난항']):
+            back_new = '연간 사업 계획 차질 우려'
+        elif any(w in back for w in ['급등', '폭등', '랠리']):
+            back_new = '가파른 강세 지속에 추가 상승 여력 주목'
+        elif any(w in back for w in ['급락', '폭락', '약세', '하락']):
+            back_new = '하방 압력 심화에 시장 불안 가중'
+        elif any(w in back for w in ['출시', '공개', '선보여']):
+            back_new = '공식 공개로 글로벌 시장 공략 시동'
+        elif any(w in back for w in ['체결', '협약', '맞손']):
+            back_new = '공식 체결로 사업 시너지 본격화'
+        elif any(w in back for w in ['착수', '돌입', '시작']):
+            back_new = '본격 돌입으로 경쟁력 제고 총력'
+        elif any(w in back for w in ['확대', '확장']):
+            back_new = '고부가 제품군 확대 본격화'
+        elif any(w in back for w in ['돌파', '신고가']):
+            back_new = '기록 경신하며 상승 랠리 가속'
+        elif any(w in back for w in ['우려', '경고']):
+            back_new = '우려 확산에 향후 대응책 분수령'
+        else:
+            back_new = f'{back} 소식에 이목 집중'
+            
+        return f"{front}…{back_new}"
+        
+    else:
+        # 단일 문장형 헤드라인 변환
+        cand = t
+        cand = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1 ', cand)
+        if any(w in cand for w in ['확대', '확장']):
+            cand = re.sub(r'(?:확대|확장)$', '확대 본격화', cand)
+        elif any(w in cand for w in ['상향', '목표가↑']):
+            cand = re.sub(r'(?:상향|목표가↑)$', '목표가 잇단 상향', cand)
+        elif any(w in cand for w in ['차질', '난항']):
+            cand = f"{cand}…연간 목표 비상"
+        elif any(w in cand for w in ['우려', '경고']):
+            cand = f"{cand}…시장 긴장감 고조"
+        else:
+            cand = f"{cand}…세부 동향에 쏠린 눈"
+        return cand
+
 # 문장 어미 자연스러운 뉴스체 변환
 ENDING_RULES = [
     (r'것으로 알려졌다\.', '것으로 전해졌습니다.'),
@@ -98,8 +168,7 @@ def local_rewrite_paragraphs(paragraphs):
 
 def generate_3line_summary(title, paragraphs):
     """기사 핵심 팩트에서 깔끔하고 절제된 3줄 요약 추출"""
-    clean_title = clean_news_title(title)
-    clean_title = re.sub(r'\[[^\]]*\]|\([^\)]*\)', '', clean_title).strip()
+    clean_title = title.strip()
     
     candidates = []
     for p in paragraphs:
@@ -110,14 +179,13 @@ def generate_3line_summary(title, paragraphs):
         sentences = [s.strip() for s in cleaned.split('.') if len(s.strip()) > 15]
         for s in sentences:
             # 핵심 수치나 키워드가 포함된 문장 우선 선별
-            if any(c in s for c in ['%', '억원', '달러', '상향', '하향', '발표', '전망', '증가', '감소', '기록', '유지', '출시']):
-                # 언론사명이나 기자명 포함 여부 재검증
+            if any(c in s for c in ['%', '억원', '달러', '상향', '하향', '발표', '전망', '증가', '감소', '기록', '유지', '출시', '생산', '차질']):
                 clean_s = clean_news_line(s)
                 if clean_s not in candidates and clean_s != clean_title:
                     candidates.append(clean_s)
-                    if len(candidates) >= 2:
+                    if len(candidates) >= 3:
                         break
-        if len(candidates) >= 2:
+        if len(candidates) >= 3:
             break
 
     points = [clean_title]
@@ -152,14 +220,15 @@ def call_gemini_news_writer(api_key, title, paragraphs, category):
 {body_input}
 
 [작성 수칙]
-1. [언론사명 및 기자명 절대 배제]: '연합뉴스', '뉴스1' 등 특정 언론사 이름이나 기자 이름, 이메일은 본문에 절대 넣지 마십시오.
-2. [풍성한 본문 분량 유지]: 요약으로 줄이지 말고, 실제 신문 기사처럼 문단을 자연스럽게 나누어 4~6개의 온전하고 풍성한 뉴스 본문 문단(paragraphs)으로 작성하십시오.
-3. [3줄 핵심 요약]: 기사 맨 앞에 들어갈 짧고 명쾌한 3줄 요약(summary_points)을 작성하십시오.
-4. [문체]: 신뢰할 수 있는 단정하고 정중한 보도체(~했습니다, ~밝혔습니다, ~설명했습니다, ~전망됩니다)로 작성하십시오.
-5. 반드시 오직 유효한 JSON 형식으로만 응답하십시오:
+1. [헤드라인 독자적 재작성 (핵심)]: 원안 헤드라인을 그대로 복사하거나 일부만 자르지 마십시오. 기사의 핵심 키워드(기업명, 인물명, 주요 수치, 핵심 사건)는 반드시 정확하게 살리되, 원문과 동일하거나 유사하지 않게 신선하고 전문적인 정통 신문 헤드라인 문장으로 완전히 새롭게 재작성하십시오. (따옴표 단순 나열 지양)
+2. [언론사명 및 기자명 절대 배제]: '연합뉴스', '뉴스1' 등 특정 언론사 이름이나 기자 이름, 이메일은 제목과 본문에 절대 넣지 마십시오.
+3. [풍성한 본문 분량 유지]: 요약으로 줄이지 말고, 실제 신문 기사처럼 문단을 자연스럽게 나누어 4~6개의 온전하고 풍성한 뉴스 본문 문단(paragraphs)으로 작성하십시오.
+4. [3줄 핵심 요약]: 기사 맨 앞에 들어갈 짧고 명쾌한 3줄 요약(summary_points)을 작성하십시오.
+5. [문체]: 신뢰할 수 있는 단정하고 정중한 보도체(~했습니다, ~밝혔습니다, ~설명했습니다, ~전망됩니다)로 작성하십시오.
+6. 반드시 오직 유효한 JSON 형식으로만 응답하십시오:
 
 {{
-  "ai_title": "세련된 정통 신문 기사 헤드라인",
+  "ai_title": "독자적이고 완성도 높은 정통 신문 기사 헤드라인",
   "summary_points": [
     "핵심 요약 1",
     "핵심 요약 2",
@@ -224,13 +293,14 @@ def build_full_news_article(title, raw_paragraphs, site_cfg=None, url="", catego
 
     # 3. 로컬 지능형 뉴스 작성 엔진 폴백
     if not article_result or not article_result.get('paragraphs'):
-        summary_pts = generate_3line_summary(clean_raw_title, cleaned_input)
+        new_title = rewrite_news_title(clean_raw_title, cleaned_input, category)
+        summary_pts = generate_3line_summary(new_title, cleaned_input)
         rewritten_paras = local_rewrite_paragraphs(cleaned_input)
         if not rewritten_paras:
-            rewritten_paras = [f"{clean_raw_title} 소식이 공식 전해졌습니다. 관련 세부 팩트와 배경에 대해 시장 및 관계자들의 관심이 집중되고 있습니다."]
+            rewritten_paras = [f"{new_title} 관련 세부 팩트와 배경에 대해 시장 및 관계자들의 관심이 집중되고 있습니다."]
 
         article_result = {
-            "ai_title": clean_raw_title,
+            "ai_title": new_title,
             "summary_points": summary_pts,
             "paragraphs": rewritten_paras
         }

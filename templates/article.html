@@ -218,9 +218,6 @@
         {% if article.main_img %}
         <figure class="article-view-hero-figure">
             <img src="{{ article.main_img }}" alt="{{ article.title }}" class="article-hero-img" referrerpolicy="no-referrer" onerror="this.parentElement.style.display='none'">
-            {% if article.caption and (not article.paragraphs or article.paragraphs[0] != article.caption) %}
-            <figcaption class="article-hero-caption" style="white-space: pre-line;">{{ article.caption }}</figcaption>
-            {% endif %}
         </figure>
         {% endif %}
 

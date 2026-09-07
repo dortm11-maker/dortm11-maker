@@ -1070,7 +1070,7 @@ def fetch_article_detail(url):
                 return cached_data
 
     from services.curation_db import get_curated_article_by_url
-    from services.ai_rewriter import build_full_news_article, clean_news_title
+    from services.ai_rewriter import build_full_news_article, clean_news_title, rewrite_news_title
 
     # 1. Curation DB에 유효한 본문 문단이 저장되어 있는 경우 즉시 반환
     existing = get_curated_article_by_url(url)
@@ -1087,16 +1087,28 @@ def fetch_article_detail(url):
                 else:
                     publisher = '주요 언론사'
 
+            orig_t = clean_news_title(existing.get('original_title', ''))
+            current_ai_title = existing.get('ai_title', '')
+            # 기존에 원문과 똑같이 저장된 제목이 있다면 독자적 헤드라인으로 즉시 변환
+            if not current_ai_title or current_ai_title == orig_t or current_ai_title == existing.get('original_title'):
+                final_title = rewrite_news_title(orig_t, paras, existing.get('category', '전체'))
+            else:
+                final_title = current_ai_title
+
+            # 3줄 요약의 첫 번째 줄도 원문과 너무 유사하면 재구성된 제목으로 정돈
+            if summary_pts and (summary_pts[0] == orig_t or summary_pts[0] == existing.get('original_title')):
+                summary_pts[0] = final_title
+
             result = {
                 'id': existing.get('id'),
-                'title': existing.get('ai_title') or clean_news_title(existing.get('original_title', '')),
+                'title': final_title,
                 'original_title': existing.get('original_title'),
                 'publisher': publisher,
                 'pub_logo': '📰',
                 'pub_date': existing.get('published_at', ''),
                 'author': '',
                 'main_img': existing.get('ai_image', ''),
-                'caption': '라이선스 확인된 상업용 고화질 테마 이미지',
+                'caption': '',
                 'summary_points': summary_pts,
                 'paragraphs': paras,
                 'url': existing.get('original_url') or url,
@@ -1144,7 +1156,7 @@ def fetch_article_detail(url):
         'pub_date': pub_date,
         'author': '',
         'main_img': art['main_img'],
-        'caption': '라이선스 확인된 상업용 고화질 테마 이미지',
+        'caption': '',
         'summary_points': art['summary_points'],
         'paragraphs': art['paragraphs'],
         'url': url,
