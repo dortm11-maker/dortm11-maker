@@ -93,6 +93,28 @@ PREMIUM_STOCK_IMAGES = {
         'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=85',
         'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=1200&q=85',
         'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=85'
+    ],
+
+    # 7. 통신 / 모바일 / 스마트 라이프 (LG유플러스, SKT, KT, 모바일, 5G)
+    'telecom': [
+        # 모바일 스마트폰 라이프스타일
+        'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=85',
+        # 세련된 스마트폰 앱 및 디지털 서비스
+        'https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&w=1200&q=85',
+        # 5G 통신망 및 스마트 커넥티비티
+        'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=85'
+    ],
+
+    # 8. 쇼핑 / 유통 / 명절 / 멤버십 (추석, 선물, 장보기, 외식, 나들이)
+    'shopping_life': [
+        # 모던 라이프스타일 쇼핑 & 멤버십 혜택
+        'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=85',
+        # 명절 선물 및 프리미엄 패키지
+        'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=1200&q=85',
+        # 활기찬 백화점 및 마트 장보기
+        'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1200&q=85',
+        # 외식 및 가족 나들이 라이프
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=85'
     ]
 }
 
@@ -102,6 +124,10 @@ NEWS_STOCK_CATALOG = PREMIUM_STOCK_IMAGES
 KEYWORD_CATEGORY_RULES = [
     # 자동차/현대차/모빌리티 키워드 (최우선 판별)
     (r'현대차|현대자동차|기아|자동차|완성차|제네시스|아이오닉|전기차|팰리세이드|아반떼|투싼|카니발|쏘나타|그랜저|모터스|파업.*생산|차량|모빌리티', 'auto'),
+    # 통신 / 모바일 / 통신사 키워드
+    (r'lg유플러스|유플러스|sk텔레콤|skt|kt|통신사|5g|유플투쁠|멤버십|통신|요금제', 'telecom'),
+    # 쇼핑 / 명절 / 추석 / 소비 / 유통 키워드
+    (r'추석|명절|쇼핑|장보기|선물세트|외식|나들이|화담숲|할인|이마트|백화점|소비자|유통|마트|생필품', 'shopping_life'),
     # 부동산 키워드
     (r'부동산|아파트|분양|청약|전세|월세|매매|집값|주택|빌라|재개발|재건축|다세대|토지|오피스텔|건설|시행사|시공사|국토부|보증금|공동주택|단지', 'realestate'),
     # 증권 키워드
@@ -109,9 +135,9 @@ KEYWORD_CATEGORY_RULES = [
     # 경제 키워드
     (r'경제|금리|환율|인플레|물가|한국은행|기준금리|수출|수입|무역|gdp|소비자물가|재정|국채|금융|은행|외환|고용|경기침체|유가|원자재', 'economy'),
     # IT/과학 키워드
-    (r'인공지능|ai|챗gpt|클라우드|빅데이터|소프트웨어|스마트폰|로봇|우주|양자|통신|사이버', 'tech'),
-    # 법조/재판/법원 키워드
-    (r'법원|재판|판결|소송|검찰|기소|변호사|대법원|헌법재판소|항소|구속|영장|형사|민사', 'law_policy')
+    (r'인공지능|ai|챗gpt|클라우드|빅데이터|소프트웨어|스마트폰|로봇|우주|양자|사이버', 'tech'),
+    # 법조/재판/법원 키워드 (재판매 등 오작동 방지: 독립 단어로만 매칭)
+    (r'법원|법정|판결|소송|검찰|기소|변호사|대법원|헌법재판소|항소|구속영장|형사재판|민사소송|(?<![가-힣])재판(?![가-힣])', 'law_policy')
 ]
 
 
@@ -124,6 +150,14 @@ def detect_article_topic(title, text="", category=""):
     # 현대차/완성차/자동차 키워드 최우선 검출
     if re.search(r'현대차|현대자동차|기아|자동차|완성차|제네시스|아이오닉|전기차|팰리세이드|아반떼|투싼|카니발|쏘나타|그랜저|파업.*생산', full_text):
         return 'auto'
+
+    # 통신 / 모바일 우선 검출
+    if re.search(r'lg유플러스|유플러스|sk텔레콤|skt|kt|통신사|유플투쁠', full_text):
+        return 'telecom'
+
+    # 명절 / 쇼핑 / 외식 우선 검출
+    if re.search(r'추석|명절|쇼핑|장보기|선물세트|외식|나들이|화담숲|멤버십', full_text):
+        return 'shopping_life'
 
     if category in ['부동산']:
         return 'realestate'

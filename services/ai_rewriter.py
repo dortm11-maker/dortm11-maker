@@ -12,20 +12,53 @@ import requests
 from services.curation_db import save_curated_article, get_curated_article_by_url
 from services.image_enhancer import get_premium_stock_image
 
-# 언론사 바이라인 및 출처 표기 정규식 패턴 (본문에서 완전 삭제)
-BYLINE_PATTERNS = [
-    r'^\s*\(.*?(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문|아이뉴스24|파이낸셜뉴스).*?\)\s*',
-    r'^\s*\[.*?(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문).*?\]\s*',
-    r'[\s\-_\|]+(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문|아이뉴스24|파이낸셜뉴스)\s*$',
-    r'[가-힣]{2,4}\s*(?:기자|특파원|논설위원|연구위원)\s*=\s*',
-    r'[가-힣]{2,4}\s*기자(?:\s|$)',
-    r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+',
-    r'<저작권자.*?>',
-    r'무단\s*전재.*?금지',
-    r'재배포\s*금지',
-    r'DB\s*금지',
-    r'송고'
-]
+def clean_news_line(text):
+    """
+    언론사명, 바이라인, 이메일, 저작권 문구, 사진 캡션 찌꺼기를 철저하게 제거
+    """
+    if not text:
+        return ""
+    t = text.strip()
+
+    # 1. 사진 캡션 괄호 및 저작권/재판매/DB금지 괄호 전체 삭제 (부분 삭제로 인한 찌꺼기 방지)
+    t = re.sub(r'\[[^\]]*(?:제공|재판매|DB|금지|저작권|사진|자료|그래픽|캡처|무단|전재|배포|송고|연합뉴스|뉴시스|뉴스1)[^\]]*\]', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'\([^)]*(?:제공|재판매|DB|금지|저작권|사진|자료|그래픽|캡처|무단|전재|배포|송고|연합뉴스|뉴시스|뉴스1)[^)]*\)', '', t, flags=re.IGNORECASE)
+
+    # 2. 언론사 바이라인 괄호 전체 삭제
+    t = re.sub(r'^\s*\(.*?(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문|아이뉴스24|파이낸셜뉴스).*?\)\s*', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'^\s*\[.*?(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문).*?\]\s*', '', t, flags=re.IGNORECASE)
+
+    # 3. 기자 이름 및 이메일, 종목코드 제거
+    t = re.sub(r'^[가-힣]{2,4}\s*(?:기자|특파원|논설위원|연구위원)\s*=\s*', '', t)
+    t = re.sub(r'[가-힣]{2,4}\s*(?:기자|특파원|논설위원|연구위원)\s*=\s*', '', t)
+    t = re.sub(r'\[[0-9]{6}\]', '', t)  # 주식 종목코드 [032640] 등 제거
+    t = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', t)
+
+    # 4. 송고 일시 제거 (2026년09월07일 09시10분, 2026.09.07 09:10 등)
+    t = re.sub(r'\d{4}년\s*\d{1,2}월\s*\d{1,2}일(?:\s*\d{1,2}시(?:\s*\d{1,2}분)?)?', '', t)
+    t = re.sub(r'\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}(?:\s*\d{1,2}:\d{1,2}(?::\d{1,2})?)?', '', t)
+    t = re.sub(r'송고시간\s*:?.*', '', t)
+
+    # 5. 기타 잔여물 제거
+    t = re.sub(r'\[\s*\]|\(\s*\)', '', t)
+    return t.strip(' \t-=\r\n')
+
+def is_valid_news_paragraph(line):
+    """
+    찌꺼기 캡션, 단순 날짜 줄, 부제목 등을 걸러내고 순수한 본문 설명 문단만 판별
+    """
+    if not line or len(line) < 15:
+        return False
+    # 사진 캡션 찌꺼기 잔여물 검출
+    if re.search(r'제공|재판매|DB\s*금지|전재|무단|송고', line):
+        return False
+    # 순수 날짜/시간 줄 검출
+    if re.search(r'^\s*\d{4}[년.\-/]\s*\d{1,2}[월.\-/]', line) and len(line) < 30:
+        return False
+    # 마침표나 종결 어미가 없는 짧은 부제목 줄 검출
+    if not line.endswith('.') and not line.endswith('다') and len(line) < 40:
+        return False
+    return True
 
 def clean_news_title(title):
     """헤드라인에서 언론사명 꼬리표 (| 연합뉴스, [매일경제] 등) 완전 제거"""
@@ -39,72 +72,56 @@ def clean_news_title(title):
 
 def rewrite_news_title(title, paragraphs=None, category='전체'):
     """
-    원문 뉴스의 핵심 키워드(기업명, 인물, 주요 수치, 사건)는 보존하되,
-    원문과 동일/유사하지 않게 자연스러운 고유 헤드라인으로 재구성
+    원문 뉴스의 실제 핵심 내용(키워드, 주제, 혜택, 수치)을 100% 온전히 유지하면서,
+    정통 신문 기사 문체로 세련되게 다듬는 헤드라인 재구성 엔진
+    (※ 임의의 엉뚱한 단어 치환 절대 금지)
     """
     if not title:
         return "실시간 주요 뉴스 속보"
         
     t = clean_news_title(title)
     
-    # 1. 인용원 / 증권사 / 취재원 접두어 자연스럽게 분리
+    # 1. 취재원/인용원 접두어 자연스럽게 정돈
     t = re.sub(r'^[가-힣a-zA-Z0-9]+(?:증권|투자증권|연구원|연구위원)\s*[\":\']\s*', '', t)
     t = re.sub(r'^[가-힣]{2,4}\s*(?:기자|특파원|대표|장관|총리|위원장|부총리)\s*[\":\']\s*', '', t)
     t = t.strip('\"\' ')
 
-    # 2. 구분 기호(… 또는 ... 또는 - 또는 |)를 기준으로 분절 분석
+    # 2. 구분 기호(… 또는 ... 또는 - 또는 |)를 기준으로 분절 정돈
     parts = re.split(r'…|\.\.\.', t)
     
     if len(parts) >= 2:
         front = parts[0].strip().strip('\"\' ')
         back = parts[1].strip().strip('\"\' ')
         
-        # 앞부분 정제 및 문맥 보강
-        front = re.sub(r'([가-힣a-zA-Z0-9]+),\s*파업', r'\1 파업 여파로', front)
-        front = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1 ', front)
-
-        # 뒷부분 서술어 재창작
-        if any(w in back for w in ['목표가↑', '목표가 ↑', '상향', '목표가상향']):
-            back_new = '수익성 개선 기대에 목표가 상향'
-        elif any(w in back for w in ['목표가↓', '목표가 ↓', '하향']):
-            back_new = '업황 둔화 우려에 목표가 하향 조정'
-        elif any(w in back for w in ['차질', '비상', '난항']):
-            back_new = '연간 사업 계획 차질 우려'
-        elif any(w in back for w in ['급등', '폭등', '랠리']):
-            back_new = '가파른 강세 지속에 추가 상승 여력 주목'
-        elif any(w in back for w in ['급락', '폭락', '약세', '하락']):
-            back_new = '하방 압력 심화에 시장 불안 가중'
-        elif any(w in back for w in ['출시', '공개', '선보여']):
-            back_new = '공식 공개로 글로벌 시장 공략 시동'
-        elif any(w in back for w in ['체결', '협약', '맞손']):
-            back_new = '공식 체결로 사업 시너지 본격화'
-        elif any(w in back for w in ['착수', '돌입', '시작']):
-            back_new = '본격 돌입으로 경쟁력 제고 총력'
-        elif any(w in back for w in ['확대', '확장']):
-            back_new = '고부가 제품군 확대 본격화'
-        elif any(w in back for w in ['돌파', '신고가']):
-            back_new = '기록 경신하며 상승 랠리 가속'
-        elif any(w in back for w in ['우려', '경고']):
-            back_new = '우려 확산에 향후 대응책 분수령'
+        # 앞부분 쉼표 등 정돈
+        front = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1, ', front)
+        
+        # 뒷부분: 원래 명사구의 의미를 보존하면서 서술어만 품격 있게 확장
+        if back.endswith('확대'):
+            back_new = re.sub(r'확대$', '혜택 대폭 확대', back) if '혜택' not in back else re.sub(r'확대$', '대폭 확대', back)
+        elif back.endswith('강화'):
+            back_new = re.sub(r'강화$', '본격 강화', back)
+        elif back.endswith('출시'):
+            back_new = re.sub(r'출시$', '공식 출시', back)
+        elif back.endswith('상향') or '목표가↑' in back:
+            back_new = '수익성 기대에 목표가 잇단 상향'
+        elif back.endswith('하향') or '목표가↓' in back:
+            back_new = '업황 둔화에 목표가 하향 조정'
+        elif any(w in back for w in ['차질', '난항', '비상']):
+            back_new = f'{back} 우려' if not back.endswith('우려') else back
         else:
-            back_new = f'{back} 소식에 이목 집중'
+            back_new = back
             
         return f"{front}…{back_new}"
         
     else:
-        # 단일 문장형 헤드라인 변환
+        # 단일 문장형 헤드라인
         cand = t
-        cand = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1 ', cand)
-        if any(w in cand for w in ['확대', '확장']):
-            cand = re.sub(r'(?:확대|확장)$', '확대 본격화', cand)
-        elif any(w in cand for w in ['상향', '목표가↑']):
-            cand = re.sub(r'(?:상향|목표가↑)$', '목표가 잇단 상향', cand)
-        elif any(w in cand for w in ['차질', '난항']):
-            cand = f"{cand}…연간 목표 비상"
-        elif any(w in cand for w in ['우려', '경고']):
-            cand = f"{cand}…시장 긴장감 고조"
-        else:
-            cand = f"{cand}…세부 동향에 쏠린 눈"
+        cand = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1, ', cand)
+        if cand.endswith('확대'):
+            cand = re.sub(r'확대$', '대폭 확대', cand)
+        elif cand.endswith('강화'):
+            cand = re.sub(r'강화$', '본격 강화', cand)
         return cand
 
 # 문장 어미 자연스러운 뉴스체 변환
@@ -142,17 +159,6 @@ ENDING_RULES = [
     (r'됐습니다됐습니다\.', '됐습니다.')
 ]
 
-def clean_news_line(text):
-    """언론사명, 바이라인, 이메일, 저작권 문구를 말끔하게 제거"""
-    if not text:
-        return ""
-    t = text.strip()
-    for pat in BYLINE_PATTERNS:
-        t = re.sub(pat, '', t, flags=re.IGNORECASE).strip()
-    # 기타 언론사 언급 단어 정제
-    t = re.sub(r'\(사진=.*?\)', '', t)
-    t = re.sub(r'\[사진=.*?\]', '', t)
-    return t.strip()
 
 def local_rewrite_paragraphs(paragraphs):
     """본문 각 문단을 매끄럽고 신뢰도 높은 실제 신문 기사 문체로 재가공"""
@@ -209,9 +215,8 @@ def generate_3line_summary(title, paragraphs):
 
 def extract_factual_data(url, title=""):
     """
-    원문 웹페이지에서 저작권 보호 대상이 아닌 '순수 사실(Fact) 및 구체적 수치(숫자, 통계, 목표치)'만 정밀 추출
-    - 기자 바이라인, 언론사명, 저작권 문구 철저 제거
-    - 숫자 단위(%, 만대, 대, 원, 억원, 달러, 배, 분기 등)가 포함된 핵심 팩트 문장만 수집
+    원문 웹페이지에서 저작권 보호 대상인 '언론사 고유 캡션/바이라인/찌꺼기'는 완전히 걷어내고,
+    독자에게 유용한 실제 기사의 사실 설명 문단과 핵심 수치(Fact Points)를 순서대로 온전하게 추출
     """
     facts = []
     if not url or not url.startswith('http'):
@@ -256,22 +261,20 @@ def extract_factual_data(url, title=""):
 
             for raw_line in lines:
                 cleaned = clean_news_line(raw_line)
-                if not cleaned or len(cleaned) < 15:
+                
+                # 유효한 본문 문단 검증 (캡션 찌꺼기, 날짜줄, 부제목 완전 배제)
+                if not is_valid_news_paragraph(cleaned):
                     continue
 
                 # 기자명 접두어 정제
-                cleaned = re.sub(r'^[가-힣]{2,4}\s*(?:연구원|연구위원|기자|위원)\s*은?\s*(?:이날 보고서에서)?\s*', '증권가 분석에 따르면 ', cleaned)
+                cleaned = re.sub(r'^[가-힣]{2,4}\s*(?:연구원|연구위원|기자|위원)\s*은?\s*(?:이날 보고서에서)?\s*', '업계 분석에 따르면 ', cleaned)
                 cleaned = re.sub(r'[가-힣]{2,4}\s*연구원은?\s*', '전문가들은 ', cleaned)
                 cleaned = re.sub(r'\[[0-9]{6}\]', '', cleaned)  # 종목코드 제거
                 cleaned = cleaned.strip()
 
-                # 숫자, 수치, 실적 관련 핵심 지표 포함 여부 판별
-                has_number = bool(re.search(r'\d+(?:[.,]\d+)?\s*(?:%|억원|조원|만대|만\s*대|대|원|만원|달러|배|분기|년|월)', cleaned))
-                has_keywords = any(k in cleaned for k in ['목표주가', '목표가', '실적', '생산차질', '생산', '판매', '파업', '신차', '매수', '전망', '수출'])
-
-                if (has_number or has_keywords) and cleaned not in facts:
+                if cleaned and cleaned not in facts:
                     facts.append(cleaned)
-                    if len(facts) >= 8:
+                    if len(facts) >= 7:
                         break
 
     except Exception as e:
@@ -281,12 +284,12 @@ def extract_factual_data(url, title=""):
 
 def local_generate_issue_briefing(title, category="전체", fact_points=None):
     """
-    공개된 헤드라인 이슈와 구체적 수치 팩트(Fact Points)를 결합하여
-    실제 전문 신문 기사와 완벽히 유사한 구체적이고 풍성한 4~5문단 기사 및 3줄 요약 생성
+    원문의 실제 알짜 정보(혜택, 일정, 수치, 사실)를 바탕으로
+    누구나 쉽게 이해할 수 있는 체계적이고 완성도 높은 4~5문단 정통 기사 및 고유 3줄 요약 생성
     """
     clean_t = rewrite_news_title(title, category=category)
     
-    # 팩트 데이터가 있는 경우 구체적 수치를 반영한 고품질 기사 생성
+    # 팩트 데이터가 있는 경우 원문의 알짜 정보를 온전히 살린 정통 기사 구성
     if fact_points and len(fact_points) >= 2:
         paras = []
         for f in fact_points[:6]:
@@ -297,28 +300,44 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
             if p and len(p) >= 15:
                 paras.append(p)
 
-        # 문단이 부족할 경우 문맥 보강
-        if len(paras) < 4:
-            paras.append(f"시장 전문가들은 이번 {clean_t} 사안이 단기적인 이슈에 머물지 않고 관련 산업계 전반의 공급망 및 경영 환경에 실질적인 변수로 작용할 것으로 분석했습니다.")
-        if len(paras) < 4:
-            paras.append("향후 전개될 세부 후속 조치와 주요 이해관계자들의 대응 방향에 따라 향후 실적 및 시장 반응이 결정적인 분수령을 맞이할 것으로 전망됩니다.")
-
-        # 구체적인 수치 기반 3줄 요약 구성
+        # 3줄 핵심 요약 구성 (절대 중복 없는 고유한 3대 팩트 선별)
         summary = []
+        seen_sum = set()
+
+        # 1) 첫 번째 요약: 기사 핵심 사안 개요
+        s1 = clean_t
+        summary.append(s1)
+        seen_sum.add(s1)
+
+        # 2) 두 번째 요약: 구체적인 수치/일정/혜택이 포함된 문장 발췌
         for p in paras:
-            # 수치(%, 만대, 억원, 만원 등)가 들어있는 문장을 우선 요약으로 발췌
-            if any(num in p for num in ['%', '만대', '만 대', '원', '억원', '달러', '대']):
-                s_part = p.split('.')[0].strip()
-                if len(s_part) >= 15 and s_part not in summary:
-                    summary.append(s_part)
-                    if len(summary) >= 3:
-                        break
-        
-        # 요약 보강
-        if len(summary) < 3:
-            summary.insert(0, f"{clean_t} 관련 주요 현황 대두")
-        while len(summary) < 3:
-            summary.append("관련 세부 동향 및 후속 대응책에 업계와 시장의 관심 고조")
+            s_cand = p.split('.')[0].strip()
+            if any(num in s_cand for num in ['%', '만대', '만 대', '원', '억원', '달러', '대', '일', '월', '대표']):
+                if len(s_cand) >= 15 and s_cand not in seen_sum:
+                    summary.append(s_cand)
+                    seen_sum.add(s_cand)
+                    break
+
+        # 3) 세 번째 요약: 후속 조치 또는 특별 대상 혜택 발췌
+        for p in reversed(paras):
+            s_cand = p.split('.')[0].strip()
+            if len(s_cand) >= 15 and s_cand not in seen_sum:
+                summary.append(s_cand)
+                seen_sum.add(s_cand)
+                break
+
+        # 요약이 3개 미만일 때 서로 다른 고유 보강 문장 채움
+        fallback_summaries = [
+            f"{clean_t} 관련 세부 맞춤 혜택 본격 가동",
+            "명절 및 실생활 물가 부담 완화를 위한 제휴 할인 지원",
+            "향후 고객 참여 일정 및 세부 이용 안내 지속 제공"
+        ]
+        for fs in fallback_summaries:
+            if len(summary) >= 3:
+                break
+            if fs not in seen_sum:
+                summary.append(fs)
+                seen_sum.add(fs)
 
         return {
             "ai_title": clean_t,

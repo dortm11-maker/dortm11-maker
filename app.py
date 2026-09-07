@@ -1008,14 +1008,19 @@ def fetch_article_detail(url):
         ai_cnt = existing['ai_content']
         paras = ai_cnt.get('paragraphs', [])
         summary_pts = ai_cnt.get('summary_points', [])
-        # 기존 글이 추상적 템플릿이거나 수치가 부족한 경우, 혹은 이미지가 없는 경우 최신 수치 반영 엔진으로 업그레이드
+        # 기존 글이 추상적 템플릿이거나 찌꺼기 캡션, 엉뚱한 제목, 중복 요약이 있는 경우 최신 엔진으로 업그레이드
         from services.image_enhancer import get_premium_stock_image
         orig_t = clean_news_title(existing.get('original_title', ''))
-        has_numbers = any(re.search(r'\d+(?:[.,]\d+)?\s*(?:%|억원|조원|만대|만\s*대|대|원|만원|달러)', p) for p in paras)
+        current_ai_t = existing.get('ai_title', '')
+        
+        has_caption_junk = any(re.search(r'제공|재판매|DB\s*금지|송고시간|송고|\d{4}년\s*\d{1,2}월\s*\d{1,2}일\s*\d{1,2}시', p) for p in paras)
+        has_awkward_title = '고부가 제품군' in current_ai_t and '고부가' not in orig_t
+        has_duplicate_summary = len(summary_pts) > 1 and len(summary_pts) != len(set(summary_pts))
         is_abstract_template = any('단순한 일회성 현상에 그치지 않고' in p for p in paras)
+        is_law_img_mismatch = existing.get('ai_image', '').find('photo-1589829545856') != -1 and '법' not in orig_t
 
-        # 수치가 없거나 추상 템플릿인 경우 새로 구체적 수치 반영 기사 생성
-        if not has_numbers or is_abstract_template:
+        # 결함이 감지되면 새로 정밀 기사 생성으로 업그레이드
+        if has_caption_junk or has_awkward_title or has_duplicate_summary or is_abstract_template or is_law_img_mismatch or len(paras) < 3:
             pass # 건너뛰어 아래 3단계 build_full_news_article 실행
         else:
             publisher = existing.get('source_name')
