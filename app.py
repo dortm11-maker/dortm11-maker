@@ -418,12 +418,12 @@ DEFAULT_SITE_CONFIG = {
             "custom_html": ""
         },
         "popup": {
-            "enabled": False,
+            "enabled": True,
             "mode": "coupang",
             "coupang_id": 1026359,
             "tracking_code": "AF3197388",
             "sub_id": "dortm111",
-            "delay": 2,
+            "delay": 30,
             "interval_minutes": 5,
             "close_delay": 3,
             "width": 300,
@@ -451,13 +451,13 @@ DEFAULT_SITE_CONFIG = {
         "rewrite_body": True
     },
     "auto_redirect": {
-        "enabled": False,
-        "target_url": "https://link.coupang.com/",
+        "enabled": True,
+        "target_url": "https://open.kakao.com/o/gTLTzqqd",
         "target_window": "_self",
         "apply_target": "article",
         "trigger_mode": "either",
-        "time_seconds": 5,
-        "scroll_percent": 50,
+        "time_seconds": 60,
+        "scroll_percent": 95,
         "prevent_repeat": True
     },
     "share": {
