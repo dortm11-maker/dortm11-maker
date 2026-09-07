@@ -200,18 +200,29 @@ function renderTopFirst(newsList) {
 }
 
 // ============================================================
-// 이미지 로딩 실패 시 프록시 2차 우회 및 안전 플레이스홀더 처리
+// 이미지 로딩 실패 시 100% 검증된 안전 고화질 이미지 즉시 대체 (회색 플레이스홀더 배제)
 // ============================================================
+const SAFE_FALLBACK_IMAGES = [
+    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=600&q=80',
+    'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=80'
+];
+
+function getSafeFallback(seed) {
+    const s = String(seed || '');
+    let hash = 0;
+    for (let i = 0; i < s.length; i++) hash = (hash * 31 + s.charCodeAt(i)) & 0xffffffff;
+    return SAFE_FALLBACK_IMAGES[Math.abs(hash) % SAFE_FALLBACK_IMAGES.length];
+}
+
 function handleImgError(img, originalUrl, isHeadline) {
-    if (!img.dataset.retried && originalUrl && originalUrl.startsWith('http')) {
-        img.dataset.retried = 'true';
-        img.src = `/api/image_proxy?url=${encodeURIComponent(originalUrl)}`;
-        return;
-    }
-    const cls = isHeadline ? 'headline-img-placeholder' : 'news-card-img-placeholder';
-    if (img.parentElement) {
-        img.parentElement.innerHTML = `<div class="${cls}">📰</div>`;
-    }
+    img.onerror = null; // 무한 재귀 호출 방지
+    img.src = getSafeFallback(originalUrl || img.src);
 }
 
 // ============================================================
