@@ -731,54 +731,25 @@ def normalize_img_url(img_url):
         return 'https:' + img_url
     return img_url
 
-# 사진이 전혀 없는 단신 기사를 위한 고화질 테마 이미지 풀
-REALESTATE_FALLBACK_IMAGES = [
-    'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&auto=format&fit=crop&q=80',
-    'https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=600&auto=format&fit=crop&q=80',
-]
-
-NEWS_THEME_FALLBACKS = {
-    '전체': [
-        'https://images.unsplash.com/photo-1585829365295-ab7cd400c167?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1526470608268-f674ce90ebd4?w=600&auto=format&fit=crop&q=80',
-    ],
-    '정치': [
-        'https://images.unsplash.com/photo-1541872703-74c5e44368f9?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1575320181282-9afab399332c?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600&auto=format&fit=crop&q=80',
-    ],
-    '경제': [
-        'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop&q=80',
-    ],
-    '부동산': REALESTATE_FALLBACK_IMAGES,
-    '증권': [
-        'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=600&auto=format&fit=crop&q=80',
-    ],
-    '사회': [
-        'https://images.unsplash.com/photo-1477959858617-67f30bc75b82?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=600&auto=format&fit=crop&q=80',
-    ],
-    'IT/과학': [
-        'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=600&auto=format&fit=crop&q=80',
-    ],
-    '스포츠': [
-        'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&auto=format&fit=crop&q=80',
-    ],
-    '연예': [
-        'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=600&auto=format&fit=crop&q=80',
-        'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=600&auto=format&fit=crop&q=80',
-    ]
-}
+# 고화질 테마 이미지 풀 (services.image_enhancer 연동)
+try:
+    from services.image_enhancer import PREMIUM_STOCK_IMAGES
+    NEWS_THEME_FALLBACKS = {
+        '전체': PREMIUM_STOCK_IMAGES.get('economy', []) + PREMIUM_STOCK_IMAGES.get('society', []),
+        '정치': PREMIUM_STOCK_IMAGES.get('law_policy', []),
+        '경제': PREMIUM_STOCK_IMAGES.get('economy', []),
+        '부동산': PREMIUM_STOCK_IMAGES.get('realestate', []),
+        '증권': PREMIUM_STOCK_IMAGES.get('stock', []),
+        '사회': PREMIUM_STOCK_IMAGES.get('society', []),
+        'IT/과학': PREMIUM_STOCK_IMAGES.get('tech', []),
+        '스포츠': PREMIUM_STOCK_IMAGES.get('sports', []),
+        '연예': PREMIUM_STOCK_IMAGES.get('entertainment', []),
+    }
+except Exception:
+    NEWS_THEME_FALLBACKS = {
+        '전체': ['https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85'],
+        '경제': ['https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85']
+    }
 
 def is_invalid_image(img_url):
     """유효하지 않은 이미지(비어있거나 언론사 로고 플레이트, 배너 광고, 기자 사진)인지 검사"""
@@ -1343,9 +1314,9 @@ def do_fetch_category_news(category, max_per_feed=15):
     # 1. 사건/이슈별 중복 기사 클러스터링 (제목 유사도 & 핵심 명사 결합)
     clusters = cluster_news_items(all_raw_news)
 
-    # 2. 클러스터별 대표 기사 포맷팅 및 안전 이미지 매칭
+    # 2. 클러스터별 대표 기사 포맷팅 및 안전 이미지 매칭 (중복 방지 및 언론사명 비노출)
     curated_items = []
-    pool = NEWS_STOCK_CATALOG.get(category, NEWS_STOCK_CATALOG.get('economy', []))
+    used_page_images = set()
 
     for cl in clusters:
         primary = cl['primary']
@@ -1354,11 +1325,13 @@ def do_fetch_category_news(category, max_per_feed=15):
         cluster_sources = cl.get('cluster_sources', [])
         cluster_count = len(cluster_sources)
 
-        # 상업적 무상 스톡 이미지 매칭 (원문 사진 크롤링 ❌)
-        safe_img = get_premium_stock_image(title, primary.get('summary', ''))
-        if not safe_img and pool:
-            idx = abs(hash(link)) % len(pool)
-            safe_img = pool[idx]
+        # 상업적 무상 스톡 이미지 매칭 (페이지 내 이미지 중복 방지)
+        safe_img = get_premium_stock_image(title, primary.get('summary', ''), category=category, used_images=used_page_images)
+
+        # 언론사명(연합뉴스, 한겨레 등) 직접 노출 배제 -> 카테고리/실시간 브리핑으로 대체
+        display_source = f"{category} 속보" if category and category != '전체' else "실시간 속보"
+        if cluster_count > 1:
+            display_source = f"종합 이슈 ({cluster_count}개사)"
 
         curated_items.append({
             'title': title,
@@ -1366,8 +1339,8 @@ def do_fetch_category_news(category, max_per_feed=15):
             'summary': primary.get('summary', ''),
             'image': safe_img,
             'date': primary.get('date', ''),
-            'source': primary.get('source', '주요 언론사'),
-            'logo': primary.get('logo', '📰'),
+            'source': display_source,
+            'logo': '⚡',
             'category': category,
             'cluster_count': cluster_count,
             'cluster_sources': cluster_sources

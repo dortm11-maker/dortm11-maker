@@ -297,7 +297,7 @@
                     {% endif %}
                 </div>
                 <div class="news-card-body">
-                    <div class="news-card-source">{{ item.logo }} {{ item.source }}</div>
+                    <div class="news-card-source"><span style="background:#f8fafc; color:#475569; font-size:11px; font-weight:600; padding:2px 6px; border-radius:4px; border:1px solid #e2e8f0;">🏷️ {{ item.category or '실시간 이슈' }}</span></div>
                     <div class="news-card-title">{{ item.title }}</div>
                     <div class="news-card-date">{{ item.date }}</div>
                 </div>

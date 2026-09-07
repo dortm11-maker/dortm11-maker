@@ -15,171 +15,253 @@ from PIL import Image, ImageEnhance, ImageDraw
 # ==============================================================================
 # 분야별 프리미엄 4K급 상업용 무료(Unsplash Verified) 스톡 이미지 카탈로그
 # ==============================================================================
+# ==============================================================================
+# 분야별 프리미엄 4K급 상업용 무료(Unsplash Verified) 스톡 이미지 카탈로그 (100종 이상 다채로운 구성)
+# ==============================================================================
 PREMIUM_STOCK_IMAGES = {
-    # 1. 부동산 (아파트, 주택, 재개발, 분양, 청약, 펜트하우스, 도심 주거)
+    # 1. 부동산 (아파트, 주택, 재개발, 분양, 청약, 건축, 인테리어)
     'realestate': [
-        # 최고급 현대식 아파트 단지 및 주거 타워
         'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=85',
-        # 도심 스카이라인 및 신도시 주거 단지 전경
         'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85',
-        # 모던 럭셔리 아파트 인테리어 & 펜트하우스 조망
         'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85',
-        # 주상복합 하이엔드 건축물
         'https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1200&q=85',
-        # 세련된 도심 아파트 야경
         'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=1200&q=85',
-        # 프리미엄 주택 단지 및 건설 현장 조감
         'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=85',
-        # 부동산 계약 및 건축 모델하우스
         'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=85',
-        # 한국 도심 스타일의 쾌적한 주거 빌딩
-        'https://images.unsplash.com/photo-1524813686514-a57563d77d66?auto=format&fit=crop&w=1200&q=85'
+        'https://images.unsplash.com/photo-1524813686514-a57563d77d66?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=1200&q=85'
     ],
 
     # 2. 증권 / 주식 (코스피, 코스닥, 트레이딩, 캔들차트, 반도체, 금융 시장)
     'stock': [
-        # 증권가 트레이딩 룸 실시간 주가 분석 화면
         'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85',
-        # 주식 상승장 캔들 차트 모니터링
         'https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=85',
-        # 글로벌 금융가 및 월스트리트 증권 거래소
         'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=85',
-        # 첨단 반도체 웨이퍼 및 마이크로칩 제조
         'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=85',
-        # 미래형 테크 투자 및 디지털 데이터 분석
         'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?auto=format&fit=crop&w=1200&q=85',
-        # 스마트폰 모바일 주식 MTS 거래
-        'https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85'
+        'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1535320903710-d993d3d77d29?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1612178991541-b48cc8e92a4d?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&w=1200&q=85'
     ],
 
     # 3. 경제 / 금융 (금리, 환율, 통화, 무역, 물가, 은행, 거시경제)
     'economy': [
-        # 글로벌 금융 중심지 대형 은행 본점 빌딩
-        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85',
-        # 골드바 및 금괴 자산 포트폴리오
-        'https://images.unsplash.com/photo-1610375461246-83df859d849d?auto=format&fit=crop&w=1200&q=85',
-        # 글로벌 무역 항만 및 수출입 컨테이너
-        'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=85',
-        # 경제 정책 금융 회의 및 비즈니스 브리핑
-        'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=85',
-        # 화폐 및 경제 지표 분석
-        'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=85'
+        'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1444653614773-995cb1ef9029?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?auto=format&fit=crop&w=1200&q=85'
     ],
 
-    # 4. IT / 과학 / AI (인공지능, 빅데이터, 로봇, 모빌리티)
+    # 4. IT / 과학 / AI / 디지털 (인공지능, 빅데이터, 클라우드, 로봇)
     'tech': [
-        # 초고속 데이터센터 서버 랙
         'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85',
-        # 인공지능 신경망 및 딥러닝 비주얼
         'https://images.unsplash.com/photo-1677442136019-21780efad99a?auto=format&fit=crop&w=1200&q=85',
-        # 미래형 자율주행 및 스마트 모빌리티
-        'https://images.unsplash.com/photo-1508974239320-0a029497e820?auto=format&fit=crop&w=1200&q=85'
+        'https://images.unsplash.com/photo-1508974239320-0a029497e820?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=85'
     ],
 
-    # 5. 법조 / 정책 / 사회 (법원, 국회, 정의, 정책 결정)
+    # 5. 법조 / 정책 / 국회 / 공공 (법원, 국회, 정부, 외교, 공공정책)
     'law_policy': [
-        # 대법원 정의의 여신상 및 법정
         'https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=85',
-        # 정부 청사 및 국회 스타일 회의장
-        'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=85'
+        'https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1575320181282-9afab399332c?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=85'
     ],
 
-    # 6. 자동차 / 모빌리티 / 현대차 (AI 생성 법적 안심 이미지 및 4K 상업용 무료)
+    # 6. 자동차 / 모빌리티 / 운송 (현대차, 전기차, 모터스, 도로)
     'auto': [
-        # 현대차 대표 AI 저작권 안심 생성 이미지 (아이오닉/세단)
         '/static/img/ai/hyundai_car.jpg',
-        # 글로벌 모던 럭셔리 세단 및 전기차
         'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=85',
         'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=85',
         'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=1200&q=85',
-        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=85'
+        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=85'
     ],
 
-    # 7. 통신 / 모바일 / 스마트 라이프 (LG유플러스, SKT, KT, 모바일, 5G)
+    # 7. 통신 / 모바일 / 디지털 라이프 (통신사, 5G, 스마트폰, 플랫폼)
     'telecom': [
-        # 모바일 스마트폰 라이프스타일
         'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=1200&q=85',
-        # 세련된 스마트폰 앱 및 디지털 서비스
         'https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&w=1200&q=85',
-        # 5G 통신망 및 스마트 커넥티비티
-        'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=85'
+        'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=1200&q=85'
     ],
 
-    # 8. 쇼핑 / 유통 / 명절 / 멤버십 (추석, 선물, 장보기, 외식, 나들이)
+    # 8. 유통 / 쇼핑 / 생활 / 명절 (마트, 백화점, 추석선물, 소비, 외식)
     'shopping_life': [
-        # 모던 라이프스타일 쇼핑 & 멤버십 혜택
         'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=85',
-        # 명절 선물 및 프리미엄 패키지
         'https://images.unsplash.com/photo-1513151233558-d860c5398176?auto=format&fit=crop&w=1200&q=85',
-        # 활기찬 백화점 및 마트 장보기
         'https://images.unsplash.com/photo-1578916171728-46686eac8d58?auto=format&fit=crop&w=1200&q=85',
-        # 외식 및 가족 나들이 라이프
-        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=85'
+        'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1526178613552-2b45c6c302f0?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1506617420156-8e4536971650?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&w=1200&q=85'
+    ],
+
+    # 9. 사회 / 환경 / 날씨 / 도시 (사회이슈, 날씨, 환경, 복지, 시민생활)
+    'society': [
+        'https://images.unsplash.com/photo-1477959858617-67f30bc75b82?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1509099836639-18ba1795216d?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?auto=format&fit=crop&w=1200&q=85'
+    ],
+
+    # 10. 스포츠 (축구, 야구, 농구, 골프, 올림픽, 월드컵, 훈련, 경기)
+    'sports': [
+        'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1562077772-3ab12186343b?auto=format&fit=crop&w=1200&q=85'
+    ],
+
+    # 11. 연예 / 문화 / 예술 (공연, 콘서트, 영화, 드라마, 스타, 음악, 전시)
+    'entertainment': [
+        'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=1200&q=85',
+        'https://images.unsplash.com/photo-1518972559570-7cc1309f3229?auto=format&fit=crop&w=1200&q=85'
     ]
 }
 
 NEWS_STOCK_CATALOG = PREMIUM_STOCK_IMAGES
 
-# 키워드 규칙 매핑 테이블
+# 키워드 규칙 매핑 테이블 (확장)
 KEYWORD_CATEGORY_RULES = [
-    # 자동차/현대차/모빌리티 키워드 (최우선 판별)
+    # 자동차/현대차/모빌리티 키워드 (최우선)
     (r'현대차|현대자동차|기아|자동차|완성차|제네시스|아이오닉|전기차|팰리세이드|아반떼|투싼|카니발|쏘나타|그랜저|모터스|파업.*생산|차량|모빌리티', 'auto'),
+    # 스포츠 키워드
+    (r'손흥민|토트넘|축구|야구|프로야구|kbo|월드컵|올림픽|골프|농구|배구|경기|선수|감독|리그|승리|패배|골|홈런|득점|챔피언|우승|메달', 'sports'),
+    # 연예/문화 키워드
+    (r'bts|아이돌|가수|배우|드라마|영화|예능|방송|음원|콘서트|페스티벌|뮤지컬|전시|앨범|컴백|스타|연예|출연|시청률', 'entertainment'),
     # 통신 / 모바일 / 통신사 키워드
     (r'lg유플러스|유플러스|sk텔레콤|skt|kt|통신사|5g|유플투쁠|멤버십|통신|요금제', 'telecom'),
     # 쇼핑 / 명절 / 추석 / 소비 / 유통 키워드
-    (r'추석|명절|쇼핑|장보기|선물세트|외식|나들이|화담숲|할인|이마트|백화점|소비자|유통|마트|생필품', 'shopping_life'),
+    (r'추석|명절|쇼핑|장보기|선물세트|외식|나들이|화담숲|할인|이마트|백화점|소비자|유통|마트|생필품|치킨|커피|식품', 'shopping_life'),
     # 부동산 키워드
     (r'부동산|아파트|분양|청약|전세|월세|매매|집값|주택|빌라|재개발|재건축|다세대|토지|오피스텔|건설|시행사|시공사|국토부|보증금|공동주택|단지', 'realestate'),
     # 증권 키워드
     (r'코스피|코스닥|증시|주식|주가|상장|공모주|배당|증권|펀드|etf|개미|외인|기관|매수|매도|반도체|하이닉스|삼성전자|엔비디아|나스닥|다우', 'stock'),
-    # 경제 키워드
-    (r'경제|금리|환율|인플레|물가|한국은행|기준금리|수출|수입|무역|gdp|소비자물가|재정|국채|금융|은행|외환|고용|경기침체|유가|원자재', 'economy'),
     # IT/과학 키워드
-    (r'인공지능|ai|챗gpt|클라우드|빅데이터|소프트웨어|스마트폰|로봇|우주|양자|사이버', 'tech'),
-    # 법조/재판/법원 키워드 (재판매 등 오작동 방지: 독립 단어로만 매칭)
-    (r'법원|법정|판결|소송|검찰|기소|변호사|대법원|헌법재판소|항소|구속영장|형사재판|민사소송|(?<![가-힣])재판(?![가-힣])', 'law_policy')
+    (r'인공지능|ai|챗gpt|클라우드|빅데이터|소프트웨어|스마트폰|로봇|우주|양자|사이버|플랫폼|스타트업|서버|애플|구글', 'tech'),
+    # 법조/재판/정치/정책 키워드
+    (r'법원|법정|판결|소송|검찰|기소|변호사|대법원|헌법재판소|항소|구속영장|형사재판|민사소송|(?<![가-힣])재판(?![가-힣])|대통령|국회|여당|야당|의원|총선|정당|당대표|정부|청와대|외교|총리|장관|정책', 'law_policy'),
+    # 경제/거시금융 키워드
+    (r'경제|금리|환율|인플레|물가|한국은행|기준금리|수출|수입|무역|gdp|소비자물가|재정|국채|금융|은행|외환|고용|경기침체|유가|원자재', 'economy'),
+    # 사회/환경 키워드
+    (r'날씨|기상|태풍|폭우|미세먼지|환경|보건|의료|의사|병원|학교|교육|수능|소방|경찰|사고|교통|시민|복지|노인|청년', 'society')
 ]
 
 
 def detect_article_topic(title, text="", category=""):
     """
-    기사 제목, 본문, 카테고리를 종합 분석하여 가장 적합한 이미지 테마를 판별
+    기사 제목, 본문, 카테고리를 종합 분석하여 가장 적합한 이미지 테마를 정밀 판별
     """
     full_text = f"{title} {category} {text[:300]}".lower()
 
-    # 현대차/완성차/자동차 키워드 최우선 검출
+    # 1. 현대차/완성차/자동차 키워드 최우선 검출
     if re.search(r'현대차|현대자동차|기아|자동차|완성차|제네시스|아이오닉|전기차|팰리세이드|아반떼|투싼|카니발|쏘나타|그랜저|파업.*생산', full_text):
         return 'auto'
 
-    # 통신 / 모바일 우선 검출
-    if re.search(r'lg유플러스|유플러스|sk텔레콤|skt|kt|통신사|유플투쁠', full_text):
+    # 2. 스포츠 키워드 최우선 검출
+    if re.search(r'손흥민|토트넘|축구|야구|프로야구|kbo|월드컵|올림픽|골프|농구|배구|경기|선수|감독|리그|승리|패배|골|홈런|득점|챔피언|우승|메달', full_text):
+        return 'sports'
+
+    # 3. 연예 / 문화 / 방송 키워드
+    if re.search(r'bts|아이돌|가수|배우|드라마|영화|예능|방송|음원|콘서트|페스티벌|뮤지컬|전시|앨범|컴백|스타|연예|출연|시청률', full_text):
+        return 'entertainment'
+
+    # 4. 통신 / 모바일 우선 검출
+    if re.search(r'lg유플러스|유플러스|sk텔레콤|skt|kt|통신사|유플투쁠|5g|요금제', full_text):
         return 'telecom'
 
-    # 명절 / 쇼핑 / 외식 우선 검출
-    if re.search(r'추석|명절|쇼핑|장보기|선물세트|외식|나들이|화담숲|멤버십', full_text):
+    # 5. 명절 / 쇼핑 / 외식 우선 검출
+    if re.search(r'추석|명절|쇼핑|장보기|선물세트|외식|나들이|화담숲|멤버십|할인|이마트|백화점|마트|치킨', full_text):
         return 'shopping_life'
 
-    if category in ['부동산']:
-        return 'realestate'
-    elif category in ['증권']:
-        return 'stock'
-    elif category in ['경제']:
-        return 'economy'
-    elif category in ['IT/과학']:
-        return 'tech'
+    # 6. 명시적 카테고리 매핑
+    category_map = {
+        '부동산': 'realestate',
+        '증권': 'stock',
+        '경제': 'economy',
+        'IT/과학': 'tech',
+        'IT·과학': 'tech',
+        '정치': 'law_policy',
+        '사회': 'society',
+        '스포츠': 'sports',
+        '연예': 'entertainment',
+        '문화': 'entertainment',
+        '생활': 'shopping_life'
+    }
+    if category in category_map:
+        return category_map[category]
 
+    # 7. 키워드 규칙 정밀 탐색
     for pattern, topic in KEYWORD_CATEGORY_RULES:
         if re.search(pattern, full_text):
             return topic
 
-    return 'economy'  # 기본값: 신뢰도 높은 금융/경제 테마
+    # 8. 기본 분산 풀 (제목 해시 기반으로 4대 대표 카테고리에 고르게 분산하여 중복 완화)
+    h = int(hashlib.md5(title.encode('utf-8')).hexdigest(), 16)
+    fallback_topics = ['economy', 'society', 'tech', 'stock', 'shopping_life']
+    return fallback_topics[h % len(fallback_topics)]
 
 
-def get_premium_stock_image(title, text="", category=""):
+def get_premium_stock_image(title, text="", category="", used_images=None):
     """
     기사 내용에 맞는 초고화질 저작권 프리 스톡 이미지를 선별 반환.
     - 현대차 관련 기사일 경우 고화질 AI 현대차 이미지 우선 매칭
-    - 동일 기사에는 항상 일관된 이미지가 선택되도록 제목 해시값 활용
+    - used_images 세트를 활용하여 동일 페이지 내 이미지 중복을 원천 차단
     """
     full_text = f"{title} {category} {text[:300]}".lower()
     
@@ -192,8 +274,29 @@ def get_premium_stock_image(title, text="", category=""):
         topic = 'economy'
 
     images = PREMIUM_STOCK_IMAGES[topic]
-    # 기사 제목 기반 해시 인덱싱 -> 동일 기사는 항상 동일한 고급 이미지 유지
-    idx = int(hashlib.md5(title.encode('utf-8')).hexdigest(), 16) % len(images)
+    h = int(hashlib.md5(title.encode('utf-8')).hexdigest(), 16)
+    
+    # used_images가 주어진 경우 (중복 방지 모드)
+    if used_images is not None:
+        # 1차: 해당 주제 내에서 아직 안 쓰인 이미지 찾기
+        for offset in range(len(images)):
+            cand = images[(h + offset) % len(images)]
+            if cand not in used_images:
+                used_images.add(cand)
+                return cand
+        
+        # 2차: 전체 카탈로그 중 아직 안 쓰인 이미지 찾기
+        for other_topic, other_imgs in PREMIUM_STOCK_IMAGES.items():
+            for offset in range(len(other_imgs)):
+                cand = other_imgs[(h + offset) % len(other_imgs)]
+                if cand not in used_images:
+                    used_images.add(cand)
+                    return cand
+
+    # 기본 해시 인덱싱
+    idx = h % len(images)
+    if used_images is not None:
+        used_images.add(images[idx])
     return images[idx]
 
 

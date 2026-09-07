@@ -350,8 +350,11 @@ function createNewsCard(item) {
     const hasImg = item.image && item.image.trim() !== '';
     const targetUrl = getArticleUrl(item.link);
     const clusterBadge = item.cluster_count && item.cluster_count > 1
-        ? `<span style="background:#eff6ff; color:#1d4ed8; font-size:10px; font-weight:700; padding:1px 6px; border-radius:10px; border:1px solid #bfdbfe; margin-left:5px;">🔥 ${item.cluster_count}개사 보도</span>`
+        ? `<span style="background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:700; padding:2px 7px; border-radius:10px; border:1px solid #bfdbfe; margin-left:4px;">🔥 ${item.cluster_count}개사 종합</span>`
         : '';
+    const categoryName = (item.category && item.category !== '전체') ? item.category : '실시간 속보';
+    const tagBadge = `<span style="background:#f8fafc; color:#475569; font-size:11px; font-weight:600; padding:2px 6px; border-radius:4px; border:1px solid #e2e8f0;">🏷️ ${esc(categoryName)}</span>`;
+
     return `
     <a class="news-card" href="${targetUrl}"
        onmouseenter="prefetchArticle('${escAttr(item.link)}')"
@@ -365,7 +368,7 @@ function createNewsCard(item) {
                 : `<div class="news-card-img-placeholder">📰</div>`}
         </div>
         <div class="news-card-body">
-            <div class="news-card-source">${esc(item.logo)} ${esc(item.source)} ${clusterBadge}</div>
+            <div class="news-card-source">${tagBadge} ${clusterBadge}</div>
             <div class="news-card-title">${esc(item.title)}</div>
             <div class="news-card-date">${esc(item.date)}</div>
         </div>
