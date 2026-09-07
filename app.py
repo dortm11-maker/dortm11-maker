@@ -888,24 +888,39 @@ def fetch_rss(feed_url, source_name, logo, max_items=15):
         resp = requests.get(feed_url, headers=headers, timeout=5)
         feed = feedparser.parse(resp.content)
         items = []
+        from services.ai_rewriter import is_meaningless_news, clean_news_title, rewrite_news_title
+
         for entry in feed.entries[:max_items]:
-            title = clean_html(getattr(entry, 'title', ''))
-            link = getattr(entry, 'link', '#')
+            raw_title = clean_html(getattr(entry, 'title', ''))
             summary = clean_html(getattr(entry, 'summary', '') or getattr(entry, 'description', ''))
+
+            # 실질적 의미 없는 뉴스(유튜브/방송 예고, 운세, 인사, 부고 등) 배제
+            if is_meaningless_news(raw_title, summary):
+                continue
+
+            cleaned_title = clean_news_title(raw_title)
+            if not cleaned_title or len(cleaned_title) < 6:
+                continue
+
+            # 원문 제목과 100% 동일하지 않게 재구성된 독창적 헤드라인 생성
+            distinct_title = rewrite_news_title(cleaned_title)
+
+            link = getattr(entry, 'link', '#')
             if len(summary) > 150:
                 summary = summary[:150] + '...'
             image = get_image_from_entry(entry)
             pub_date = parse_date(entry)
-            if title:
-                items.append({
-                    'title': title,
-                    'link': link,
-                    'summary': summary,
-                    'image': image,
-                    'date': pub_date,
-                    'source': source_name,
-                    'logo': logo,
-                })
+
+            items.append({
+                'title': distinct_title,
+                'original_title': raw_title,
+                'link': link,
+                'summary': summary,
+                'image': image,
+                'date': pub_date,
+                'source': source_name,
+                'logo': logo,
+            })
         return items
     except Exception as e:
         print(f"[RSS Error] {source_name}: {e}")
@@ -984,15 +999,19 @@ def fetch_article_detail(url):
         orig_t = clean_news_title(existing.get('original_title', ''))
         current_ai_t = existing.get('ai_title', '')
         
+        from services.ai_rewriter import is_meaningless_news
         has_caption_junk = any(re.search(r'촬영|제공|재판매|DB\s*금지|송고시간|송고|\d{4}년\s*\d{1,2}월\s*\d{1,2}일\s*\d{1,2}시', p) for p in paras)
-        has_bracket_tag = bool(re.search(r'^\[(?:게시판|인사|부고|알림|속보|단독|포토|종합)\]', current_ai_t)) or any('촬영' in s for s in summary_pts)
+        has_host_junk = any(re.search(r'진행\s*[:：]|출연\s*[:：]|한겨레\s*정치팀|시청\s*바랍니다|시청바랍니다', p) for p in paras)
+        has_bracket_tag = bool(re.search(r'^\[[^\]]+\]', current_ai_t)) or any('촬영' in s for s in summary_pts)
         has_awkward_title = '고부가 제품군' in current_ai_t and '고부가' not in orig_t
         has_duplicate_summary = len(summary_pts) > 1 and len(summary_pts) != len(set(summary_pts))
         is_abstract_template = any('단순한 일회성 현상에 그치지 않고' in p for p in paras)
         has_double_dot = any('..' in p for p in paras)
+        is_same_as_raw = (current_ai_t == existing.get('original_title')) or (current_ai_t == orig_t)
+        is_meaningless = is_meaningless_news(existing.get('original_title', ''), text=" ".join(paras))
 
-        # 결함이 감지되면 새로 정밀 기사 생성으로 업그레이드
-        if has_caption_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or is_law_img_mismatch or has_double_dot or len(paras) < 3:
+        # 결함(방송 출연진 찌꺼기, 원문과 동일한 제목, 대괄호 태그, 무의미한 뉴스 등) 감지 시 재구성 실행
+        if has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or is_law_img_mismatch or has_double_dot or is_same_as_raw or is_meaningless or len(paras) < 3:
             pass # 건너뛰어 아래 3단계 build_full_news_article 실행
         else:
             publisher = existing.get('source_name')
@@ -1320,13 +1339,26 @@ def do_fetch_category_news(category, max_per_feed=15):
 
     for cl in clusters:
         primary = cl['primary']
-        title = primary.get('title', '')
+        raw_title = primary.get('title', '')
         link = primary.get('link', '')
         cluster_sources = cl.get('cluster_sources', [])
         cluster_count = len(cluster_sources)
 
+        from services.ai_rewriter import is_meaningless_news, clean_news_title, rewrite_news_title
+
+        # 실질적 뉴스 가치가 없는 글(방송 예고, 유튜브 안내, 운세, 인사 등) 배제
+        if is_meaningless_news(raw_title, primary.get('summary', '')):
+            continue
+
+        cleaned_title = clean_news_title(raw_title)
+        if not cleaned_title or len(cleaned_title) < 6:
+            continue
+
+        # 원문 제목과 100% 동일하지 않도록 독창적 뉴스 헤드라인으로 재구성
+        display_title = rewrite_news_title(cleaned_title, category=category)
+
         # 상업적 무상 스톡 이미지 매칭 (페이지 내 이미지 중복 방지)
-        safe_img = get_premium_stock_image(title, primary.get('summary', ''), category=category, used_images=used_page_images)
+        safe_img = get_premium_stock_image(display_title, primary.get('summary', ''), category=category, used_images=used_page_images)
 
         # 언론사명(연합뉴스, 한겨레 등) 직접 노출 배제 -> 카테고리/실시간 브리핑으로 대체
         display_source = f"{category} 속보" if category and category != '전체' else "실시간 속보"
@@ -1334,7 +1366,8 @@ def do_fetch_category_news(category, max_per_feed=15):
             display_source = f"종합 이슈 ({cluster_count}개사)"
 
         curated_items.append({
-            'title': title,
+            'title': display_title,
+            'original_title': raw_title,
             'link': link,
             'summary': primary.get('summary', ''),
             'image': safe_img,
