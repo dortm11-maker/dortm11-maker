@@ -980,84 +980,14 @@ def get_publisher_info(url, soup=None):
             return og_site['content'].strip(), '📰'
     return '주요 언론사', '📰'
 
-def extract_article_content(url):
-    """원문 뉴스 URL로부터 제목, 본문 문단들, 언론사명을 정밀 추출"""
-    publisher, pub_logo = get_publisher_info(url)
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    }
-    try:
-        resp = requests.get(url, headers=headers, timeout=6)
-        html_text = decode_html_bytes(resp.content, resp.headers)
-        soup = BeautifulSoup(html_text, 'html.parser')
-
-        p_name, _ = get_publisher_info(url, soup)
-        if p_name:
-            publisher = p_name
-
-        title = ''
-        og_t = soup.find('meta', property='og:title')
-        if og_t and og_t.get('content'):
-            title = og_t['content'].strip()
-        if not title:
-            h1 = soup.find('h1')
-            if h1:
-                title = h1.get_text(strip=True)
-
-        body_elem = None
-        if 'yna.co.kr' in url:
-            body_elem = soup.find('div', class_='story-news') or soup.find('article')
-        elif 'mk.co.kr' in url:
-            body_elem = soup.find('div', class_='news_cnt_detail_wrap') or soup.find('div', class_='art_txt')
-        elif 'hankyung.com' in url:
-            body_elem = soup.find('div', id='articletxt') or soup.find('div', class_='article-body')
-        elif 'chosun.com' in url:
-            body_elem = soup.find('section', class_='article-body')
-        elif 'donga.com' in url:
-            body_elem = soup.find('div', class_='article_txt') or soup.find('div', id='article_body')
-
-        if not body_elem:
-            body_elem = (
-                soup.find('article') or
-                soup.find('div', id='articletxt') or
-                soup.find('div', class_='article-body') or
-                soup.find('div', id='article_body') or
-                soup.find('div', class_='article_view') or
-                soup.find('div', itemprop='articleBody') or
-                soup.find('div', id='news_body_area') or
-                soup.find('div', class_='news_view')
-            )
-
-        search_root = body_elem if body_elem else soup
-        for junk in search_root.find_all(['script', 'style', 'iframe', 'button', 'form', 'aside', 'header', 'footer']):
-            junk.decompose()
-
-        raw_paras = []
-        p_tags = search_root.find_all('p')
-        if p_tags:
-            for p in p_tags:
-                txt = p.get_text().strip()
-                if len(txt) >= 20:
-                    if not any(k in txt for k in ['저작권자', '무단 전재', '재배포', '제보는 카카오톡', '구글 검색에서', '앱 다운로드', '기사제보', '구독하기']):
-                        raw_paras.append(txt)
-
-        if len(raw_paras) < 2 and body_elem:
-            text = body_elem.get_text('\n')
-            for line in text.split('\n'):
-                line = line.strip()
-                if len(line) >= 25 and not any(k in line for k in ['저작권자', '무단 전재', '재배포', '제보는 카카오톡', '구글 검색에서', '기사제보']):
-                    raw_paras.append(line)
-
-        return repair_text(title), raw_paras, publisher
-    except Exception as e:
-        print(f"[extract_article_content error] {url}: {e}")
-        return '', [], publisher
-
 def fetch_article_detail(url):
     """
-    정통 뉴스 스타일 AI 큐레이션 엔진:
-    - 3줄 요약 + 온전하고 풍성한 실제 신문 기사 본문 문단(4~8문단) 생성
-    - 언론사 이름, 바이라인은 본문/헤더에서 완전 배제 (오직 하단 원문 공식 링크 박스에서만 표시)
+    저작권 안심 독자적 뉴스 큐레이션 & 브리핑 리포트 엔진:
+    - 언론사 원문 기사 본문 스크래핑/인용/DB저장 ❌ (연합뉴스 등 저작권 완전 보호)
+    - 언론사 원본 이미지 수집/저장 ❌
+    - 오직 RSS 메타데이터(제목, 링크, 출처, 날짜, 카테고리)만 저장 및 참조
+    - 공개된 이슈 헤드라인을 바탕으로 사건 배경, 시장 영향, 시사점, 전망을 분석한 독자적 뉴스 브리핑 리포트 제공
+    - 모든 게시물 하단에 원본 언론사명과 원문 URL 공식 아웃링크 제공
     """
     if not url or not url.startswith('http'):
         return None
@@ -1072,7 +1002,7 @@ def fetch_article_detail(url):
     from services.curation_db import get_curated_article_by_url
     from services.ai_rewriter import build_full_news_article, clean_news_title, rewrite_news_title
 
-    # 1. Curation DB에 유효한 본문 문단이 저장되어 있는 경우 즉시 반환
+    # 1. Curation DB에 유효한 브리핑이 저장되어 있는 경우 즉시 반환
     existing = get_curated_article_by_url(url)
     if existing and existing.get('ai_content') and isinstance(existing.get('ai_content'), dict):
         ai_cnt = existing['ai_content']
@@ -1082,20 +1012,15 @@ def fetch_article_detail(url):
             publisher = existing.get('source_name')
             if not publisher or publisher == '주요 언론사':
                 p_name, _ = get_publisher_info(url)
-                if p_name and p_name != '주요 언론사':
-                    publisher = p_name
-                else:
-                    publisher = '주요 언론사'
+                publisher = p_name if (p_name and p_name != '주요 언론사') else '주요 언론사'
 
             orig_t = clean_news_title(existing.get('original_title', ''))
             current_ai_title = existing.get('ai_title', '')
-            # 기존에 원문과 똑같이 저장된 제목이 있다면 독자적 헤드라인으로 즉시 변환
             if not current_ai_title or current_ai_title == orig_t or current_ai_title == existing.get('original_title'):
-                final_title = rewrite_news_title(orig_t, paras, existing.get('category', '전체'))
+                final_title = rewrite_news_title(orig_t, category=existing.get('category', '전체'))
             else:
                 final_title = current_ai_title
 
-            # 3줄 요약의 첫 번째 줄도 원문과 너무 유사하면 재구성된 제목으로 정돈
             if summary_pts and (summary_pts[0] == orig_t or summary_pts[0] == existing.get('original_title')):
                 summary_pts[0] = final_title
 
@@ -1118,11 +1043,8 @@ def fetch_article_detail(url):
             ARTICLE_CACHE[url] = (now_ts, result)
             return result
 
-    # 2. 본문 문단 직접 추출
+    # 2. RSS 캐시에서 메타데이터 추출 (원문 웹페이지 본문 스크래핑 ❌ 절대 안 함)
     site_cfg = load_site_config()
-    raw_title, raw_paras, publisher = extract_article_content(url)
-
-    # 캐시/클러스터에서 메타데이터 보강
     cluster_match = None
     with RSS_CACHE_LOCK:
         for cat, entry in RSS_CACHE.items():
@@ -1133,26 +1055,30 @@ def fetch_article_detail(url):
             if cluster_match:
                 break
 
-    category = cluster_match.get('category', '전체') if cluster_match else '전체'
-    if not raw_title and cluster_match:
-        raw_title = cluster_match.get('title', '')
-    if not raw_paras and cluster_match and cluster_match.get('summary'):
-        raw_paras = [cluster_match['summary']]
+    publisher, pub_logo = get_publisher_info(url)
+    category = '전체'
+    raw_title = ''
+    pub_date = datetime.now().strftime('%m.%d %H:%M')
 
-    pub_date = cluster_match.get('date', datetime.now().strftime('%m.%d %H:%M')) if cluster_match else datetime.now().strftime('%m.%d %H:%M')
+    if cluster_match:
+        category = cluster_match.get('category', '전체')
+        raw_title = cluster_match.get('title', '')
+        pub_date = cluster_match.get('date', pub_date)
+        if cluster_match.get('source'):
+            publisher = cluster_match['source']
 
     if not raw_title:
         raw_title = "실시간 주요 뉴스 속보"
 
-    # 3. AI 리라이팅 엔진으로 3줄 요약 + 풍성한 본문 기사 문단 생성
-    art = build_full_news_article(raw_title, raw_paras, site_cfg, url, category, publisher_name=publisher)
+    # 3. 공개 헤드라인을 기반으로 독자적 이슈 분석 브리핑 리포트 생성 (원문 본문 전달 일절 없음)
+    art = build_full_news_article(raw_title, site_cfg=site_cfg, url=url, category=category, publisher_name=publisher)
 
     result = {
         'id': '',
         'title': art['title'],
         'original_title': raw_title,
         'publisher': publisher,
-        'pub_logo': '📰',
+        'pub_logo': pub_logo,
         'pub_date': pub_date,
         'author': '',
         'main_img': art['main_img'],

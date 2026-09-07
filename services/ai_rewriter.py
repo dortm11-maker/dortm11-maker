@@ -207,25 +207,76 @@ def generate_3line_summary(title, paragraphs):
 
     return points[:3]
 
-def call_gemini_news_writer(api_key, title, paragraphs, category):
-    """Google Gemini를 활용하여 풍성하고 자연스러운 정통 신문 기사 본문 재작성"""
-    body_input = "\n\n".join(paragraphs[:8])
-    prompt = f"""당신은 한국 경제/시사 전문지의 수석 저널리스트입니다.
-제공된 뉴스 사실(Fact)과 수치 데이터를 바탕으로, 실제 메이저 신문 지면에 실리는 것과 같은 완성도 높은 정통 뉴스 기사를 작성하십시오.
+def local_generate_issue_briefing(title, category="전체"):
+    """
+    원문 본문 스크래핑 및 인용 없이, 공개된 헤드라인 이슈의 핵심 키워드를 기반으로
+    배경, 시장 영향, 산업적 의미, 향후 전망을 담은 독자적 뉴스 브리핑 문단(4문단) 생성
+    """
+    clean_t = rewrite_news_title(title, category=category)
+    
+    # 카테고리별 전문적인 분석 관점 정의
+    cat_focus = {
+        '증권': ('증권가 및 금융 투자 시장', '기업 실적 추정치와 밸류에이션, 외국인·기관 수급 동향', '시장 눈높이 변화와 단기 변동성'),
+        '경제': ('거시 경제 및 실물 산업계', '공급망 안정성 및 경기 지표, 주요 경영 환경', '금리·환율 등 대외 불확실성 대응'),
+        '부동산': ('부동산 시장 및 분양·매매 동향', '대출 규제 및 금리 환경, 거래량 추이', '실수요자 관망세 및 향후 시장 가격 흐름'),
+        'IT/과학': ('첨단 테크 생태계 및 IT 산업계', '글로벌 기술 표준 경쟁, 차세대 로드맵 및 특허 영향력', '연구개발(R&D) 성과 및 시장 선점 속도'),
+        '정치': ('정치권 및 정책 당국', '제도 정비 및 입법 과제, 주요 이해관계자 여론', '후속 정책 발표 및 향후 국정 대응 추이'),
+        '사회': ('사회 각계 및 관련 현장', '제도적 보완책 및 공론화 논의, 시민 생활 영향', '재발 방지 대책 및 제도 개선 동향'),
+        '전체': ('시장 및 관련 산업계 전반', '주요 실적 지표와 공급망, 업계 전반의 경영 환경', '향후 전개될 정책 및 시장 반응')
+    }
+    target_area, impact_area, outlook_area = cat_focus.get(category, cat_focus['전체'])
 
+    p1 = (
+        f"{clean_t} 관련 소식이 전해지며 {target_area}의 이목이 집중되고 있습니다. "
+        f"이번 사안은 최근 {category} 분야의 흐름과 맞물려 관련 업계 및 이해관계자들 사이에서 주요 현안으로 떠올랐습니다."
+    )
+
+    p2 = (
+        f"전문가들은 이번 이슈가 단순한 일회성 현상에 그치지 않고, 향후 {impact_area}에 "
+        f"실질적인 변수로 작용할 가능성에 주목하고 있습니다. 특히 관련 생태계의 거래 동향과 정책적 가이드라인의 변화가 중요한 분수령이 될 것으로 분석됩니다."
+    )
+
+    p3 = (
+        f"시장 참여자들 사이에서는 이번 사안을 둘러싸고 다각도의 분석과 신중론이 교차하는 분위기입니다. "
+        f"대내외 경제 환경의 불확실성이 지속되는 상황에서, 단기적인 리스크 관리와 함께 중장기적인 기회 요인을 면밀히 짚어보아야 한다는 의견이 힘을 얻고 있습니다."
+    )
+
+    p4 = (
+        f"향후 전개될 세부 후속 조치와 관련 업계의 대응 방향에 따라 구체적인 영향의 윤곽이 드러날 전망입니다. "
+        f"관계자들은 {outlook_area}을 주시하며, 시장의 안정적인 대응과 발전적 해법을 모색하는 데 집중하고 있습니다."
+    )
+
+    summary = [
+        f"{clean_t} 관련 현황 대두",
+        f"{category} 분야 및 {target_area} 파급 영향 집중 분석",
+        "향후 세부 후속 조치 및 주요 변수에 업계 관심 고조"
+    ]
+
+    return {
+        "ai_title": clean_t,
+        "summary_points": summary,
+        "paragraphs": [p1, p2, p3, p4]
+    }
+
+def call_gemini_news_writer(api_key, title, category):
+    """
+    Google Gemini를 활용하여 원문 복제 없이 공개 헤드라인 기반 독자적 이슈 분석 브리핑 리포트 생성
+    (※ 원문 본문은 일절 전달하지 않음 - 저작권 완벽 준수)
+    """
+    prompt = f"""당신은 한국 경제/시사 전문 리서치 에디터입니다.
+오직 공개된 [이슈 헤드라인]과 [카테고리] 정보만을 바탕으로, 독자들을 위한 독자적이고 전문적인 [시사·경제 이슈 분석 브리핑 리포트]를 작성하십시오.
+
+[이슈 헤드라인] {title}
 [카테고리] {category}
-[헤드라인 원안] {title}
 
-[기사 사실 데이터]
-{body_input}
-
-[작성 수칙]
-1. [헤드라인 독자적 재작성 (핵심)]: 원안 헤드라인을 그대로 복사하거나 일부만 자르지 마십시오. 기사의 핵심 키워드(기업명, 인물명, 주요 수치, 핵심 사건)는 반드시 정확하게 살리되, 원문과 동일하거나 유사하지 않게 신선하고 전문적인 정통 신문 헤드라인 문장으로 완전히 새롭게 재작성하십시오. (따옴표 단순 나열 지양)
-2. [언론사명 및 기자명 절대 배제]: '연합뉴스', '뉴스1' 등 특정 언론사 이름이나 기자 이름, 이메일은 제목과 본문에 절대 넣지 마십시오.
-3. [풍성한 본문 분량 유지]: 요약으로 줄이지 말고, 실제 신문 기사처럼 문단을 자연스럽게 나누어 4~6개의 온전하고 풍성한 뉴스 본문 문단(paragraphs)으로 작성하십시오.
-4. [3줄 핵심 요약]: 기사 맨 앞에 들어갈 짧고 명쾌한 3줄 요약(summary_points)을 작성하십시오.
-5. [문체]: 신뢰할 수 있는 단정하고 정중한 보도체(~했습니다, ~밝혔습니다, ~설명했습니다, ~전망됩니다)로 작성하십시오.
-6. 반드시 오직 유효한 JSON 형식으로만 응답하십시오:
+[작성 수칙 - 저작권 완벽 준수]
+1. [원문 복제/다시쓰기 절대 금지]: 외부 언론사의 기사 원문이나 문장을 복제하거나 흉내 내지 마십시오. 오직 헤드라인의 핵심 사건/주제를 바탕으로, 독자적인 배경 설명, 시장 영향 분석, 산업적 시사점, 향후 관전 포인트를 신문사 분석 기사 형식의 4~5개 문단으로 작성하십시오.
+2. [헤드라인 독자적 재작성]: 원안 헤드라인의 핵심 키워드(기업/인물/주제/수치)는 정확히 유지하되, 원문과 동일하거나 유사하지 않게 정통 신문 기사 헤드라인으로 완전히 새롭게 재구성하십시오.
+3. [언론사명 및 기자명 절대 배제]: '연합뉴스', '뉴스1' 등 특정 언론사나 기자 이름, 이메일은 절대 언급하지 마십시오.
+4. [풍성한 분석 문단 (4~5개)]: 실제 전문지의 심층 분석 기사처럼 자연스러운 문맥으로 4~5개의 온전하고 풍성한 문단(paragraphs)으로 작성하십시오.
+5. [3줄 핵심 요약]: 리포트 첫머리에 들어갈 간결하고 명쾌한 3줄 요약(summary_points)을 작성하십시오.
+6. [문체]: 단정하고 신뢰할 수 있는 저널리즘 해설 보도체(~했습니다, ~설명됩니다, ~전망입니다)로 서술하십시오.
+7. 반드시 오직 유효한 JSON 형식으로만 응답하십시오:
 
 {{
   "ai_title": "독자적이고 완성도 높은 정통 신문 기사 헤드라인",
@@ -235,10 +286,10 @@ def call_gemini_news_writer(api_key, title, paragraphs, category):
     "핵심 요약 3"
   ],
   "paragraphs": [
-    "문단 1 (사건의 개요 및 주요 발표 사실)",
-    "문단 2 (세부 내용 및 근거)",
-    "문단 3 (주요 수치 및 실적/시장 지표)",
-    "문단 4 (업계 반응 및 향후 전망)"
+    "문단 1 (이슈의 개요 및 발생 배경)",
+    "문단 2 (시장 및 산업 생태계에 미치는 파급 효과)",
+    "문단 3 (업계 반응 및 주요 변수 분석)",
+    "문단 4 (향후 전망 및 관전 포인트)"
   ]
 }}"""
 
@@ -263,52 +314,35 @@ def call_gemini_news_writer(api_key, title, paragraphs, category):
 
     raise Exception(f"Gemini API 오류 ({resp.status_code})")
 
-def build_full_news_article(title, raw_paragraphs, site_cfg=None, url="", category="전체", publisher_name="주요 언론사"):
+def build_full_news_article(title, site_cfg=None, url="", category="전체", publisher_name="주요 언론사", raw_paragraphs=None):
     """
-    본문 내용이 풍성한 실제 신문 기사 형식으로 가공 및 저장
+    저작권 안심 독자적 뉴스 브리핑 리포트 생성 엔진:
+    - 원문 본문 스크래핑/인용/DB저장 ❌
+    - 공개된 헤드라인과 카테고리만을 바탕으로 배경·시장영향·전망을 담은 4문단 분석 리포트 생성 ✅
     """
     ai_cfg = (site_cfg or {}).get('ai_rewrite', {})
     gemini_key = ai_cfg.get('gemini_api_key', '').strip()
 
     clean_raw_title = clean_news_title(title)
-
-    # 1. 1차 정제: 언론사명, 바이라인, 기자 이메일 제거
-    cleaned_input = []
-    for p in raw_paragraphs:
-        cl = clean_news_line(p)
-        if len(cl) >= 15:
-            cleaned_input.append(cl)
-
-    if not cleaned_input:
-        cleaned_input = [clean_raw_title]
-
     article_result = None
 
-    # 2. Gemini 초거대 AI 연동 시도
-    if gemini_key and len(cleaned_input) >= 2:
+    # 1. Gemini 초거대 AI 연동 시도 (오직 헤드라인과 카테고리만 전달)
+    if gemini_key:
         try:
-            article_result = call_gemini_news_writer(gemini_key, clean_raw_title, cleaned_input, category)
+            article_result = call_gemini_news_writer(gemini_key, clean_raw_title, category)
         except Exception as e:
-            print(f"[Gemini Writer Fallback to Local Engine] {e}")
+            print(f"[Gemini Briefing Fallback to Local Engine] {e}")
 
-    # 3. 로컬 지능형 뉴스 작성 엔진 폴백
+    # 2. 로컬 지능형 이슈 분석 브리핑 엔진 폴백
     if not article_result or not article_result.get('paragraphs'):
-        new_title = rewrite_news_title(clean_raw_title, cleaned_input, category)
-        summary_pts = generate_3line_summary(new_title, cleaned_input)
-        rewritten_paras = local_rewrite_paragraphs(cleaned_input)
-        if not rewritten_paras:
-            rewritten_paras = [f"{new_title} 관련 세부 팩트와 배경에 대해 시장 및 관계자들의 관심이 집중되고 있습니다."]
+        article_result = local_generate_issue_briefing(clean_raw_title, category=category)
 
-        article_result = {
-            "ai_title": new_title,
-            "summary_points": summary_pts,
-            "paragraphs": rewritten_paras
-        }
+    final_title = article_result.get('ai_title') or rewrite_news_title(clean_raw_title, category=category)
 
     # 대표 이미지 매칭 (상업적 무상 고화질 스톡)
-    safe_img = get_premium_stock_image(article_result.get('ai_title', clean_raw_title), " ".join(article_result.get('paragraphs', [])[:2]))
+    safe_img = get_premium_stock_image(final_title, " ".join(article_result.get('paragraphs', [])[:2]))
 
-    # Curation DB에 저장
+    # Curation DB에 저장 (원문 본문은 일절 저장하지 않음)
     record = {
         'source_name': publisher_name,
         'original_title': title,
@@ -316,7 +350,7 @@ def build_full_news_article(title, raw_paragraphs, site_cfg=None, url="", catego
         'published_at': '',
         'category': category,
         'keywords': [],
-        'ai_title': article_result.get('ai_title', clean_raw_title),
+        'ai_title': final_title,
         'ai_content': {
             'summary_points': article_result.get('summary_points', []),
             'paragraphs': article_result.get('paragraphs', [])
@@ -328,7 +362,7 @@ def build_full_news_article(title, raw_paragraphs, site_cfg=None, url="", catego
         save_curated_article(record)
 
     return {
-        'title': article_result.get('ai_title', clean_raw_title),
+        'title': final_title,
         'summary_points': article_result.get('summary_points', []),
         'paragraphs': article_result.get('paragraphs', []),
         'main_img': safe_img
@@ -339,13 +373,13 @@ def build_curated_briefing(cluster_item, site_cfg=None):
     primary = cluster_item.get('primary', {})
     url = primary.get('link') or primary.get('original_url', '')
     title = primary.get('title') or primary.get('original_title', '')
-    all_summaries = cluster_item.get('all_summaries', [])
     category = cluster_item.get('category', '전체')
+    publisher = primary.get('source', '주요 언론사')
     
-    art = build_full_news_article(title, all_summaries, site_cfg, url, category)
+    art = build_full_news_article(title, site_cfg, url, category, publisher)
     return {
         'id': '',
-        'source_name': primary.get('source', '주요 언론사'),
+        'source_name': publisher,
         'original_title': title,
         'original_url': url,
         'published_at': primary.get('date', ''),
