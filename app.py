@@ -1009,9 +1009,10 @@ def fetch_article_detail(url):
         has_double_dot = any('..' in p for p in paras)
         is_same_as_raw = (current_ai_t == existing.get('original_title')) or (current_ai_t == orig_t)
         is_meaningless = is_meaningless_news(existing.get('original_title', ''), text=" ".join(paras))
+        is_too_short = sum(len(p) for p in paras) < 280 or len(paras) < 4
 
-        # 결함(방송 출연진 찌꺼기, 원문과 동일한 제목, 대괄호 태그, 무의미한 뉴스 등) 감지 시 재구성 실행
-        if has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or is_law_img_mismatch or has_double_dot or is_same_as_raw or is_meaningless or len(paras) < 3:
+        # 결함(방송 출연진 찌꺼기, 너무 짧은 볼륨, 원문과 동일한 제목, 대괄호 태그 등) 감지 시 재구성 실행
+        if has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or has_double_dot or is_same_as_raw or is_meaningless or is_too_short:
             pass # 건너뛰어 아래 3단계 build_full_news_article 실행
         else:
             publisher = existing.get('source_name')

@@ -138,9 +138,10 @@ def clean_news_title(title):
     t = re.sub(r'^[▲■◆●★▶▷☞\s]+', '', t)
     return t.strip()
 
-def make_short_bullet(text, max_len=36):
+def make_short_bullet(text, max_len=45):
     """
-    긴 문장에서 불필요한 서술어를 걷어내고 20~35자 내외의 명료하고 압축된 핵심 요약 불릿 생성
+    긴 문장에서 불필요한 서술어를 걷어내고 25~45자 내외의 명료하고 완결된 핵심 요약 불릿 생성
+    (문장 도중이나 조사가 잘리지 않도록 안전 종결 처리)
     """
     s = text.strip()
     s = re.sub(r'^[▲■◆●★▶▷☞\s]+', '', s)
@@ -159,9 +160,16 @@ def make_short_bullet(text, max_len=36):
     s = re.sub(r'한다\.?$', ' 추진', s)
     s = re.sub(r'된다\.?$', ' 결정', s)
     s = re.sub(r'\s{2,}', ' ', s).strip(' .,~')
+
     if len(s) > max_len:
-        s = s[:max_len].rsplit(' ', 1)[0]
-    return s
+        cut = s[:max_len].rsplit(' ', 1)[0]
+        # 잘린 끝부분이 어색한 조사(을/를/이/가/에/의/과/와/로 등)로 끝나면 정리
+        cut = re.sub(r'[\s,]+(?:을|를|이|가|에|의|과|와|로|으로|는|은|도|며|고|서)\s*$', '', cut)
+        if not cut.endswith(('추진', '기록', '분석', '발표', '전망', '강화', '확대', '주목', '집계', '선정', '마련')):
+            cut += ' 집중 분석'
+        s = cut
+
+    return s.strip()
 
 def rewrite_news_title(title, paragraphs=None, category='전체'):
     """
@@ -346,8 +354,8 @@ def generate_3line_summary(title, paragraphs):
 
 def extract_factual_data(url, title=""):
     """
-    원문 웹페이지에서 저작권 보호 대상인 '언론사 고유 캡션/바이라인/찌꺼기'는 완전히 걷어내고,
-    독자에게 유용한 실제 기사의 사실 설명 문단과 핵심 수치(Fact Points)를 순서대로 온전하게 추출
+    원문 웹페이지에서 언론사 캡션/바이라인/찌꺼기는 걷어내고,
+    독자에게 유용한 실제 기사의 사실 설명 문단과 핵심 수치(Fact Points)를 폭넓게 추출 (최대 35문장)
     """
     facts = []
     if not url or not url.startswith('http'):
@@ -357,12 +365,12 @@ def extract_factual_data(url, title=""):
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
         }
-        resp = requests.get(url, headers=headers, timeout=3.5)
+        resp = requests.get(url, headers=headers, timeout=4.0)
         if resp.status_code == 200 and len(resp.text) > 200:
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(resp.text, 'html.parser')
             
-            # 본문 컨테이너 영역 탐색 (네이버 뉴스, 연합뉴스, 다음, 매일경제, 한국경제 등 종합 지원)
+            # 본문 컨테이너 영역 탐색
             body = (
                 soup.select_one('article._article_body') or
                 soup.select_one('article.comp_news_article') or
@@ -381,30 +389,36 @@ def extract_factual_data(url, title=""):
                 soup.find('body')
             )
             
-            lines = []
+            raw_blocks = []
             if body:
-                for s in body.stripped_strings:
-                    txt = s.strip()
-                    if txt and len(txt) >= 15:
-                        lines.append(txt)
+                # p, div, li 태그 우선 탐색하여 단락 구조 보존
+                for elem in body.find_all(['p', 'div', 'li', 'h2', 'h3', 'h4']):
+                    t = elem.get_text().strip()
+                    if t and len(t) >= 15 and t not in raw_blocks:
+                        raw_blocks.append(t)
+                if not raw_blocks:
+                    for s in body.stripped_strings:
+                        txt = s.strip()
+                        if txt and len(txt) >= 15:
+                            raw_blocks.append(txt)
             else:
-                lines = resp.text.split('\n')
+                raw_blocks = resp.text.split('\n')
 
-            for raw_line in lines:
+            for raw_line in raw_blocks:
                 cleaned = clean_news_line(raw_line)
                 
-                # 유효한 본문 문단 검증 (캡션 찌꺼기, 날짜줄, 부제목 완전 배제)
+                # 유효한 본문 문단 검증
                 if not is_valid_news_paragraph(cleaned):
                     continue
 
                 # 기자명 접두어 정제
                 cleaned = re.sub(r'^[가-힣]{2,4}\s*(?:연구원|연구위원|기자|위원)\s*은?\s*(?:이날 보고서에서)?\s*', '업계 분석에 따르면 ', cleaned)
                 cleaned = re.sub(r'[가-힣]{2,4}\s*연구원은?\s*', '전문가들은 ', cleaned)
-                cleaned = re.sub(r'\[[0-9]{6}\]', '', cleaned)  # 종목코드 제거
+                cleaned = re.sub(r'\[[0-9]{6}\]', '', cleaned)
                 cleaned = cleaned.strip()
 
-                # 마침표 기준으로 여러 문장이 붙어 있는 경우 개별 문장으로 분리하여 수집
-                sub_sentences = [s.strip().rstrip('.') + '.' for s in cleaned.split('. ') if len(s.strip()) >= 15]
+                # 마침표 기준 문장 분리
+                sub_sentences = [s.strip().rstrip('.') + '.' for s in re.split(r'(?<=[.?!])\s+', cleaned) if len(s.strip()) >= 15]
                 if not sub_sentences:
                     sub_sentences = [cleaned]
 
@@ -412,9 +426,9 @@ def extract_factual_data(url, title=""):
                     sent = clean_news_line(sent)
                     if is_valid_news_paragraph(sent) and sent not in facts:
                         facts.append(sent)
-                        if len(facts) >= 7:
+                        if len(facts) >= 35:
                             break
-                if len(facts) >= 7:
+                if len(facts) >= 35:
                     break
 
     except Exception as e:
@@ -424,65 +438,94 @@ def extract_factual_data(url, title=""):
 
 def local_generate_issue_briefing(title, category="전체", fact_points=None):
     """
-    원문의 실제 알짜 정보(혜택, 일정, 수치, 사실)를 바탕으로
-    누구나 쉽게 이해할 수 있는 체계적이고 완성도 높은 4~5문단 정통 기사 및 짧고 명쾌한 3줄 요약 생성
+    원문의 실제 알짜 정보(혜택, 일정, 수치, 가이드, 사실)의 큰 틀을 온전히 살려
+    짜임새 있고 풍성한 5~7문단 정통 기사 및 완결된 3줄 핵심 요약 생성
     """
     clean_t = rewrite_news_title(title, category=category)
     
-    # 팩트 데이터가 있는 경우 원문의 알짜 정보를 온전히 살린 정통 기사 구성
+    # 팩트 데이터가 있는 경우: 원문의 큰 틀과 핵심 정보를 풍성한 문단으로 조립
     if fact_points and len(fact_points) >= 2:
-        paras = []
-        for f in fact_points[:6]:
+        # 1. 문장 단위 어미 정통 뉴스체 변환
+        converted_sentences = []
+        for f in fact_points:
             p = f
-            # 어미 정통 뉴스체 변환
             for pat, repl in ENDING_RULES:
                 p = re.sub(pat, repl, p)
-            if p and len(p) >= 15:
-                paras.append(p)
+            if p and len(p) >= 15 and p not in converted_sentences:
+                converted_sentences.append(p)
 
-        # 3줄 핵심 요약 구성 (짧고 명료하게 25~35자 내외로 압축)
+        # 2. 문장들을 2~3개씩 의미 단위로 결합하여 풍성한 볼륨 있는 문단(Paragraphs) 형성
+        paras = []
+        chunk_size = 2 if len(converted_sentences) <= 8 else 3
+        temp_chunk = []
+
+        for sent in converted_sentences:
+            temp_chunk.append(sent)
+            if len(temp_chunk) >= chunk_size:
+                combined_para = " ".join(temp_chunk)
+                paras.append(combined_para)
+                temp_chunk = []
+                if len(paras) >= 7:
+                    break
+
+        if temp_chunk and len(paras) < 7:
+            paras.append(" ".join(temp_chunk))
+
+        # 만약 문단 수가 3개 이하로 적으면, 맥락 보강 문단을 덧붙여 최소 4문단 이상의 큰 틀 확보
+        if len(paras) < 4:
+            cat_supplements = {
+                '경제': "금융 전문가들은 이번 사안이 중장기적인 시장 흐름과 가계 재정 운용에 미치는 영향을 주시하고 있으며, 체계적인 대응 전략 마련이 필요한 시점이라고 강조했습니다.",
+                '부동산': "부동산 및 자산 관리 전문가들은 시장 변동성에 대비해 중장기적인 자산 배분과 실수요 관점의 신중한 접근이 요구된다고 조언했습니다.",
+                '증권': "증권가에서는 단기 수급 변화뿐만 아니라 기업의 펀더멘털과 대외 거시 경제 변수를 종합적으로 고려한 포트폴리오 다변화가 필요하다고 분석했습니다.",
+                '전체': "전문가들은 이번 이슈가 시장 참여자들에게 중요한 시사점을 던져주고 있는 만큼, 향후 전개될 정책 변화와 관련 업계의 구체적인 후속 조치를 면밀히 살펴볼 필요가 있다고 제언했습니다."
+            }
+            paras.append(cat_supplements.get(category, cat_supplements['전체']))
+
+        # 3. 3줄 핵심 요약 구성 (각 25~45자 내외의 완결된 문장)
         summary = []
         seen_sum = set()
 
-        # 1) 첫 번째 요약: 기사 핵심 사안을 짧고 명료하게 요약
-        s1 = make_short_bullet(clean_t, max_len=32)
+        # 1) 첫 번째 요약: 핵심 사안
+        s1 = make_short_bullet(clean_t, max_len=40)
         summary.append(s1)
         seen_sum.add(s1)
 
-        # 2) 두 번째 요약: 구체적인 수치/일정/혜택 핵심 요약
-        for p in paras:
-            s_cand = p.split('.')[0].strip()
-            if any(num in s_cand for num in ['%', '만대', '만 대', '원', '억원', '달러', '대', '일', '월', '대표', '명', '천']):
-                bullet = make_short_bullet(s_cand, max_len=36)
-                if len(bullet) >= 12 and bullet not in seen_sum:
+        # 2) 두 번째 요약: 구체적 수치 및 핵심 데이터
+        for s in converted_sentences:
+            if any(num in s for num in ['%', '원', '억', '달러', '대', '세', '년', '월', '일', '명', '건', '배']):
+                bullet = make_short_bullet(s, max_len=45)
+                if len(bullet) >= 14 and bullet not in seen_sum:
                     summary.append(bullet)
                     seen_sum.add(bullet)
                     break
 
-        # 3) 세 번째 요약: 후속 조치 또는 특별 대상 혜택 핵심 요약
-        for p in reversed(paras):
-            s_cand = p.split('.')[0].strip()
-            bullet = make_short_bullet(s_cand, max_len=36)
-            if len(bullet) >= 12 and bullet not in seen_sum:
+        # 3) 세 번째 요약: 주요 대책 및 핵심 제언/전망
+        for s in reversed(converted_sentences):
+            bullet = make_short_bullet(s, max_len=45)
+            if len(bullet) >= 14 and bullet not in seen_sum:
                 summary.append(bullet)
                 seen_sum.add(bullet)
                 break
 
-        # 요약이 3개 미만일 때 서로 다른 고유 단문 보강
+        # 부족할 경우 보강
         fallback_summaries = [
-            f"{clean_t[:18]} 세부 맞춤 혜택 본격화",
-            "명절 및 실생활 물가 부담 완화 지원",
-            "세부 참여 일정 및 이용 절차 안내"
+            f"{clean_t[:20]} 관련 주요 쟁점 및 현황 분석",
+            "세부 실행 방안 및 단계별 점검 사항 제시",
+            "향후 시장 파급 효과 및 전문가 제언 정리"
         ]
         for fs in fallback_summaries:
             if len(summary) >= 3:
                 break
+            if fs not in seen_sum:
+                summary.append(fs)
+                seen_sum.add(fs)
+
         rewritten_title = rewrite_news_title(clean_t, paragraphs=paras, category=category)
 
         return {
             "ai_title": rewritten_title,
             "summary_points": summary[:3],
-            "paragraphs": paras[:5]
+            "paragraphs": paras[:7]
         }
 
     # 팩트 데이터가 없는 경우 (원문 접근 불가 시) 카테고리별 전문 분석 브리핑
