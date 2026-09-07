@@ -379,17 +379,39 @@ function goBackOrHome() {
     }
 }
 
-// 링크 복사
+// 링크 복사 (네이버 공식 브릿지 링크로 자동 변환하여 복사)
 function copyArticleUrl() {
-    navigator.clipboard.writeText(window.location.href).then(() => {
-        const copyTxt = document.getElementById('copyText');
+    // 현재 기사 페이지 URL (우리 사이트)
+    const ourUrl = window.location.href;
+    // 네이버 공식 브릿지 우회 링크 생성
+    const naverBridgeUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
+
+    const copyTxt = document.getElementById('copyText');
+    const originalText = copyTxt ? copyTxt.textContent : '링크 복사';
+
+    navigator.clipboard.writeText(naverBridgeUrl).then(() => {
         if (copyTxt) {
-            const original = copyTxt.textContent;
-            copyTxt.textContent = '복사 완료!';
-            setTimeout(() => { copyTxt.textContent = original; }, 2000);
+            copyTxt.textContent = '✅ 네이버 링크 복사됨!';
+            setTimeout(() => { copyTxt.textContent = originalText; }, 2500);
         }
     }).catch(() => {
-        alert('주소가 복사되었습니다: ' + window.location.href);
+        // 클립보드 API 실패 시 폴백
+        const el = document.createElement('textarea');
+        el.value = naverBridgeUrl;
+        el.style.position = 'fixed';
+        el.style.opacity = '0';
+        document.body.appendChild(el);
+        el.select();
+        try {
+            document.execCommand('copy');
+            if (copyTxt) {
+                copyTxt.textContent = '✅ 네이버 링크 복사됨!';
+                setTimeout(() => { copyTxt.textContent = originalText; }, 2500);
+            }
+        } catch(e) {
+            alert('복사할 링크:\n' + naverBridgeUrl);
+        }
+        document.body.removeChild(el);
     });
 }
 
