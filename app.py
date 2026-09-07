@@ -888,14 +888,14 @@ def fetch_rss(feed_url, source_name, logo, max_items=15):
         resp = requests.get(feed_url, headers=headers, timeout=5)
         feed = feedparser.parse(resp.content)
         items = []
-        from services.ai_rewriter import is_meaningless_news, clean_news_title, rewrite_news_title
+        from services.ai_rewriter import is_meaningless_news, clean_news_title, rewrite_news_title, clean_news_summary
 
         for entry in feed.entries[:max_items]:
             raw_title = clean_html(getattr(entry, 'title', ''))
-            summary = clean_html(getattr(entry, 'summary', '') or getattr(entry, 'description', ''))
+            raw_summary = clean_html(getattr(entry, 'summary', '') or getattr(entry, 'description', ''))
 
             # 실질적 의미 없는 뉴스(유튜브/방송 예고, 운세, 인사, 부고 등) 배제
-            if is_meaningless_news(raw_title, summary):
+            if is_meaningless_news(raw_title, raw_summary):
                 continue
 
             cleaned_title = clean_news_title(raw_title)
@@ -904,6 +904,9 @@ def fetch_rss(feed_url, source_name, logo, max_items=15):
 
             # 원문 제목과 100% 동일하지 않게 재구성된 독창적 헤드라인 생성
             distinct_title = rewrite_news_title(cleaned_title)
+
+            # 저작권 안전을 위해 (서울=연합뉴스) 김예나 기자 = 등 모든 바이라인/언론사/기자명 100% 제거
+            summary = clean_news_summary(raw_summary)
 
             link = getattr(entry, 'link', '#')
             if len(summary) > 150:
@@ -1295,10 +1298,15 @@ def load_snapshot():
     """서버 부팅 즉시 파일 스냅샷을 메모리 캐시로 로드 (0.001초 콜드 스타트 제거)"""
     if os.path.exists(NEWS_SNAPSHOT_FILE):
         try:
+            from services.ai_rewriter import clean_news_summary
             with open(NEWS_SNAPSHOT_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 with RSS_CACHE_LOCK:
                     for cat, news_list in data.items():
+                        # 스냅샷 기사들의 요약에서도 바이라인/언론사명 완전 제거
+                        for n in news_list:
+                            if n.get('summary'):
+                                n['summary'] = clean_news_summary(n['summary'])
                         RSS_CACHE[cat] = {
                             'timestamp': time.time() - 30,
                             'news': news_list,

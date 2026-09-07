@@ -29,7 +29,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- 쿠팡 파트너스 공식 SDK -->
     <script src="https://ads-partners.coupang.com/g.js"></script>
-    <link rel="stylesheet" href="/static/css/style.css?v=20260906_5">
+    <link rel="stylesheet" href="/static/css/style.css?v=20260907_1">
 </head>
 <body class="article-page-body {% if is_mobile %}is-mobile-device{% endif %}">
 
@@ -470,14 +470,33 @@ window.__ORIGINAL_ARTICLE_URL__ = {{ article.url | tojson }};
 <script src="/static/js/auto_redirect.js?v=20260906_1"></script>
 <script src="/static/js/admin_secret.js?v=20260906_1"></script>
 <script>
-// 모바일 하단 플로팅 고정 배너 닫기 및 초기화
+// 모바일 하단 플로팅 고정 배너 닫기 (슬라이드 다운 애니메이션 및 세션 유지)
 function closeMobileStickyAd() {
     const el = document.getElementById('mobileStickyAd');
     if (el) {
-        el.style.display = 'none';
+        el.classList.add('closing');
         document.body.classList.remove('has-mobile-ad');
+        setTimeout(() => {
+            el.classList.add('closed');
+            el.style.setProperty('display', 'none', 'important');
+        }, 350);
+        try {
+            sessionStorage.setItem('hideMobileStickyAd', 'true');
+        } catch(e) {}
     }
 }
+
+// 이전에 닫은 적이 있다면 즉시 숨김
+try {
+    if (sessionStorage.getItem('hideMobileStickyAd') === 'true') {
+        const el = document.getElementById('mobileStickyAd');
+        if (el) {
+            el.classList.add('closed');
+            el.style.setProperty('display', 'none', 'important');
+            document.body.classList.remove('has-mobile-ad');
+        }
+    }
+} catch(e) {}
 
 function fitMobileStickyAd() {
     const stickyAd = document.getElementById('mobileStickyAd');

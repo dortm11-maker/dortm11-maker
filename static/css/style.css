@@ -1244,8 +1244,18 @@ body.is-mobile-device .mobile-sticky-ad-bar {
     border-top: 2px solid #2563eb !important;
     padding: 6px 0 6px 0 !important;
     box-sizing: border-box !important;
-    animation: stickySlideUp 0.3s ease !important;
-    overflow: hidden !important;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease !important;
+    overflow: visible !important;
+}
+
+.mobile-sticky-ad-bar.closing {
+    transform: translateY(120%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.mobile-sticky-ad-bar.closed {
+    display: none !important;
 }
 
 @media (max-width: 1024px) {
@@ -1263,8 +1273,8 @@ body.is-mobile-device .mobile-sticky-ad-bar {
         border-top: 2px solid #2563eb !important;
         padding: 6px 0 6px 0 !important;
         box-sizing: border-box !important;
-        animation: stickySlideUp 0.3s ease !important;
-        overflow: hidden !important;
+        transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.35s ease !important;
+        overflow: visible !important;
     }
 
     body.has-mobile-ad {
@@ -1285,22 +1295,30 @@ body.is-mobile-device .mobile-sticky-ad-bar {
 
     .mobile-sticky-ad-close {
         position: absolute;
-        top: -22px;
-        right: 4px;
-        width: 24px;
-        height: 24px;
+        top: 2px;
+        right: 6px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
-        background: #0f172a;
+        background: rgba(15, 23, 42, 0.85);
         color: #ffffff;
-        border: 2px solid #ffffff;
-        font-size: 11px;
+        border: 1.5px solid rgba(255, 255, 255, 0.9);
+        font-size: 14px;
         font-weight: 700;
+        line-height: 1;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
         z-index: 100000;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        transition: all 0.2s ease;
+        padding: 0;
+    }
+
+    .mobile-sticky-ad-close:active {
+        background: #ef4444;
+        transform: scale(0.9);
     }
 
     .mobile-sticky-header {
