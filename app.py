@@ -865,6 +865,89 @@ def get_image_from_entry(entry):
         return ''
     return img
 
+RAW_ORIGIN_IMAGE_CACHE = {}
+
+def get_raw_origin_image(url):
+    """
+    카카오톡 / 네이버 / SNS 링크 공유 시 매력적이고 관련도 높은 미리보기를 위해
+    언론사 원본 기사 사진(RSS 대표 이미지 또는 메타태그 og:image)을 정밀 추출.
+    (Unsplash AI 대체 이미지는 일절 배제하고 순수 원문 사진만 반환)
+    """
+    if not url or not str(url).startswith('http'):
+        return ''
+    if url in RAW_ORIGIN_IMAGE_CACHE and RAW_ORIGIN_IMAGE_CACHE[url]:
+        return RAW_ORIGIN_IMAGE_CACHE[url]
+
+    # 1. 메모리 RSS 캐시에서 원본 이미지 우선 탐색
+    with RSS_CACHE_LOCK:
+        for cat, entry in RSS_CACHE.items():
+            for item in entry.get('news', []):
+                if item.get('link') == url:
+                    img = item.get('image', '')
+                    if img and 'unsplash.com' not in img and not is_invalid_image(img):
+                        RAW_ORIGIN_IMAGE_CACHE[url] = img
+                        return img
+                    break
+
+    # 2. 원본 기사 웹페이지의 og:image 태그 정밀 추출
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+        }
+        resp = requests.get(url, headers=headers, timeout=3.5)
+        if resp.status_code == 200 and len(resp.text) > 150:
+            resp_text = resp.text
+
+            # 매일경제 특화 패턴
+            if 'mk.co.kr' in url:
+                mk_matches = re.findall(r'https?://(?:pimg|wimg)\.mk\.co\.kr/news/cms/[0-9a-zA-Z_/.]+\.(?:jpg|png|jpeg|webp)', resp_text)
+                if mk_matches:
+                    RAW_ORIGIN_IMAGE_CACHE[url] = mk_matches[0]
+                    return mk_matches[0]
+
+            # 한국경제 특화 패턴
+            if 'hankyung.com' in url:
+                hk_matches = re.findall(r'https?://img\.hankyung\.com/photo/[0-9a-zA-Z_/.]+\.(?:jpg|png|jpeg|webp)', resp_text)
+                if hk_matches:
+                    RAW_ORIGIN_IMAGE_CACHE[url] = hk_matches[0]
+                    return hk_matches[0]
+
+            # 표준 og:image 추출
+            m = re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']', resp_text, re.I)
+            if not m:
+                m = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']', resp_text, re.I)
+            if m:
+                cand = html.unescape(m.group(1).strip())
+                if cand and 'unsplash.com' not in cand and not is_invalid_image(cand):
+                    RAW_ORIGIN_IMAGE_CACHE[url] = cand
+                    return cand
+
+            # 본문 내 첫 번째 유효 이미지 추출
+            soup = BeautifulSoup(resp_text, 'html.parser')
+            body = (
+                soup.find('div', id='articletxt') or 
+                soup.find('div', class_='article-body') or
+                soup.find('div', id='article_body') or
+                soup.find('div', class_='news_cnt_detail_wrap') or
+                soup.find('div', class_='art_txt') or
+                soup.find('div', id='articleBody') or
+                soup.find('div', class_='article_view') or
+                soup.find('article')
+            )
+            if body:
+                for im in body.find_all('img'):
+                    src = im.get('src') or im.get('data-src') or ''
+                    if src.startswith('//'):
+                        src = 'https:' + src
+                    if src and src.startswith('http') and 'unsplash.com' not in src and not is_invalid_image(src):
+                        RAW_ORIGIN_IMAGE_CACHE[url] = src
+                        return src
+    except Exception as e:
+        print(f"[get_raw_origin_image warning]: {e}")
+
+    RAW_ORIGIN_IMAGE_CACHE[url] = ''
+    return ''
+
 def parse_date(entry):
     try:
         if hasattr(entry, 'published_parsed') and entry.published_parsed:
@@ -986,6 +1069,10 @@ def fetch_article_detail(url):
         cached_time, cached_data = ARTICLE_CACHE[url]
         if now_ts - cached_time < 3600:
             if cached_data.get('paragraphs') and len(cached_data['paragraphs']) >= 2:
+                if not cached_data.get('og_img') or 'unsplash.com' in cached_data.get('og_img', ''):
+                    raw_origin_img = get_raw_origin_image(url)
+                    if raw_origin_img:
+                        cached_data['og_img'] = raw_origin_img
                 return cached_data
 
     from services.curation_db import get_curated_article_by_url
@@ -1046,6 +1133,11 @@ def fetch_article_detail(url):
             if not current_img or ('현대차' in orig_t and current_img != '/static/img/ai/hyundai_car.jpg') or (is_crime_news and is_sports_img):
                 current_img = get_premium_stock_image(final_title, text=orig_t, category=existing.get('category', '사회' if is_crime_news else '전체'))
 
+            # 카카오톡/SNS 링크 공유용 원본 기사 사진 추출 (사이트 본문에서는 current_img AI 이미지 유지)
+            raw_origin_img = ai_cnt.get('og_img')
+            if not raw_origin_img or 'unsplash.com' in raw_origin_img:
+                raw_origin_img = get_raw_origin_image(url)
+
             result = {
                 'id': existing.get('id'),
                 'title': final_title,
@@ -1055,6 +1147,7 @@ def fetch_article_detail(url):
                 'pub_date': existing.get('published_at', ''),
                 'author': '',
                 'main_img': current_img,
+                'og_img': raw_origin_img or current_img,
                 'caption': '',
                 'summary_points': summary_pts,
                 'paragraphs': paras,
@@ -1095,6 +1188,9 @@ def fetch_article_detail(url):
     # 3. 공개 헤드라인을 기반으로 독자적 이슈 분석 브리핑 리포트 생성 (원문 본문 전달 일절 없음)
     art = build_full_news_article(raw_title, site_cfg=site_cfg, url=url, category=category, publisher_name=publisher)
 
+    # 카카오톡/SNS 링크 공유용 원본 기사 사진 추출 (사이트 본문에서는 art['main_img'] AI 이미지 유지)
+    raw_origin_img = get_raw_origin_image(url)
+
     result = {
         'id': '',
         'title': art['title'],
@@ -1104,6 +1200,7 @@ def fetch_article_detail(url):
         'pub_date': pub_date,
         'author': '',
         'main_img': art['main_img'],
+        'og_img': raw_origin_img or art['main_img'],
         'caption': '',
         'summary_points': art['summary_points'],
         'paragraphs': art['paragraphs'],
@@ -1732,7 +1829,7 @@ def admin_convert_share_link():
         article_data = fetch_article_detail(target_news_url)
         title = article_data.get('title') or '최신 주요 뉴스 속보'
         publisher = article_data.get('publisher') or '언론사'
-        image = article_data.get('main_img') or ''
+        image = article_data.get('og_img') or article_data.get('main_img') or ''
 
         # 4. 우리 사이트 배포 URL 기준 뷰어 링크 구성
         base_host = "https://news-now-82jg.onrender.com"
