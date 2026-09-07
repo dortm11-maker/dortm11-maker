@@ -3543,7 +3543,7 @@
             const watermarkEl = document.getElementById('aiWatermarkEnabled');
 
             if (enabledEl) enabledEl.checked = ai.enabled !== false;
-            if (apiKeyEl) apiKeyEl.value = ai.gemini_api_key || '';
+            if (apiKeyEl) apiKeyEl.value = ai.gemini_api_key || ai.api_key || '';
             if (titleEl) titleEl.checked = ai.rewrite_title !== false;
             if (bodyEl) bodyEl.checked = ai.rewrite_body !== false;
             if (premImgEl) premImgEl.checked = ai.use_premium_stock !== false;
@@ -3554,15 +3554,18 @@
         async function saveAiConfig() {
             if (!currentSiteConfig) currentSiteConfig = {};
 
+            const apiKeyVal = document.getElementById('aiApiKey')?.value.trim() || '';
             currentSiteConfig.ai_rewrite = {
                 enabled: document.getElementById('aiRewriteEnabled')?.checked !== false,
-                gemini_api_key: document.getElementById('aiApiKey')?.value.trim() || '',
+                gemini_api_key: apiKeyVal,
+                api_key: apiKeyVal,
                 rewrite_title: document.getElementById('aiRewriteTitle')?.checked !== false,
                 rewrite_body: document.getElementById('aiRewriteBody')?.checked !== false,
                 use_premium_stock: document.getElementById('aiUsePremiumImages')?.checked !== false,
                 image_safeguard: document.getElementById('aiImageSafeguard')?.checked !== false,
                 add_watermark: document.getElementById('aiWatermarkEnabled')?.checked !== false
             };
+
 
             try {
                 const resp = await fetch('/admin/api/site_config', {

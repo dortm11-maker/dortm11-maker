@@ -2068,7 +2068,7 @@ def admin_add_custom_news():
 
         # 6. AI 뉴스 기사 전면 빌드
         site_cfg = load_site_config()
-        art = build_full_news_article(raw_title, site_cfg=site_cfg, url=url, category=target_category, publisher_name=publisher)
+        art = build_full_news_article(raw_title, site_cfg=site_cfg, url=url, category=target_category, publisher_name=publisher, raw_paragraphs=fact_points)
 
         # 7. 기사 썸네일 & 시간
         final_thumb = art['main_img']
