@@ -489,6 +489,58 @@ def load_site_config():
 def save_site_config(config):
     with open(SITE_CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
+    # 관리자가 저장할 때마다 GitHub에 자동 push (Render 재배포 시에도 설정 영구 유지)
+    _auto_push_site_config_to_github(config)
+
+def _auto_push_site_config_to_github(config):
+    """
+    GitHub REST API를 통해 site_config.json을 자동으로 레포에 커밋/push.
+    환경변수 GITHUB_TOKEN이 설정된 경우에만 동작.
+    """
+    token = os.environ.get('GITHUB_TOKEN', '').strip()
+    if not token:
+        return  # 토큰 없으면 조용히 건너뜀
+
+    try:
+        import base64
+        GITHUB_OWNER = 'dortm11-maker'
+        GITHUB_REPO  = 'dortm11-maker'
+        GITHUB_PATH  = 'site_config.json'
+        API_BASE     = f'https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{GITHUB_PATH}'
+
+        headers = {
+            'Authorization': f'token {token}',
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json',
+            'X-GitHub-Api-Version': '2022-11-28'
+        }
+
+        # 1. 현재 파일의 SHA 가져오기 (업데이트에 필요)
+        get_resp = requests.get(API_BASE, headers=headers, timeout=8)
+        sha = None
+        if get_resp.status_code == 200:
+            sha = get_resp.json().get('sha', '')
+
+        # 2. 파일 내용 base64 인코딩
+        content_str = json.dumps(config, ensure_ascii=False, indent=2)
+        content_b64 = base64.b64encode(content_str.encode('utf-8')).decode('ascii')
+
+        # 3. PUT 요청으로 파일 업데이트
+        put_body = {
+            'message': '[auto] admin: save site_config.json',
+            'content': content_b64,
+            'branch': 'main'
+        }
+        if sha:
+            put_body['sha'] = sha
+
+        put_resp = requests.put(API_BASE, headers=headers, json=put_body, timeout=10)
+        if put_resp.status_code in (200, 201):
+            print(f"[GitHub Auto-Push] site_config.json 업데이트 성공 ✅")
+        else:
+            print(f"[GitHub Auto-Push] 실패: {put_resp.status_code} {put_resp.text[:200]}")
+    except Exception as e:
+        print(f"[GitHub Auto-Push] 예외: {e}")
 
 def get_admin_password():
     try:
