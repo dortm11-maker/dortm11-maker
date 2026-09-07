@@ -81,6 +81,18 @@ def clean_news_line(text):
     t = re.sub(r'\d{4}[.\-/]\d{1,2}[.\-/]\d{1,2}(?:\s*\d{1,2}:\d{1,2}(?::\d{1,2})?)?', '', t)
     t = re.sub(r'송고시간\s*:?.*', '', t)
 
+    # 5-1. 웹페이지 버튼/UI 텍스트 및 구독/공유/글자크기 찌꺼기 강력 제거
+    t = re.sub(r'북마크\s*공유\s*공유하기.*?닫기', '', t)
+    t = re.sub(r'URL이?\s*복사되었습니다\.?', '', t)
+    t = re.sub(r'카카오톡\s*페이스북\s*X\s*페이스북\s*메신저\s*네이버\s*밴드\s*URL\s*복사\.?', '', t)
+    t = re.sub(r'댓글\s*글자크기\s*본문\s*글자\s*크기\s*조정.*?프린트\s*제보\.?', '', t)
+    t = re.sub(r'본문\s*글자\s*크기\s*조정.*?닫기\.?', '', t)
+    t = re.sub(r'폰트\s*\d단계\s*\d+px\s*', '', t)
+    t = re.sub(r'구독\s*구독중\s*[가-힣]{2,4}\s*기자\s*구독\s*구독중(?:\s*이선\s*다음)?\.?', '', t)
+    t = re.sub(r'구독\s*구독중', '', t)
+    t = re.sub(r'[가-힣]{2,4}\s*기자\s*구독', '', t)
+    t = re.sub(r'이선\s*다음', '', t)
+
     # 6. 빈 괄호 제거
     t = re.sub(r'\[\s*\]|\(\s*\)', '', t)
 
@@ -91,9 +103,18 @@ def clean_news_line(text):
 
 def is_valid_news_paragraph(line):
     """
-    찌꺼기 캡션, 촬영자 정보, 방송 출연진 안내, 단순 날짜 줄을 걸러내고 순수한 본문 설명 문단만 판별
+    찌꺼기 캡션, 촬영자 정보, 방송 출연진 안내, 단순 날짜 줄, 웹페이지 버튼/UI 텍스트를 걸러내고 순수한 본문 설명 문단만 판별
     """
     if not line or len(line) < 15:
+        return False
+    # 웹페이지 버튼, 폰트 조절, 공유, 구독, 북마크, 앱 다운로드 UI 쓰레기 검출
+    if re.search(r'폰트\s*\d단계|\d+px|글자크기|본문\s*글자\s*크기|글자\s*크기|프린트|제보|인쇄|스크랩', line):
+        return False
+    if re.search(r'구독|구독중|기자\s*구독|구독하기', line):
+        return False
+    if re.search(r'북마크|공유하기|카카오톡|페이스북|메신저|네이버\s*밴드|URL\s*복사|복사되었습니다|닫기', line):
+        return False
+    if re.search(r'이전\s*다음|댓글\s*\d*|공감\s*\d*|추천\s*\d*', line):
         return False
     # 방송 진행/출연/제작 안내 찌꺼기 검출
     if re.search(r'진행\s*[:：]|출연\s*[:：]|제작\s*[:：]|연출\s*[:：]|앵커\s*[:：]', line):
@@ -370,6 +391,10 @@ def extract_factual_data(url, title=""):
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(resp.text, 'html.parser')
             
+            # UI 및 찌꺼기 엘리먼트 전면 파기
+            for junk in soup.select('script, style, button, nav, header, footer, noscript, svg, form, input, select, textarea, .share_wrap, .sns_wrap, .byline, .reporter, .font_size, .btn_area, .util_area, .reply_area, .comment_area, .copyright, .article_relation, .recommend_news, .subscribe_wrap, .subscribe_box, .sns_area, .aside_wrap, .link_news, .ad_wrap, .vod_area, .vod_player'):
+                junk.decompose()
+            
             # 본문 컨테이너 영역 탐색
             body = (
                 soup.select_one('article._article_body') or
@@ -391,16 +416,23 @@ def extract_factual_data(url, title=""):
             
             raw_blocks = []
             if body:
-                # p, div, li 태그 우선 탐색하여 단락 구조 보존
-                for elem in body.find_all(['p', 'div', 'li', 'h2', 'h3', 'h4']):
-                    t = elem.get_text().strip()
+                # 1차: 순수 문단 태그 <p> 우선 추출
+                p_tags = body.find_all('p')
+                for p in p_tags:
+                    t = p.get_text().strip()
                     if t and len(t) >= 15 and t not in raw_blocks:
                         raw_blocks.append(t)
-                if not raw_blocks:
-                    for s in body.stripped_strings:
-                        txt = s.strip()
-                        if txt and len(txt) >= 15:
-                            raw_blocks.append(txt)
+
+                # p 태그가 2개 이하로 너무 적을 때만 div/li 보조 탐색
+                if len(raw_blocks) < 3:
+                    for elem in body.find_all(['div', 'li', 'h2', 'h3', 'h4']):
+                        cl = ' '.join(elem.get('class', []))
+                        id_name = elem.get('id', '')
+                        if any(k in f"{cl} {id_name}".lower() for k in ['share', 'sns', 'byline', 'font', 'subscri', 'util', 'btn', 'foot', 'head', 'comment', 'recommend']):
+                            continue
+                        t = elem.get_text().strip()
+                        if t and len(t) >= 20 and t not in raw_blocks:
+                            raw_blocks.append(t)
             else:
                 raw_blocks = resp.text.split('\n')
 

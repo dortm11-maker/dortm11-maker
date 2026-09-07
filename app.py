@@ -1002,6 +1002,7 @@ def fetch_article_detail(url):
         from services.ai_rewriter import is_meaningless_news
         has_caption_junk = any(re.search(r'촬영|제공|재판매|DB\s*금지|송고시간|송고|\d{4}년\s*\d{1,2}월\s*\d{1,2}일\s*\d{1,2}시', p) for p in paras)
         has_host_junk = any(re.search(r'진행\s*[:：]|출연\s*[:：]|한겨레\s*정치팀|시청\s*바랍니다|시청바랍니다', p) for p in paras)
+        has_web_junk = any(re.search(r'폰트\s*\d단계|\d+px|글자크기|본문\s*글자\s*크기|구독\s*구독중|심민규|북마크|공유하기|카카오톡|페이스북|메신저|네이버\s*밴드|URL\s*복사|프린트|제보', p) for p in paras) or any(re.search(r'폰트\s*\d단계|글자크기|북마크|카카오톡|페이스북|URL\s*복사', s) for s in summary_pts)
         has_bracket_tag = bool(re.search(r'^\[[^\]]+\]', current_ai_t)) or any('촬영' in s for s in summary_pts)
         has_awkward_title = '고부가 제품군' in current_ai_t and '고부가' not in orig_t
         has_duplicate_summary = len(summary_pts) > 1 and len(summary_pts) != len(set(summary_pts))
@@ -1011,8 +1012,8 @@ def fetch_article_detail(url):
         is_meaningless = is_meaningless_news(existing.get('original_title', ''), text=" ".join(paras))
         is_too_short = sum(len(p) for p in paras) < 280 or len(paras) < 4
 
-        # 결함(방송 출연진 찌꺼기, 너무 짧은 볼륨, 원문과 동일한 제목, 대괄호 태그 등) 감지 시 재구성 실행
-        if has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or has_double_dot or is_same_as_raw or is_meaningless or is_too_short:
+        # 결함(웹 찌꺼기 텍스트, 방송 출연진, 너무 짧은 볼륨, 원문과 동일한 제목 등) 감지 시 재구성 실행
+        if has_web_junk or has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or has_double_dot or is_same_as_raw or is_meaningless or is_too_short:
             pass # 건너뛰어 아래 3단계 build_full_news_article 실행
         else:
             publisher = existing.get('source_name')
@@ -1030,8 +1031,10 @@ def fetch_article_detail(url):
                 summary_pts[0] = final_title
 
             current_img = existing.get('ai_image', '')
-            if not current_img or ('현대차' in orig_t and current_img != '/static/img/ai/hyundai_car.jpg'):
-                current_img = get_premium_stock_image(final_title, text=orig_t, category=existing.get('category', '전체'))
+            is_crime_news = bool(re.search(r'시신|살인|피의자|검거|체포|구속|경찰|수사|용의자|사건|참사|범죄|냉동창고', orig_t))
+            is_sports_img = any(s in current_img for s in ['photo-1579952363873', 'photo-1461896836934', 'photo-1574629810360', 'photo-1431324155629', 'photo-1540747913346', 'photo-1534438327276'])
+            if not current_img or ('현대차' in orig_t and current_img != '/static/img/ai/hyundai_car.jpg') or (is_crime_news and is_sports_img):
+                current_img = get_premium_stock_image(final_title, text=orig_t, category=existing.get('category', '사회' if is_crime_news else '전체'))
 
             result = {
                 'id': existing.get('id'),
