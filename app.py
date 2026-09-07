@@ -948,7 +948,64 @@ def get_raw_origin_image(url):
     RAW_ORIGIN_IMAGE_CACHE[url] = ''
     return ''
 
+
+RAW_ORIGIN_TITLE_CACHE = {}
+
+def get_raw_origin_title(url):
+    """
+    원본 기사 URL에서 og:title 혹은 <title> 태그를 추출해 실제 기사 제목을 반환.
+    RSS 캐시에서 찾지 못한 경우의 fallback으로 사용.
+    """
+    if not url or not str(url).startswith('http'):
+        return ''
+    if url in RAW_ORIGIN_TITLE_CACHE and RAW_ORIGIN_TITLE_CACHE[url]:
+        return RAW_ORIGIN_TITLE_CACHE[url]
+
+    # 먼저 RSS 캐시에서 탐색
+    with RSS_CACHE_LOCK:
+        for cat, entry in RSS_CACHE.items():
+            for item in entry.get('news', []):
+                if item.get('link') == url:
+                    t = item.get('title', '').strip()
+                    if t:
+                        RAW_ORIGIN_TITLE_CACHE[url] = t
+                        return t
+
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+        }
+        resp = requests.get(url, headers=headers, timeout=4)
+        if resp.status_code == 200 and len(resp.text) > 100:
+            # og:title 우선
+            m = re.search(r'<meta[^>]+property=["\']og:title["\']\s[^>]+content=["\']([^"\']{5,})["\']', resp.text, re.I)
+            if not m:
+                m = re.search(r'<meta[^>]+content=["\']([^"\']{5,})["\']\s[^>]+property=["\']og:title["\']', resp.text, re.I)
+            if m:
+                t = html.unescape(m.group(1).strip())
+                if t:
+                    RAW_ORIGIN_TITLE_CACHE[url] = t
+                    return t
+            # <title> 태그 fallback
+            m2 = re.search(r'<title[^>]*>([^<]{5,})</title>', resp.text, re.I)
+            if m2:
+                t = html.unescape(m2.group(1).strip())
+                # 사이트명 제거 (| / :: - 뒤 부분이 사이트명인 경우)
+                for sep in [' | ', ' :: ', ' - ', ' – ']:
+                    if sep in t:
+                        t = t.split(sep)[0].strip()
+                        break
+                if t:
+                    RAW_ORIGIN_TITLE_CACHE[url] = t
+                    return t
+    except Exception as e:
+        print(f"[get_raw_origin_title warning]: {e}")
+
+    RAW_ORIGIN_TITLE_CACHE[url] = ''
+    return ''
+
 def parse_date(entry):
+
     try:
         if hasattr(entry, 'published_parsed') and entry.published_parsed:
             dt = datetime(*entry.published_parsed[:6])
@@ -1183,7 +1240,8 @@ def fetch_article_detail(url):
             publisher = cluster_match['source']
 
     if not raw_title:
-        raw_title = "실시간 주요 뉴스 속보"
+        # RSS 캐시 미매칭 → 원본 페이지 og:title 실시간 스크랩으로 실제 기사 제목 복원
+        raw_title = get_raw_origin_title(url) or "실시간 주요 뉴스 속보"
 
     # 3. 공개 헤드라인을 기반으로 독자적 이슈 분석 브리핑 리포트 생성 (원문 본문 전달 일절 없음)
     art = build_full_news_article(raw_title, site_cfg=site_cfg, url=url, category=category, publisher_name=publisher)
