@@ -1,26 +1,43 @@
 /* ============================================================
    뉴스NOW - 시크릿 단축키 및 비공개 접근 제어 엔진
-   - Ctrl + F12 (또는 Cmd + F12): 관리자 모드(/admin)로 즉시 전환
-   - Ctrl + F11 (또는 Cmd + F11): 뉴스 상세 페이지에서 언론사 원문으로 즉시 이동 (비밀 루트)
-   - 모바일 지원: 상단 로고 5회 연속 탭 시 관리자 모드로 비밀 전환
+   - Ctrl + F12 (또는 Cmd + F12): 관리자 모드(/admin)를 새 탭(새 창)으로 1개만 열기 (기존 페이지 유지)
+   - Ctrl + F11 (또는 Cmd + F11): 뉴스 상세 페이지에서 언론사 원문을 새 탭(새 창)으로 1개만 열기 (기존 페이지 유지)
+   - 모바일 지원: 상단 로고 5회 연속 탭 시 관리자 모드를 새 탭으로 열기
    ============================================================ */
 (function() {
+    // 안전하게 새 탭(새 창)을 1개만 여는 헬퍼 (기존 페이지는 절대 변경하지 않음)
+    function openNewTabSafely(url) {
+        if (!url) return;
+        try {
+            const a = document.createElement('a');
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(function() {
+                if (a.parentNode) a.parentNode.removeChild(a);
+            }, 100);
+        } catch (err) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+    }
+
     // 1. 키보드 단축키 감지
     window.addEventListener('keydown', function(e) {
-        // [비밀 루트 1] Ctrl + F12 (Cmd + F12): 관리자 페이지 전환
+        // [비밀 루트 1] Ctrl + F12 (Cmd + F12): 관리자 페이지를 새 창(새 탭)으로 1개만 열기
         const isF12 = e.key === 'F12' || e.code === 'F12' || e.keyCode === 123;
         if ((e.ctrlKey || e.metaKey) && isF12) {
             e.preventDefault();
             e.stopPropagation();
 
-            showNoticeToast('🔒 관리자 모드로 전환 중입니다...', '#38bdf8');
-            setTimeout(function() {
-                window.location.href = '/admin';
-            }, 300);
+            showNoticeToast('🔒 관리자 모드를 새 탭으로 엽니다...', '#38bdf8');
+            openNewTabSafely('/admin');
             return false;
         }
 
-        // [비밀 루트 2] Ctrl + F11 (Cmd + F11): 해당 뉴스 언론사 원문으로 바로가기
+        // [비밀 루트 2] Ctrl + F11 (Cmd + F11): 언론사 원문 기사를 새 창(새 탭)으로 1개만 열기
         const isF11 = e.key === 'F11' || e.code === 'F11' || e.keyCode === 122;
         if ((e.ctrlKey || e.metaKey) && isF11) {
             e.preventDefault();
@@ -31,14 +48,8 @@
             const originalUrl = window.__ORIGINAL_ARTICLE_URL__ || urlParams.get('url');
 
             if (originalUrl && (originalUrl.startsWith('http://') || originalUrl.startsWith('https://'))) {
-                showNoticeToast('🚀 언론사 원문 페이지로 이동합니다...', '#10b981');
-                setTimeout(function() {
-                    const win = window.open(originalUrl, '_blank', 'noopener,noreferrer');
-                    if (!win) {
-                        // 팝업이 차단된 경우 현재 탭에서 이동
-                        window.location.href = originalUrl;
-                    }
-                }, 300);
+                showNoticeToast('🚀 언론사 원문을 새 탭으로 엽니다...', '#10b981');
+                openNewTabSafely(originalUrl);
             } else {
                 showNoticeToast('ℹ️ 뉴스 상세 페이지에서만 원문 이동이 가능합니다.', '#f59e0b');
             }
@@ -46,7 +57,7 @@
         }
     }, true);
 
-    // 2. 모바일/터치 지원: 상단 로고 5회 연속 탭 시 관리자 전환
+    // 2. 모바일/터치 지원: 상단 로고 5회 연속 탭 시 관리자 모드 새 탭 열기
     let logoTapCount = 0;
     let logoTapTimer = null;
 
@@ -64,10 +75,8 @@
             if (logoTapCount >= 5) {
                 e.preventDefault();
                 logoTapCount = 0;
-                showNoticeToast('🔒 관리자 모드로 전환 중입니다...', '#38bdf8');
-                setTimeout(function() {
-                    window.location.href = '/admin';
-                }, 350);
+                showNoticeToast('🔒 관리자 모드를 새 탭으로 엽니다...', '#38bdf8');
+                openNewTabSafely('/admin');
             }
         });
     }
@@ -91,7 +100,7 @@
             setTimeout(function() {
                 toast.style.display = 'none';
             }, 250);
-        }, 2200);
+        }, 2000);
     }
 
     if (document.readyState === 'loading') {
