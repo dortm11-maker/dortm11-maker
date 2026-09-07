@@ -1035,7 +1035,7 @@ def fetch_article_detail(url):
             if not current_ai_title or current_ai_title == orig_t or current_ai_title == existing.get('original_title'):
                 final_title = rewrite_news_title(orig_t, category=existing.get('category', '전체'))
             else:
-                final_title = current_ai_title
+                final_title = clean_news_title(current_ai_title)
 
             if summary_pts and (summary_pts[0] == orig_t or summary_pts[0] == existing.get('original_title')):
                 summary_pts[0] = final_title
@@ -1298,15 +1298,17 @@ def load_snapshot():
     """서버 부팅 즉시 파일 스냅샷을 메모리 캐시로 로드 (0.001초 콜드 스타트 제거)"""
     if os.path.exists(NEWS_SNAPSHOT_FILE):
         try:
-            from services.ai_rewriter import clean_news_summary
+            from services.ai_rewriter import clean_news_summary, clean_news_title
             with open(NEWS_SNAPSHOT_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
                 with RSS_CACHE_LOCK:
                     for cat, news_list in data.items():
-                        # 스냅샷 기사들의 요약에서도 바이라인/언론사명 완전 제거
+                        # 스냅샷 기사들의 요약 및 제목에서도 바이라인/동향분석 꼬리표 완전 제거
                         for n in news_list:
                             if n.get('summary'):
                                 n['summary'] = clean_news_summary(n['summary'])
+                            if n.get('title'):
+                                n['title'] = clean_news_title(n['title'])
                         RSS_CACHE[cat] = {
                             'timestamp': time.time() - 30,
                             'news': news_list,

@@ -186,6 +186,14 @@ def clean_news_title(title):
     
     # 3. 문두 특수기호 제거
     t = re.sub(r'^[▲■◆●★▶▷☞\s]+', '', t)
+    
+    # 4. 인위적으로 붙은 '동향 분석' 등 불필요한 꼬리표 100% 제거
+    t = re.sub(r'(?:…|\.\.\.|\s)*동향\s*분석', '', t)
+    t = re.sub(r'(?:…|\.\.\.|\s)*시장\s*영향\s*분석', '', t)
+    t = re.sub(r'(?:…|\.\.\.|\s)*배경과\s*전망', '', t)
+    t = re.sub(r'(?:…|\.\.\.|\s)*향후\s*추이\s*주목', '', t)
+    t = re.sub(r'(?:…|\.\.\.|\s)*공식\s*집계\s*발표', '', t)
+    t = re.sub(r'[…\.\s]+$', '', t)
     return t.strip()
 
 def make_short_bullet(text, max_len=95):
@@ -311,15 +319,9 @@ def rewrite_news_title(title, paragraphs=None, category='전체'):
         elif cand.endswith('발표'):
             cand = re.sub(r'발표$', '공식 입장 발표', cand)
 
-    # 원문 제목과 100% 동일할 경우, 저작권 보호를 위해 안전한 브리핑 수식 추가
-    if cand == title or cand == t:
-        if '?' in cand:
-            cand = cand.replace('?', ' 주목')
-        elif cand.endswith('다') or cand.endswith('요'):
-            cand = f"[이슈] {cand}"
-        else:
-            cand = f"{cand}… 동향 분석"
-
+    # 원문 제목 정돈 및 불필요한 '동향 분석' 접미사 완전 배제
+    cand = re.sub(r'(?:…|\.\.\.|\s)*동향\s*분석', '', cand)
+    cand = re.sub(r'[…\.\s]+$', '', cand)
     return cand.strip()
 
 # 문장 어미 자연스러운 뉴스체 변환

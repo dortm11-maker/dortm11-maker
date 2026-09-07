@@ -326,6 +326,14 @@ function onCardClick() {
     setTimeout(() => { bar.style.width = '96%'; }, 180);
 }
 
+function cleanTitle(text) {
+    if (!text) return '';
+    let t = text.trim();
+    t = t.replace(/(?:…|\.\.\.|\s)*동향\s*분석/g, '');
+    t = t.replace(/[…\.\s]+$/, '');
+    return t.trim();
+}
+
 function cleanSummary(text) {
     if (!text) return '';
     let t = text.trim();
@@ -348,6 +356,7 @@ function createHeadlineCard(item) {
         ? `<span style="background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:700; padding:2px 7px; border-radius:10px; border:1px solid #bfdbfe; margin-left:6px;">🔥 ${item.cluster_count}개 언론사 보도</span>`
         : '';
     const cleanedSum = cleanSummary(item.summary);
+    const cleanedTitle = cleanTitle(item.title);
     return `
     <a class="headline-card" href="${targetUrl}"
        onmouseenter="prefetchArticle('${escAttr(item.link)}')"
@@ -366,7 +375,7 @@ function createHeadlineCard(item) {
                 ${esc(item.source)}
                 ${clusterBadge}
             </div>
-            <div class="headline-title">${esc(item.title)}</div>
+            <div class="headline-title">${esc(cleanedTitle)}</div>
             ${cleanedSum ? `<div class="headline-summary">${esc(cleanedSum)}</div>` : ''}
             <div class="headline-date">${esc(item.date)}</div>
         </div>
@@ -396,7 +405,7 @@ function createNewsCard(item) {
         </div>
         <div class="news-card-body">
             <div class="news-card-source">${tagBadge} ${clusterBadge}</div>
-            <div class="news-card-title">${esc(item.title)}</div>
+            <div class="news-card-title">${esc(cleanTitle(item.title))}</div>
             <div class="news-card-date">${esc(item.date)}</div>
         </div>
     </a>`;
