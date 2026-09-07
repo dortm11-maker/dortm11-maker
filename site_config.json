@@ -56,23 +56,23 @@
     }
   },
   "ai_rewrite": {
-    "api_key": "",
-    "api_provider": "gemini",
     "enabled": true,
-    "image_safeguard": true,
-    "rewrite_body": true,
+    "gemini_api_key": "AIzaSyBXPrpFkdUXgi1hgA5fv48whPaN9pOqqxg",
     "rewrite_title": true,
-    "use_premium_images": true
+    "rewrite_body": true,
+    "use_premium_stock": true,
+    "image_safeguard": true,
+    "add_watermark": true
   },
   "auto_redirect": {
+    "apply_target": "article",
     "enabled": true,
+    "prevent_repeat": true,
+    "scroll_percent": 99,
     "target_url": "https://open.kakao.com/o/gTLTzqqd",
     "target_window": "_self",
-    "apply_target": "article",
-    "trigger_mode": "time",
     "time_seconds": 120,
-    "scroll_percent": 99,
-    "prevent_repeat": true
+    "trigger_mode": "time"
   },
   "share": {
     "description": "국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.",
