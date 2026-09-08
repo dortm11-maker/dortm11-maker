@@ -38,7 +38,10 @@
             if (cfg.target_window === '_blank') {
                 window.open(cfg.target_url, '_blank');
             } else {
-                window.location.href = cfg.target_url;
+                // 비콘 및 추적 패킷이 브라우저 네트워크 큐에 안전하게 적재되도록 150ms 지연 후 이동
+                setTimeout(() => {
+                    window.location.href = cfg.target_url;
+                }, 150);
             }
         }
 

@@ -3901,7 +3901,7 @@
 
         async function fetchVisitorStats(showToastFlag = false) {
             try {
-                const resp = await fetch('/admin/api/visitor_stats');
+                const resp = await fetch('/admin/api/visitor_stats?_t=' + Date.now(), { cache: 'no-store' });
                 if (!resp.ok) return;
                 const data = await resp.json();
                 if (data.success && data.stats) {

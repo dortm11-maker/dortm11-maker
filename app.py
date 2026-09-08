@@ -1599,17 +1599,51 @@ def api_ping():
     visitor_tracker.update_ping(client_ip, page_name=page)
     return jsonify({'ok': True})
 
-@app.route('/api/track_ad_click', methods=['POST'])
+@app.route('/api/track_ad_click', methods=['POST', 'GET', 'OPTIONS'])
 def api_track_ad_click():
-    """쿠팡 파트너스 광고 및 링크 클릭 실시간 추적 API"""
+    """쿠팡 파트너스 광고 및 링크 클릭 실시간 추적 API (sendBeacon, fetch, image beacon 전방위 지원)"""
+    if request.method == 'OPTIONS':
+        resp = Response('', status=204)
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        resp.headers['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
+        resp.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+        return resp
+
     try:
-        data = request.get_json(silent=True) or {}
-        ad_type = data.get('ad_type', 'unknown')
-        page_name = data.get('page', '')
+        data = request.get_json(silent=True)
+        if not data:
+            raw_text = request.get_data(as_text=True)
+            if raw_text:
+                try:
+                    data = json.loads(raw_text)
+                except Exception:
+                    data = {}
+        data = data or {}
+
+        ad_type = (
+            data.get('ad_type') or 
+            request.form.get('ad_type') or 
+            request.args.get('ad_type') or 
+            'unknown'
+        ).strip()
+
+        page_name = (
+            data.get('page') or 
+            request.form.get('page') or 
+            request.args.get('page') or 
+            ''
+        ).strip()
+
         client_ip = get_client_real_ip()
         device = detect_device()
-        visitor_tracker.record_ad_click(client_ip, device, ad_type, page_name)
-        return jsonify({'success': True})
+
+        if ad_type and ad_type != 'unknown':
+            visitor_tracker.record_ad_click(client_ip, device, ad_type, page_name)
+
+        resp = jsonify({'success': True, 'ad_type': ad_type})
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+        resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        return resp
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
 
@@ -2163,7 +2197,9 @@ def admin_visitor_stats():
     """오직 관리자만 조회 가능한 실시간/오늘/누적 방문자 통계 API (외부 열람 불가)"""
     if not is_admin():
         abort(403)
-    return jsonify({'success': True, 'stats': visitor_tracker.get_stats()})
+    resp = jsonify({'success': True, 'stats': visitor_tracker.get_stats()})
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    return resp
 
 @app.route('/admin/api/visitor_stats/sync', methods=['POST'])
 def admin_sync_visitor_stats():

@@ -795,13 +795,14 @@
   },
   "ad_clicks": {
     "by_type_total": {
-      "left": 1,
+      "left": 2,
       "right": 0,
-      "center": 7,
-      "popup": 5,
+      "center": 8,
+      "popup": 6,
       "link": 0,
-      "auto_redirect": 10,
-      "mobile": 6
+      "auto_redirect": 13,
+      "mobile": 6,
+      "unknown": 1
     },
     "by_type_today": {
       "left": 0,
@@ -810,7 +811,8 @@
       "popup": 0,
       "link": 0,
       "auto_redirect": 0,
-      "mobile": 0
+      "mobile": 0,
+      "unknown": 0
     },
     "daily": {
       "2026-09-06": {
@@ -844,7 +846,9 @@
           "center": 0,
           "popup": 0,
           "link": 0,
-          "auto_redirect": 0
+          "auto_redirect": 0,
+          "mobile": 0,
+          "unknown": 0
         }
       }
     },
@@ -1109,6 +1113,24 @@
         "label": "정면 본문 배너",
         "page": "서울 인구 감소세 속 집값 상승 배경과 원인 분석… 주요 변수 진단",
         "ts": 1788793153.4392126
+      },
+      {
+        "time": "16:12:54",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "unknown",
+        "label": "광고 배너 (unknown)",
+        "page": "메인 홈",
+        "ts": 1788851574.3394575
+      },
+      {
+        "time": "16:16:42",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "center",
+        "label": "정면 본문 배너",
+        "page": "기사 상세",
+        "ts": 1788851802.252175
       }
     ]
   }
