@@ -362,16 +362,19 @@ def rewrite_news_title(title, paragraphs=None, category='전체'):
         parts = re.split(r'는데|지만', t, maxsplit=1)
         front = parts[0].strip()
         back = parts[1].strip()
-        front = re.sub(r'인구\s*줄어', '인구 감소세 속', front)
-        front = re.sub(r'경기\s*침체', '경기 둔화 속', front)
-        cand = f"{front}에도 {back} 지속… 주요 배경과 시장 진단"
+        front = re.sub(r'[…\.\-\|\s]+$', '', front).strip()
+        back = re.sub(r'^[…\.\-\|\s]+', '', back).strip()
+        front = re.sub(r'라$', '', front)
+        front = re.sub(r'인구\s*줄어', '인구 감소세', front)
+        front = re.sub(r'경기\s*침체', '경기 둔화', front)
+        cand = f"{front} 속에서도 {back}… 시장 파급 영향 분석"
 
     # 4. 구분 기호(… 또는 ... 또는 - 또는 |)를 기준으로 분절 정돈
     elif any(sep in t for sep in ['…', '...']):
         parts = re.split(r'…|\.\.\.', t)
         if len(parts) >= 2:
-            front = parts[0].strip().strip('\"\' ')
-            back = parts[1].strip().strip('\"\' ')
+            front = parts[0].strip().strip('\"\'….-| ')
+            back = parts[1].strip().strip('\"\'….-| ')
             
             # 앞부분 정돈
             front = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1, ', front)
@@ -379,8 +382,10 @@ def rewrite_news_title(title, paragraphs=None, category='전체'):
             front = re.sub(r'치솟자', '급등세 지속에', front)
             front = re.sub(r'내리자', '하락 전환에', front)
             
-            # 뒷부분 서술어 품격 있게 재구성
-            if '집중' in back:
+            # 뒷부분 서술어 품격 있게 재구성 (중복 부착 방지)
+            if any(back.endswith(x) for x in ['흐름 뚜렷', '분석', '전망', '진단', '주목', '심화', '방침', '기록', '지속', '가속', '비상']):
+                back_new = back
+            elif '집중' in back:
                 back_new = re.sub(r'집중$', '쏠림 현상 심화', back)
             elif '급증' in back:
                 back_new = re.sub(r'급증$', '큰 폭 증가세 기록', back)
@@ -431,8 +436,12 @@ def rewrite_news_title(title, paragraphs=None, category='전체'):
         else:
             cand = f"{t}… 핵심 배경과 시장 파급 전망"
 
-    # 최종 정돈
+    # 최종 정돈 (중복 단어 및 중복 어미 철저 방지)
+    cand = re.sub(r'(흐름\s*뚜렷\s*)+', '흐름 뚜렷', cand)
+    cand = re.sub(r'([가-힣]{2,})\s+\1\b', r'\1', cand)
+    cand = re.sub(r'\.{2,}', '…', cand)
     cand = re.sub(r'[…\.\s]+$', '', cand)
+    cand = re.sub(r'[ \t]{2,}', ' ', cand)
     return cand.strip()
 
 

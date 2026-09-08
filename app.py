@@ -1035,7 +1035,7 @@ RAW_ORIGIN_IMAGE_CACHE = {}
 def get_raw_origin_image(url):
     """
     카카오톡 / 네이버 / SNS 링크 공유 시 매력적이고 관련도 높은 미리보기를 위해
-    언론사 원본 기사 사진(RSS 대표 이미지 또는 메타태그 og:image)을 정밀 추출.
+    언론사 원본 기사 사진(메타태그 og:image 또는 본문 대표 사진)을 정밀 추출.
     (Unsplash AI 대체 이미지는 일절 배제하고 순수 원문 사진만 반환)
     """
     if not url or not str(url).startswith('http'):
@@ -1043,60 +1043,43 @@ def get_raw_origin_image(url):
     if url in RAW_ORIGIN_IMAGE_CACHE and RAW_ORIGIN_IMAGE_CACHE[url]:
         return RAW_ORIGIN_IMAGE_CACHE[url]
 
-    # 1. 메모리 RSS 캐시에서 원본 이미지 우선 탐색
-    with RSS_CACHE_LOCK:
-        for cat, entry in RSS_CACHE.items():
-            for item in entry.get('news', []):
-                if item.get('link') == url:
-                    img = item.get('image', '')
-                    if img and 'unsplash.com' not in img and not is_invalid_image(img):
-                        RAW_ORIGIN_IMAGE_CACHE[url] = img
-                        return img
-                    break
-
-    # 2. 원본 기사 웹페이지의 og:image 태그 정밀 추출
+    # 1. 원본 기사 웹페이지의 공식 og:image / twitter:image 태그 정밀 추출 (최우선)
     try:
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
         }
-        resp = requests.get(url, headers=headers, timeout=3.5)
-        if resp.status_code == 200 and len(resp.text) > 150:
-            resp_text = resp.text
+        resp = requests.get(url, headers=headers, timeout=4.0)
+        if resp.status_code == 200 and len(resp.content) > 150:
+            soup = BeautifulSoup(resp.text, 'html.parser')
 
-            # 매일경제 특화 패턴
-            if 'mk.co.kr' in url:
-                mk_matches = re.findall(r'https?://(?:pimg|wimg)\.mk\.co\.kr/news/cms/[0-9a-zA-Z_/.]+\.(?:jpg|png|jpeg|webp)', resp_text)
-                if mk_matches:
-                    RAW_ORIGIN_IMAGE_CACHE[url] = mk_matches[0]
-                    return mk_matches[0]
-
-            # 한국경제 특화 패턴
-            if 'hankyung.com' in url:
-                hk_matches = re.findall(r'https?://img\.hankyung\.com/photo/[0-9a-zA-Z_/.]+\.(?:jpg|png|jpeg|webp)', resp_text)
-                if hk_matches:
-                    RAW_ORIGIN_IMAGE_CACHE[url] = hk_matches[0]
-                    return hk_matches[0]
-
-            # 표준 og:image 추출
-            m = re.search(r'<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)["\']', resp_text, re.I)
-            if not m:
-                m = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:image["\']', resp_text, re.I)
-            if m:
-                cand = html.unescape(m.group(1).strip())
-                if cand and 'unsplash.com' not in cand and not is_invalid_image(cand):
+            # 1-1. 공식 오픈그래프 og:image 탐색 (언론사가 공식 지정한 기사 대표 사진)
+            og_tag = (
+                soup.find('meta', property='og:image') or
+                soup.find('meta', attrs={'name': 'og:image'}) or
+                soup.find('meta', property='twitter:image') or
+                soup.find('meta', attrs={'name': 'twitter:image'})
+            )
+            if og_tag and og_tag.get('content'):
+                cand = html.unescape(og_tag['content'].strip())
+                if cand.startswith('//'):
+                    cand = 'https:' + cand
+                if cand.startswith('http') and 'unsplash.com' not in cand and not is_invalid_image(cand):
                     RAW_ORIGIN_IMAGE_CACHE[url] = cand
                     return cand
 
-            # 본문 내 첫 번째 유효 이미지 추출
-            soup = BeautifulSoup(resp_text, 'html.parser')
+            # 1-2. 본문 컨테이너 내 첫 번째 유효 보도 사진 (사이드바/헤더/인기뉴스 광고 제외)
             body = (
-                soup.find('div', id='articletxt') or 
-                soup.find('div', class_='article-body') or
-                soup.find('div', id='article_body') or
-                soup.find('div', class_='news_cnt_detail_wrap') or
-                soup.find('div', class_='art_txt') or
-                soup.find('div', id='articleBody') or
-                soup.find('div', class_='article_view') or
+                soup.find('div', id='dic_area') or              # 네이버 뉴스
+                soup.find('div', id='newsct_article') or        # 네이버 모바일
+                soup.find('div', class_='article_view') or      # 다음 뉴스
+                soup.find('div', id='textBody') or              # 뉴시스
+                soup.find('div', class_='view_text') or         # 뉴스1
+                soup.find('div', class_='story-news') or        # 연합뉴스
+                soup.find('section', class_='article-body') or  # 조선일보
+                soup.find('div', class_='art_txt') or           # 매일경제
+                soup.find('div', id='articletxt') or            # 한국경제
+                soup.find('div', class_='article_txt') or       # 동아일보
+                soup.find('div', id='article_body') or          # 중앙/매경
                 soup.find('article')
             )
             if body:
@@ -1109,6 +1092,17 @@ def get_raw_origin_image(url):
                         return src
     except Exception as e:
         print(f"[get_raw_origin_image warning]: {e}")
+
+    # 2. 메모리 RSS 캐시에서 대체 이미지 보강
+    with RSS_CACHE_LOCK:
+        for cat, entry in RSS_CACHE.items():
+            for item in entry.get('news', []):
+                if item.get('link') == url:
+                    img = item.get('image', '')
+                    if img and 'unsplash.com' not in img and not is_invalid_image(img):
+                        RAW_ORIGIN_IMAGE_CACHE[url] = img
+                        return img
+                    break
 
     RAW_ORIGIN_IMAGE_CACHE[url] = ''
     return ''
@@ -1323,7 +1317,17 @@ def fetch_article_detail(url):
         has_host_junk = any(re.search(r'진행\s*[:：]|출연\s*[:：]|한겨레\s*정치팀|시청\s*바랍니다|시청바랍니다', p) for p in paras)
         has_web_junk = any(re.search(r'폰트\s*\d단계|\d+px|글자크기|본문\s*글자\s*크기|구독\s*구독중|심민규|북마크|공유하기|카카오톡|페이스북|메신저|네이버\s*밴드|URL\s*복사|프린트|제보', p) for p in paras) or any(re.search(r'폰트\s*\d단계|글자크기|북마크|카카오톡|페이스북|URL\s*복사', s) for s in summary_pts)
         has_bracket_tag = bool(re.search(r'\[[^\]]+\]', current_ai_t)) or any('촬영' in s for s in summary_pts)
-        has_awkward_title = '고부가 제품군' in current_ai_t and '고부가' not in orig_t
+        has_awkward_title = (
+            ('고부가 제품군' in current_ai_t and '고부가' not in orig_t) or
+            ('흐름 뚜렷' in current_ai_t and current_ai_t.count('흐름 뚜렷') > 1) or
+            bool(re.search(r'([가-힣]{2,})\s+\1\b', current_ai_t)) or
+            ('지속 흐름 뚜렷' in current_ai_t)
+        )
+        has_wrong_og_img = bool(
+            ai_cnt.get('og_img') and
+            any(s in ai_cnt.get('og_img', '') for s in ['rcv.NEWSIS', 'golf', 'sports']) and
+            any(k in orig_t for k in ['아파트', '집값', '부동산', '분양', '청약', '한남', '강남'])
+        )
         has_duplicate_summary = len(summary_pts) > 1 and len(summary_pts) != len(set(summary_pts))
         is_abstract_template = any('단순한 일회성 현상에 그치지 않고' in p for p in paras)
         has_double_dot = any('..' in p for p in paras)
@@ -1344,8 +1348,8 @@ def fetch_article_detail(url):
             for s in summary_pts
         )
 
-        # 결함(플랫폼 홍보 문구, 웹 찌꺼기 텍스트, 방송 출연진, 너무 짧은 볼륨, 불완전 요약, 원문과 동일한 제목 등) 감지 시 재구성 실행
-        if has_promo_junk or has_web_junk or has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_duplicate_summary or is_abstract_template or has_double_dot or is_same_as_raw or is_meaningless or is_too_short or has_incomplete_summary:
+        # 결함(플랫폼 홍보 문구, 웹 찌꺼기 텍스트, 방송 출연진, 너무 짧은 볼륨, 불완전 요약, 잘못된 공유사진, 원문과 동일한 제목 등) 감지 시 재구성 실행
+        if has_promo_junk or has_web_junk or has_caption_junk or has_host_junk or has_bracket_tag or has_awkward_title or has_wrong_og_img or has_duplicate_summary or is_abstract_template or has_double_dot or is_same_as_raw or is_meaningless or is_too_short or has_incomplete_summary:
             pass # 건너뛰어 아래 3단계 build_full_news_article 실행
         else:
             publisher = existing.get('source_name')
@@ -1368,10 +1372,12 @@ def fetch_article_detail(url):
             if not current_img or ('현대차' in orig_t and current_img != '/static/img/ai/hyundai_car.jpg') or (is_crime_news and is_sports_img):
                 current_img = get_premium_stock_image(final_title, text=orig_t, category=existing.get('category', '사회' if is_crime_news else '전체'))
 
-            # 카카오톡/SNS 링크 공유용 원본 기사 사진 추출 (사이트 본문에서는 current_img AI 이미지 유지)
-            raw_origin_img = ai_cnt.get('og_img')
-            if not raw_origin_img or 'unsplash.com' in raw_origin_img:
-                raw_origin_img = get_raw_origin_image(url)
+            # 카카오톡/SNS 링크 공유용 원본 기사 사진 정밀 추출
+            raw_origin_img = get_raw_origin_image(url)
+            if not raw_origin_img:
+                raw_origin_img = ai_cnt.get('og_img')
+            else:
+                ai_cnt['og_img'] = raw_origin_img
 
             result = {
                 'id': existing.get('id'),
