@@ -1674,7 +1674,7 @@
                                 <span>🌐 홈페이지에서 확인하기</span>
                             </a>
                             <button type="button" class="btn" onclick="copyCnResultUrl()" style="background:#15803d; color:#fff; font-size:13px; font-weight:600; padding:7px 14px; border-radius:6px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-                                <span>🔗 기사 링크 복사 (썸네일 노출)</span>
+                                <span>🔗 네이버 우회 링크 복사</span>
                             </button>
                         </div>
                     </div>
@@ -4304,11 +4304,12 @@
                 fullUrl = fullUrl.replace(/^https?:\/\/[^\/]+/, 'https://news-now-82jg.onrender.com');
             }
             const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
-            const targetUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + cacheKey;
-            navigator.clipboard.writeText(targetUrl).then(() => {
-                showToast('✅ 기사 링크 복사 완료! (카톡에 원본 썸네일+제목 100% 노출)');
+            const ourUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + cacheKey;
+            const naverUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
+            navigator.clipboard.writeText(naverUrl).then(() => {
+                showToast('✅ 네이버 우회 링크 복사 완료! 카톡에 붙여넣으시면 됩니다.');
             }).catch(() => {
-                prompt('기사 공유 링크 (Ctrl+C 복사):', targetUrl);
+                prompt('네이버 우회 링크 (Ctrl+C 복사):', naverUrl);
             });
         }
 
@@ -4425,7 +4426,7 @@
                                 </a>
                                 <button type="button" onclick="copyCustomNewsNaverUrl('${escAttr(articleUrl)}')" class="btn"
                                     style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; font-size:12px; font-weight:600; padding:6px 12px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
-                                    <span>🔗 링크 복사 (썸네일 노출)</span>
+                                    <span>🔗 네이버 우회 링크 복사</span>
                                 </button>
                                 <a href="${escAttr(link)}" target="_blank" class="btn"
                                     style="background:#ffffff; color:#64748b; border:1px solid #e2e8f0; font-size:12px; font-weight:500; padding:6px 10px; border-radius:6px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
@@ -4484,11 +4485,12 @@
             }
             let fullUrl = (baseHost + relArticleUrl).split('&_t=')[0].split('?_t=')[0];
             const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
-            const targetUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + cacheKey;
-            navigator.clipboard.writeText(targetUrl).then(() => {
-                showToast('✅ 기사 링크 복사 완료! (카톡에 원본 썸네일+제목 100% 노출)');
+            const ourUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + cacheKey;
+            const naverUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
+            navigator.clipboard.writeText(naverUrl).then(() => {
+                showToast('✅ 네이버 우회 링크 복사 완료! 카톡에 붙여넣으시면 됩니다.');
             }).catch(() => {
-                prompt('기사 공유 링크 (Ctrl+C 복사):', targetUrl);
+                prompt('네이버 우회 링크 (Ctrl+C 복사):', naverUrl);
             });
         }
     </script>

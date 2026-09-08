@@ -390,7 +390,8 @@ function copyArticleUrl() {
         cleanUrl = 'https://news-now-82jg.onrender.com' + pathAndQuery.split('&_t=')[0].split('?_t=')[0];
     }
     const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
-    const targetUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + cacheKey;
+    const ourUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + cacheKey;
+    const targetUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
 
     const copyTxt = document.getElementById('copyText');
     const originalText = copyTxt ? copyTxt.textContent : '링크 복사';
