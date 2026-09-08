@@ -33,7 +33,7 @@ app.secret_key = 'news_now_secret_2026_!@#'
 # ============================================================
 # 관리자 설정 (비밀번호 변경 가능)
 # ============================================================
-ADMIN_PASSWORD = 'thfWlrgl12!@'
+ADMIN_PASSWORD = 'xlghk12!@'
 
 # ============================================================
 # 실시간 방문자 & 투데이/토탈 통계 추적 엔진
@@ -683,9 +683,9 @@ def sync_custom_news_from_github():
 def get_admin_password():
     try:
         cfg = load_site_config()
-        return cfg.get('admin_password') or 'thfWlrgl12!@'
+        return cfg.get('admin_password') or 'xlghk12!@'
     except Exception:
-        return 'thfWlrgl12!@'
+        return 'xlghk12!@'
 
 DEFAULT_RSS_FEEDS = {
     "전체": [
