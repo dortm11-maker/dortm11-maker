@@ -381,7 +381,7 @@ function goBackOrHome() {
     }
 }
 
-// 기사 링크 복사 (카톡/SNS 공유 시 실제 뉴스 원본 썸네일 + 제목이 100% 큼직하게 노출되는 링크)
+// 기사 링크 복사 (네이버 공식 브릿지 자동 우회 링크 복사)
 function copyArticleUrl() {
     let cleanUrl = window.location.href.split('&_t=')[0].split('?_t=')[0];
     if (cleanUrl.includes('localhost') || cleanUrl.includes('127.0.0.1')) {
@@ -390,6 +390,7 @@ function copyArticleUrl() {
     }
     const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
     const ourUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + cacheKey;
+    const targetUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
 
     const copyTxt = document.getElementById('copyText');
     const originalText = copyTxt ? copyTxt.textContent : '링크 복사';
@@ -402,13 +403,13 @@ function copyArticleUrl() {
     }
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(ourUrl).then(() => {
+        navigator.clipboard.writeText(targetUrl).then(() => {
             showSuccess('✅ 링크 복사됨!');
         }).catch(() => {
-            fallbackCopy(ourUrl, showSuccess);
+            fallbackCopy(targetUrl, showSuccess);
         });
     } else {
-        fallbackCopy(ourUrl, showSuccess);
+        fallbackCopy(targetUrl, showSuccess);
     }
 }
 

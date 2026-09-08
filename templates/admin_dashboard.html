@@ -1673,8 +1673,8 @@
                             <a id="cnResultLink" href="#" target="_blank" class="btn" style="background:#059669; color:#fff; font-size:13px; font-weight:600; padding:7px 14px; border-radius:6px; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
                                 <span>🌐 홈페이지에서 확인하기</span>
                             </a>
-                            <button type="button" class="btn" onclick="copyCnResultUrl()" style="background:#2563eb; color:#fff; font-size:13px; font-weight:600; padding:7px 14px; border-radius:6px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-                                <span>📸 카톡 사진 공유 링크 복사</span>
+                            <button type="button" class="btn" onclick="copyCnResultUrl()" style="background:#15803d; color:#fff; font-size:13px; font-weight:600; padding:7px 14px; border-radius:6px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                                <span>🔗 네이버 우회 링크 복사</span>
                             </button>
                         </div>
                     </div>
@@ -4243,10 +4243,11 @@
                 return;
             }
             const fullUrl = linkEl.href;
-            navigator.clipboard.writeText(fullUrl).then(() => {
-                showToast('✅ 카톡 사진 공유용 링크 복사 완료! 카톡에 붙여넣으면 기사 사진과 제목이 큼직하게 뜹니다.');
+            const naverUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(fullUrl) + '&dst=' + encodeURIComponent(fullUrl);
+            navigator.clipboard.writeText(naverUrl).then(() => {
+                showToast('✅ 네이버 우회 링크 복사 완료! 카톡에 붙여넣으시면 됩니다.');
             }).catch(() => {
-                prompt('카톡 사진 공유용 링크 (Ctrl+C 복사):', fullUrl);
+                prompt('네이버 우회 링크 (Ctrl+C 복사):', naverUrl);
             });
         }
     </script>
