@@ -1627,14 +1627,31 @@ RSS_CACHE = {}          # category -> {"timestamp": float, "news": list, "count"
 RSS_CACHE_LOCK = threading.Lock()
 CACHE_TTL = 90          # 90초(1.5분) 동안은 캐시에서 0.001초 만에 즉시 반환
 
+def clean_display_source(source, category=None):
+    """언론사 실명(연합뉴스, 매일경제 등) 노출을 일체 배제하고 카테고리 속보명(경제 속보, 실시간 속보 등)으로 표준화"""
+    cat = (category or '').strip()
+    default_name = f"{cat} 속보" if cat and cat != '전체' else "실시간 속보"
+    if not source:
+        return default_name
+    s = str(source).strip()
+    # 언론사 실명 패턴 감지 시 카테고리 속보명으로 완전 대체
+    if re.search(r'연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문|아이뉴스24|파이낸셜뉴스|로이터|AP|AFP|EPA|언론사', s, re.I):
+        return default_name
+    if '속보' in s or '이슈' in s:
+        return s
+    return default_name
+
 def load_custom_news():
-    """관리자가 수동 등록한 AI 뉴스를 영구 파일 및 DB에서 로드 (영구 보존)"""
+    """관리자가 수동 등록한 AI 뉴스를 영구 파일 및 DB에서 로드 (영구 보존 및 언론사 실명 100% 차단)"""
     items = []
     if os.path.exists(CUSTOM_NEWS_FILE):
         try:
             with open(CUSTOM_NEWS_FILE, 'r', encoding='utf-8') as f:
                 loaded = json.load(f)
                 if isinstance(loaded, list):
+                    for it in loaded:
+                        if isinstance(it, dict):
+                            it['source'] = clean_display_source(it.get('source'), it.get('category'))
                     items = loaded
         except Exception as e:
             print(f"[load_custom_news file error]: {e}")
@@ -1653,6 +1670,7 @@ def load_custom_news():
                 summary_text = (paras[0][:140] + '...') if paras else (d.get('ai_title') or '')
                 created_str = str(d.get('created_at', ''))
                 date_display = d.get('published_at') or (created_str[5:16].replace('-', '.') if len(created_str) >= 16 else '최근')
+                cat = d.get('category') or '전체'
                 items.append({
                     'title': d.get('ai_title') or d.get('original_title'),
                     'original_title': d.get('original_title'),
@@ -1661,9 +1679,9 @@ def load_custom_news():
                     'image': d.get('ai_image', ''),
                     'og_img': ai_cnt.get('og_img') or d.get('ai_image', ''),
                     'date': date_display,
-                    'source': d.get('source_name') or '실시간 속보',
+                    'source': clean_display_source(d.get('source_name'), cat),
                     'logo': '⚡',
-                    'category': d.get('category') or '전체',
+                    'category': cat,
                     'is_custom': True
                 })
         except Exception as e:
@@ -1672,8 +1690,10 @@ def load_custom_news():
     return items
 
 def save_custom_news_item(item):
-    """새로운 수동 등록 기사를 custom_news.json 최상단에 영구 추가 보관"""
+    """새로운 수동 등록 기사를 custom_news.json 최상단에 영구 추가 보관 (언론사 실명 필터링 적용)"""
     try:
+        if isinstance(item, dict):
+            item['source'] = clean_display_source(item.get('source'), item.get('category'))
         items = load_custom_news()
         target_link = item.get('link', '')
         # 동일 기사 링크가 이미 있다면 제거 후 최신 데이터로 최상단 삽입
@@ -1846,7 +1866,9 @@ def do_fetch_category_news(category, max_per_feed=15):
         for cn in custom_news_all:
             # 전체 카테고리이거나 해당 카테고리와 일치하는 경우
             if category == '전체' or cn.get('category') == category:
-                cat_customs.append(cn)
+                cn_copy = dict(cn)
+                cn_copy['source'] = clean_display_source(cn.get('source'), category if category != '전체' else cn.get('category'))
+                cat_customs.append(cn_copy)
         
         if cat_customs:
             custom_links = {cn.get('link') for cn in cat_customs if cn.get('link')}
@@ -2229,8 +2251,8 @@ def admin_add_custom_news():
             'image': final_thumb,
             'og_img': raw_origin_img or final_thumb,
             'date': now_date_str,
-            'source': publisher,
-            'logo': pub_logo or '📰',
+            'source': clean_display_source('', target_category),
+            'logo': '⚡',
             'category': target_category,
             'is_custom': True,
             'created_ts': time.time()

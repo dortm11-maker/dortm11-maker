@@ -326,6 +326,21 @@ function onCardClick() {
     setTimeout(() => { bar.style.width = '96%'; }, 180);
 }
 
+function formatNewsSource(source, category) {
+    const cat = (category && category !== '전체') ? category : '';
+    const defaultBadge = cat ? `${cat} 속보` : '실시간 속보';
+    if (!source || typeof source !== 'string') return defaultBadge;
+    const s = source.trim();
+    const mediaPattern = /(연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문|아이뉴스24|파이낸셜뉴스|로이터|AP|AFP|EPA|언론사)/i;
+    if (mediaPattern.test(s)) {
+        return defaultBadge;
+    }
+    if (s.includes('속보') || s.includes('이슈')) {
+        return s;
+    }
+    return defaultBadge;
+}
+
 function cleanTitle(text) {
     if (!text) return '';
     let t = text.trim();
@@ -340,7 +355,7 @@ function cleanSummary(text) {
     // 1. (도시=언론사) + [기자명 기자] = 바이라인 완벽 제거
     t = t.replace(/^\s*[\(\[][가-힣a-zA-Z\s]+=[가-힣a-zA-Z\s]+[\)\]]\s*(?:[가-힣]{2,4}\s*(?:기자|특파원|논설위원|연구위원|인턴기자)\s*)?=?\s*/i, '');
     // 2. 언론사명 괄호 제거
-    t = t.replace(/[\(\[][^\)\]]*(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문|아이뉴스24|파이낸셜뉴스|로이터|AP|AFP|EPA)[^\)\]]*[\)\]]\s*(?:[가-힣]{2,4}\s*(?:기자|특파원|논설위원|연구위원|인턴기자)\s*)?=?\s*/gi, '');
+    t = t.replace(/[\(\[][^\)\]]*(?:연합뉴스|뉴스1|뉴시스|매일경제|한국경제|조선일보|동아일보|중앙일보|한겨레|경향신문|헤럴드경제|머니투데이|아시아경제|SBS|MBC|KBS|YTN|데일리안|이데일리|디지털타임스|전자신문|아이뉴스24|파이낸셜뉴스|로이터|AP|AFP|EPA|언론사)[^\)\]]*[\)\]]\s*(?:[가-힣]{2,4}\s*(?:기자|특파원|논설위원|연구위원|인턴기자)\s*)?=?\s*/gi, '');
     // 3. 사진/출처 괄호 제거
     t = t.replace(/[\(\[][^\)\]]*(?:촬영|제공|재판매|DB|금지|저작권|사진|자료|그래픽|캡처|무단|전재|배포|송고)[^\)\]]*[\)\]]/gi, '');
     // 4. 단독 기자명 = 제거
@@ -353,10 +368,12 @@ function createHeadlineCard(item) {
     const hasImg = item.image && item.image.trim() !== '';
     const targetUrl = getArticleUrl(item.link);
     const clusterBadge = item.cluster_count && item.cluster_count > 1
-        ? `<span style="background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:700; padding:2px 7px; border-radius:10px; border:1px solid #bfdbfe; margin-left:6px;">🔥 ${item.cluster_count}개 언론사 보도</span>`
+        ? `<span style="background:#eff6ff; color:#1d4ed8; font-size:11px; font-weight:700; padding:2px 7px; border-radius:10px; border:1px solid #bfdbfe; margin-left:4px;">🔥 ${item.cluster_count}개사 종합</span>`
         : '';
-    const cleanedSum = cleanSummary(item.summary);
     const cleanedTitle = cleanTitle(item.title);
+    const cleanedSum = cleanSummary(item.summary);
+    const displaySource = formatNewsSource(item.source, item.category);
+
     return `
     <a class="headline-card" href="${targetUrl}"
        onmouseenter="prefetchArticle('${escAttr(item.link)}')"
@@ -372,7 +389,7 @@ function createHeadlineCard(item) {
         <div class="headline-body">
             <div class="headline-source">
                 <span class="headline-source-dot"></span>
-                ${esc(item.source)}
+                ${esc(displaySource)}
                 ${clusterBadge}
             </div>
             <div class="headline-title">${esc(cleanedTitle)}</div>
