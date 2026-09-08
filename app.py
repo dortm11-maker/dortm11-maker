@@ -1622,9 +1622,98 @@ def api_image_proxy():
 # 서버 측 RSS 스마트 캐시 & 비동기 갱신 엔진 (0초대 초고속화)
 # ============================================================
 NEWS_SNAPSHOT_FILE = os.path.join(os.path.dirname(__file__), 'news_snapshot.json')
+CUSTOM_NEWS_FILE = os.path.join(os.path.dirname(__file__), 'custom_news.json')
 RSS_CACHE = {}          # category -> {"timestamp": float, "news": list, "count": int, "is_refreshing": bool}
 RSS_CACHE_LOCK = threading.Lock()
 CACHE_TTL = 90          # 90초(1.5분) 동안은 캐시에서 0.001초 만에 즉시 반환
+
+def load_custom_news():
+    """관리자가 수동 등록한 AI 뉴스를 영구 파일 및 DB에서 로드 (영구 보존)"""
+    items = []
+    if os.path.exists(CUSTOM_NEWS_FILE):
+        try:
+            with open(CUSTOM_NEWS_FILE, 'r', encoding='utf-8') as f:
+                loaded = json.load(f)
+                if isinstance(loaded, list):
+                    items = loaded
+        except Exception as e:
+            print(f"[load_custom_news file error]: {e}")
+
+    # 파일이 비어있거나 부족할 때 DB(curated_articles)에서 복원 보강
+    if not items:
+        try:
+            from services.curation_db import get_recent_curated_articles
+            db_articles = get_recent_curated_articles(category='전체', limit=60)
+            for d in db_articles:
+                orig_url = d.get('original_url', '')
+                if not orig_url:
+                    continue
+                ai_cnt = d.get('ai_content') or {}
+                paras = ai_cnt.get('paragraphs', []) if isinstance(ai_cnt, dict) else []
+                summary_text = (paras[0][:140] + '...') if paras else (d.get('ai_title') or '')
+                created_str = str(d.get('created_at', ''))
+                date_display = d.get('published_at') or (created_str[5:16].replace('-', '.') if len(created_str) >= 16 else '최근')
+                items.append({
+                    'title': d.get('ai_title') or d.get('original_title'),
+                    'original_title': d.get('original_title'),
+                    'link': orig_url,
+                    'summary': summary_text,
+                    'image': d.get('ai_image', ''),
+                    'og_img': ai_cnt.get('og_img') or d.get('ai_image', ''),
+                    'date': date_display,
+                    'source': d.get('source_name') or '실시간 속보',
+                    'logo': '⚡',
+                    'category': d.get('category') or '전체',
+                    'is_custom': True
+                })
+        except Exception as e:
+            print(f"[load_custom_news db fallback error]: {e}")
+
+    return items
+
+def save_custom_news_item(item):
+    """새로운 수동 등록 기사를 custom_news.json 최상단에 영구 추가 보관"""
+    try:
+        items = load_custom_news()
+        target_link = item.get('link', '')
+        # 동일 기사 링크가 이미 있다면 제거 후 최신 데이터로 최상단 삽입
+        items = [it for it in items if it.get('link') != target_link]
+        items.insert(0, item)
+        # 최대 150개 보관
+        items = items[:150]
+        with open(CUSTOM_NEWS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(items, f, ensure_ascii=False, indent=1)
+        return True
+    except Exception as e:
+        print(f"[save_custom_news_item error]: {e}")
+        return False
+
+def parse_news_timestamp(date_str):
+    """기사 날짜 문자열(09.08 11:04, 2026-09-08 등)을 비교 가능한 유닉스 타임스탬프로 변환"""
+    if not date_str:
+        return 0
+    now = datetime.now(KST)
+    s = str(date_str).strip()
+    
+    # YYYY-MM-DD HH:MM or YYYY.MM.DD HH:MM
+    m_full = re.search(r'(\d{4})[-./](\d{1,2})[-./](\d{1,2})\s*(\d{1,2}):(\d{1,2})', s)
+    if m_full:
+        y, m, d, h, mi = map(int, m_full.groups())
+        return datetime(y, m, d, h, mi, tzinfo=KST).timestamp()
+
+    # MM.DD HH:MM or MM-DD HH:MM or MM/DD HH:MM
+    m_short = re.search(r'(\d{1,2})[-./](\d{1,2})\s*(\d{1,2}):(\d{1,2})', s)
+    if m_short:
+        m, d, h, mi = map(int, m_short.groups())
+        return datetime(now.year, m, d, h, mi, tzinfo=KST).timestamp()
+
+    # MM.DD
+    m_day = re.search(r'(\d{1,2})[-./](\d{1,2})', s)
+    if m_day:
+        m, d = map(int, m_day.groups())
+        return datetime(now.year, m, d, 0, 0, tzinfo=KST).timestamp()
+
+    return 0
 
 def save_snapshot():
     """최신 캐시 뉴스를 파일로 영구 보관하여 서버 재부팅 시에도 0.00초 즉시 제공"""
@@ -1652,6 +1741,10 @@ def load_snapshot():
                                 n['summary'] = clean_news_summary(n['summary'])
                             if n.get('title'):
                                 n['title'] = clean_news_title(n['title'])
+                        
+                        # 최신순 정렬 보장
+                        news_list.sort(key=lambda x: (not x.get('is_custom', False), -parse_news_timestamp(x.get('date'))))
+
                         RSS_CACHE[cat] = {
                             'timestamp': time.time() - 30,
                             'news': news_list,
@@ -1742,6 +1835,23 @@ def do_fetch_category_news(category, max_per_feed=15):
             'cluster_count': cluster_count,
             'cluster_sources': cluster_sources
         })
+
+    # 3. 날짜별 최신순 정렬 (제일 위부터 최신 뉴스글 순서로 정렬)
+    curated_items.sort(key=lambda x: parse_news_timestamp(x.get('date')), reverse=True)
+
+    # 4. 관리자 수동 등록 뉴스(custom_news) 영구 병합 (해당 카테고리 및 전체 홈 최상단 고정 노출)
+    custom_news_all = load_custom_news()
+    if custom_news_all:
+        cat_customs = []
+        for cn in custom_news_all:
+            # 전체 카테고리이거나 해당 카테고리와 일치하는 경우
+            if category == '전체' or cn.get('category') == category:
+                cat_customs.append(cn)
+        
+        if cat_customs:
+            custom_links = {cn.get('link') for cn in cat_customs if cn.get('link')}
+            filtered_curated = [n for n in curated_items if n.get('link') not in custom_links]
+            return cat_customs + filtered_curated
 
     return curated_items
 
@@ -2122,26 +2232,25 @@ def admin_add_custom_news():
             'source': publisher,
             'logo': pub_logo or '📰',
             'category': target_category,
-            'is_custom': True
+            'is_custom': True,
+            'created_ts': time.time()
         }
 
-        # 9. RSS_CACHE 최상단에 즉각 반영
+        # 9. 영구 커스텀 뉴스 파일에 즉각 보관 (서버 재부팅/RSS 갱신 시에도 절대 소실 방지)
+        save_custom_news_item(new_item)
+
+        # 10. RSS_CACHE 최상단에 즉각 반영
         with RSS_CACHE_LOCK:
-            if target_category not in RSS_CACHE:
-                RSS_CACHE[target_category] = {'timestamp': time.time(), 'news': [], 'count': 0, 'is_refreshing': False}
-            RSS_CACHE[target_category]['news'] = [n for n in RSS_CACHE[target_category].get('news', []) if n.get('link') != url]
-            RSS_CACHE[target_category]['news'].insert(0, new_item)
-            RSS_CACHE[target_category]['count'] = len(RSS_CACHE[target_category]['news'])
-            RSS_CACHE[target_category]['timestamp'] = time.time()
+            for cat_key in [target_category, '전체']:
+                if cat_key not in RSS_CACHE:
+                    RSS_CACHE[cat_key] = {'timestamp': time.time(), 'news': [], 'count': 0, 'is_refreshing': False}
+                existing = [n for n in RSS_CACHE[cat_key].get('news', []) if n.get('link') != url]
+                existing.insert(0, new_item)
+                RSS_CACHE[cat_key]['news'] = existing
+                RSS_CACHE[cat_key]['count'] = len(existing)
+                RSS_CACHE[cat_key]['timestamp'] = time.time()
 
-            if '전체' not in RSS_CACHE:
-                RSS_CACHE['전체'] = {'timestamp': time.time(), 'news': [], 'count': 0, 'is_refreshing': False}
-            RSS_CACHE['전체']['news'] = [n for n in RSS_CACHE['전체'].get('news', []) if n.get('link') != url]
-            RSS_CACHE['전체']['news'].insert(0, new_item)
-            RSS_CACHE['전체']['count'] = len(RSS_CACHE['전체']['news'])
-            RSS_CACHE['전체']['timestamp'] = time.time()
-
-        # 10. 스냅샷 영구 저장
+        # 11. 스냅샷 영구 저장
         save_snapshot()
 
         return jsonify({

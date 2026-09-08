@@ -57,15 +57,15 @@ function switchCategory(cat) {
 // ============================================================
 // 초고속 브라우저 로컬 캐시 & 스켈레톤 관리
 // ============================================================
-const LOCAL_CACHE_PREFIX = 'news_cache_v5_';
+const LOCAL_CACHE_PREFIX = 'news_cache_v7_';
 
 function getLocalCache(category) {
     try {
         const raw = localStorage.getItem(LOCAL_CACHE_PREFIX + category);
         if (!raw) return null;
         const parsed = JSON.parse(raw);
-        // 캐시가 20분 이내인 경우 즉시 활용
-        if (Date.now() - parsed.savedAt < 20 * 60 * 1000) {
+        // 캐시가 2분 이내인 경우 즉시 활용 (이후 서버 최신 동기화)
+        if (Date.now() - parsed.savedAt < 2 * 60 * 1000) {
             return parsed.news;
         }
     } catch (e) {}
