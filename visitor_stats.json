@@ -1,8 +1,12 @@
 {
-  "total_uv": 100,
-  "total_pv": 165,
+  "total_uv": 103,
+  "total_pv": 168,
   "current_date": "2026-09-08",
-  "today_vids": [],
+  "today_vids": [
+    "118.235.69.211",
+    "127.0.0.1",
+    "35.227.183.65"
+  ],
   "daily": {
     "2026-09-06": {
       "uv": 11,
@@ -13,8 +17,8 @@
       "pv": 142
     },
     "2026-09-08": {
-      "uv": 0,
-      "pv": 0
+      "uv": 3,
+      "pv": 3
     }
   },
   "visitor_logs": {
@@ -39,10 +43,10 @@
     "127.0.0.1": {
       "ip": "127.0.0.1",
       "device": "💻 PC",
-      "visit_count": 0,
+      "visit_count": 1,
       "first_seen": "17:06:22",
-      "last_seen": "22:39:32",
-      "last_seen_ts": 1788788372.6430254,
+      "last_seen": "17:01:48",
+      "last_seen_ts": 1788854508.3176687,
       "last_page": "🌐 메인 뉴스 홈"
     },
     "35.199.162.116": {
@@ -791,6 +795,24 @@
       "last_seen": "23:58:54",
       "last_seen_ts": 1788793134.161133,
       "last_page": "📰 기사 상세 읽는 중"
+    },
+    "35.227.183.65": {
+      "ip": "35.227.183.65",
+      "device": "💻 PC",
+      "visit_count": 1,
+      "first_seen": "17:01:53",
+      "last_seen": "17:01:53",
+      "last_seen_ts": 1788854513.5173688,
+      "last_page": "🌐 메인 뉴스 홈"
+    },
+    "118.235.69.211": {
+      "ip": "118.235.69.211",
+      "device": "📱 모바일",
+      "visit_count": 1,
+      "first_seen": "17:02:39",
+      "last_seen": "17:02:39",
+      "last_seen_ts": 1788854559.6263957,
+      "last_page": "📰 기사 상세 읽는 중"
     }
   },
   "ad_clicks": {
@@ -800,7 +822,7 @@
       "center": 8,
       "popup": 6,
       "link": 0,
-      "auto_redirect": 13,
+      "auto_redirect": 16,
       "mobile": 6,
       "unknown": 1
     },
@@ -810,7 +832,7 @@
       "center": 0,
       "popup": 0,
       "link": 0,
-      "auto_redirect": 0,
+      "auto_redirect": 3,
       "mobile": 0,
       "unknown": 0
     },
@@ -846,7 +868,7 @@
           "center": 0,
           "popup": 0,
           "link": 0,
-          "auto_redirect": 0,
+          "auto_redirect": 3,
           "mobile": 0,
           "unknown": 0
         }
@@ -1131,6 +1153,33 @@
         "label": "정면 본문 배너",
         "page": "기사 상세",
         "ts": 1788851802.252175
+      },
+      {
+        "time": "17:02:01",
+        "ip": "222.102.202.121",
+        "device": "💻 PC",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "오세훈 “서울이 전월세 지옥되고 있어… 특단의 대책 필요”",
+        "ts": 1788854521.4672756
+      },
+      {
+        "time": "17:02:05",
+        "ip": "210.110.110.129",
+        "device": "💻 PC",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "오세훈 “서울이 전월세 지옥되고 있어… 특단의 대책 필요”",
+        "ts": 1788854525.3483758
+      },
+      {
+        "time": "17:02:17",
+        "ip": "223.38.80.153",
+        "device": "📱 모바일",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "오세훈 “서울이 전월세 지옥되고 있어… 특단의 대책 필요”",
+        "ts": 1788854537.7840822
       }
     ]
   }
