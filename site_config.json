@@ -2,57 +2,57 @@
   "admin_password": "thfWlrgl12!@",
   "ads": {
     "center": {
-      "enabled": true,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 680,
+      "custom_html": "",
+      "enabled": true,
       "height": 140,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 680
     },
     "left": {
-      "enabled": true,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 200,
+      "custom_html": "",
+      "enabled": true,
       "height": 600,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 200
     },
     "mobile": {
-      "enabled": true,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 360,
+      "custom_html": "",
+      "enabled": true,
       "height": 100,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 360
     },
     "popup": {
-      "enabled": true,
-      "mode": "coupang",
-      "delay": 120,
-      "interval_minutes": 5,
       "close_delay": 3,
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 300,
+      "custom_html": "",
+      "delay": 120,
+      "enabled": true,
       "height": 300,
-      "custom_html": ""
+      "interval_minutes": 5,
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 300
     },
     "right": {
-      "enabled": true,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 200,
+      "custom_html": "",
+      "enabled": true,
       "height": 600,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 200
     }
   },
   "ai_rewrite": {
@@ -65,14 +65,14 @@
     "use_premium_stock": true
   },
   "auto_redirect": {
-    "apply_target": "article",
     "enabled": true,
-    "prevent_repeat": true,
-    "scroll_percent": 100,
     "target_url": "https://open.kakao.com/o/gTLTzqqd",
     "target_window": "_self",
-    "time_seconds": 120,
-    "trigger_mode": "either"
+    "apply_target": "article",
+    "trigger_mode": "time",
+    "time_seconds": 30,
+    "scroll_percent": 100,
+    "prevent_repeat": true
   },
   "share": {
     "description": "국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.",
