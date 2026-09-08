@@ -1669,10 +1669,13 @@
                         </div>
                         <h3 id="cnResultTitle" style="font-size:16px; font-weight:700; color:#0f172a; margin-bottom:8px; line-height:1.4;">제목</h3>
                         <p id="cnResultSummary" style="font-size:13px; color:#475569; line-height:1.5; margin-bottom:12px;">요약</p>
-                        <div>
-                            <a id="cnResultLink" href="#" target="_blank" class="btn" style="background:#059669; color:#fff; font-size:13px; font-weight:600; padding:6px 14px; border-radius:6px; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                            <a id="cnResultLink" href="#" target="_blank" class="btn" style="background:#059669; color:#fff; font-size:13px; font-weight:600; padding:7px 14px; border-radius:6px; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
                                 <span>🌐 홈페이지에서 확인하기</span>
                             </a>
+                            <button type="button" class="btn" onclick="copyCnResultUrl()" style="background:#2563eb; color:#fff; font-size:13px; font-weight:600; padding:7px 14px; border-radius:6px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+                                <span>📸 카톡 사진 공유 링크 복사</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -4231,6 +4234,20 @@
                 btn.disabled = false;
                 btn.innerHTML = origBtnHtml;
             }
+        }
+
+        function copyCnResultUrl() {
+            const linkEl = document.getElementById('cnResultLink');
+            if (!linkEl || !linkEl.href || linkEl.href === '#' || linkEl.href.endsWith('#')) {
+                showToast('⚠️ 기사 링크가 아직 준비되지 않았습니다.');
+                return;
+            }
+            const fullUrl = linkEl.href;
+            navigator.clipboard.writeText(fullUrl).then(() => {
+                showToast('✅ 카톡 사진 공유용 링크 복사 완료! 카톡에 붙여넣으면 기사 사진과 제목이 큼직하게 뜹니다.');
+            }).catch(() => {
+                prompt('카톡 사진 공유용 링크 (Ctrl+C 복사):', fullUrl);
+            });
         }
     </script>
 </body>
