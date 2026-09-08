@@ -1674,7 +1674,7 @@
                                 <span>🌐 홈페이지에서 확인하기</span>
                             </a>
                             <button type="button" class="btn" onclick="copyCnResultUrl()" style="background:#15803d; color:#fff; font-size:13px; font-weight:600; padding:7px 14px; border-radius:6px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-                                <span>🔗 네이버 우회 링크 복사</span>
+                                <span>🔗 기사 링크 복사 (썸네일 노출)</span>
                             </button>
                         </div>
                     </div>
@@ -4299,12 +4299,16 @@
                 showToast('⚠️ 기사 링크가 아직 준비되지 않았습니다.');
                 return;
             }
-            const fullUrl = linkEl.href;
-            const naverUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(fullUrl) + '&dst=' + encodeURIComponent(fullUrl);
-            navigator.clipboard.writeText(naverUrl).then(() => {
-                showToast('✅ 네이버 우회 링크 복사 완료! 카톡에 붙여넣으시면 됩니다.');
+            let fullUrl = linkEl.href.split('&_t=')[0].split('?_t=')[0];
+            if (fullUrl.includes('localhost') || fullUrl.includes('127.0.0.1')) {
+                fullUrl = fullUrl.replace(/^https?:\/\/[^\/]+/, 'https://news-now-82jg.onrender.com');
+            }
+            const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
+            const targetUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + cacheKey;
+            navigator.clipboard.writeText(targetUrl).then(() => {
+                showToast('✅ 기사 링크 복사 완료! (카톡에 원본 썸네일+제목 100% 노출)');
             }).catch(() => {
-                prompt('네이버 우회 링크 (Ctrl+C 복사):', naverUrl);
+                prompt('기사 공유 링크 (Ctrl+C 복사):', targetUrl);
             });
         }
 
@@ -4421,7 +4425,7 @@
                                 </a>
                                 <button type="button" onclick="copyCustomNewsNaverUrl('${escAttr(articleUrl)}')" class="btn"
                                     style="background:#f0fdf4; color:#166534; border:1px solid #bbf7d0; font-size:12px; font-weight:600; padding:6px 12px; border-radius:6px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
-                                    <span>🔗 네이버 우회 링크 복사</span>
+                                    <span>🔗 링크 복사 (썸네일 노출)</span>
                                 </button>
                                 <a href="${escAttr(link)}" target="_blank" class="btn"
                                     style="background:#ffffff; color:#64748b; border:1px solid #e2e8f0; font-size:12px; font-weight:500; padding:6px 10px; border-radius:6px; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
@@ -4474,12 +4478,17 @@
         }
 
         function copyCustomNewsNaverUrl(relArticleUrl) {
-            const fullUrl = window.location.origin + relArticleUrl;
-            const naverUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(fullUrl) + '&dst=' + encodeURIComponent(fullUrl);
-            navigator.clipboard.writeText(naverUrl).then(() => {
-                showToast('✅ 네이버 우회 링크 복사 완료! 카톡에 붙여넣으시면 됩니다.');
+            let baseHost = window.location.origin;
+            if (baseHost.includes('localhost') || baseHost.includes('127.0.0.1')) {
+                baseHost = 'https://news-now-82jg.onrender.com';
+            }
+            let fullUrl = (baseHost + relArticleUrl).split('&_t=')[0].split('?_t=')[0];
+            const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
+            const targetUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + cacheKey;
+            navigator.clipboard.writeText(targetUrl).then(() => {
+                showToast('✅ 기사 링크 복사 완료! (카톡에 원본 썸네일+제목 100% 노출)');
             }).catch(() => {
-                prompt('네이버 우회 링크 (Ctrl+C 복사):', naverUrl);
+                prompt('기사 공유 링크 (Ctrl+C 복사):', targetUrl);
             });
         }
     </script>

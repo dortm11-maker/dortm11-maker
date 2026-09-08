@@ -13,7 +13,8 @@
     <meta property="og:site_name" content="뉴스NOW">
     <meta property="og:title" content="{{ article.title }}">
     <meta property="og:description" content="{{ article_desc }}">
-    {% set share_img = (article.og_img if article.og_img else (article.main_img if article.main_img else 'https://news-now-82jg.onrender.com/static/img/og_image.jpg')) %}
+    {% set raw_img = (article.og_img if article.og_img else (article.main_img if article.main_img else '/static/img/og_image.jpg')) %}
+    {% set share_img = ('https://news-now-82jg.onrender.com' + raw_img if raw_img.startswith('/') else ('https:' + raw_img if raw_img.startswith('//') else raw_img)) %}
     <meta property="og:image" content="{{ share_img }}">
     <meta property="og:image:secure_url" content="{{ share_img }}">
     <meta property="og:image:width" content="800">
@@ -389,8 +390,7 @@ function copyArticleUrl() {
         cleanUrl = 'https://news-now-82jg.onrender.com' + pathAndQuery.split('&_t=')[0].split('?_t=')[0];
     }
     const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
-    const ourUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + cacheKey;
-    const targetUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
+    const targetUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + cacheKey;
 
     const copyTxt = document.getElementById('copyText');
     const originalText = copyTxt ? copyTxt.textContent : '링크 복사';
