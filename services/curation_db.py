@@ -146,5 +146,18 @@ def get_recent_curated_articles(category='전체', limit=40):
             ).fetchall()
         return [parse_curated_row(r) for r in rows]
 
+def delete_curated_article(url):
+    """지정된 원문 URL의 큐레이션 기사를 DB에서 완전히 삭제"""
+    if not url:
+        return False
+    try:
+        with get_db() as conn:
+            conn.execute("DELETE FROM curated_articles WHERE original_url = ?", (url.strip(),))
+            conn.commit()
+        return True
+    except Exception as e:
+        print(f"[delete_curated_article error]: {e}")
+        return False
+
 # 앱 시작 시 DB 초기화
 init_db()

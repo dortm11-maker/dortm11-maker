@@ -1819,6 +1819,92 @@ def save_custom_news_item(item):
         print(f"[save_custom_news_item error]: {e}")
         return False
 
+def delete_custom_news_item(target_link):
+    """수동/AI 등록 기사를 custom_news.json에서 제거하고 모든 캐시(RSS, 본문) 및 DB에서도 즉각 삭제 후 GitHub에 영구 백업 푸시"""
+    if not target_link:
+        return False, "삭제할 기사 링크가 전달되지 않았습니다."
+
+    target_link = target_link.strip()
+    norm_url = ""
+    try:
+        from services.news_cluster import canonicalize_url
+        norm_url = canonicalize_url(target_link)
+    except Exception:
+        pass
+
+    # 1. custom_news.json에서 제거
+    deleted_title = ""
+    items = load_custom_news()
+    new_items = []
+    found = False
+    for it in items:
+        it_link = (it.get('link') or '').strip()
+        it_title = (it.get('title') or '').strip()
+        matches = (
+            it_link == target_link or
+            (norm_url and canonicalize_url(it_link) == norm_url) or
+            it_title == target_link
+        )
+        if matches:
+            found = True
+            deleted_title = it.get('title') or it.get('original_title') or target_link
+        else:
+            new_items.append(it)
+
+    if found or os.path.exists(CUSTOM_NEWS_FILE):
+        try:
+            with open(CUSTOM_NEWS_FILE, 'w', encoding='utf-8') as f:
+                json.dump(new_items, f, ensure_ascii=False, indent=1)
+            # GitHub에 변경사항 비동기 푸시
+            threading.Thread(
+                target=push_file_to_github,
+                args=(CUSTOM_NEWS_FILE, 'custom_news.json', f'[auto] delete custom news: {deleted_title[:30]}'),
+                daemon=True
+            ).start()
+        except Exception as e:
+            print(f"[delete_custom_news_item file error]: {e}")
+
+    # 2. curated_news.db 에서 제거
+    try:
+        from services.curation_db import delete_curated_article
+        delete_curated_article(target_link)
+    except Exception as e:
+        print(f"[delete_custom_news_item db error]: {e}")
+
+    # 3. RSS_CACHE 에서 즉각 제거
+    with RSS_CACHE_LOCK:
+        for cat_k, cat_data in RSS_CACHE.items():
+            news_list = cat_data.get('news', [])
+            filtered_news = []
+            for n in news_list:
+                n_link = (n.get('link') or '').strip()
+                n_title = (n.get('title') or '').strip()
+                if n_link == target_link or (norm_url and canonicalize_url(n_link) == norm_url) or (deleted_title and n_title == deleted_title):
+                    continue
+                filtered_news.append(n)
+            if len(filtered_news) != len(news_list):
+                cat_data['news'] = filtered_news
+                cat_data['count'] = len(filtered_news)
+                cat_data['timestamp'] = time.time()
+
+    # 4. ARTICLE_CACHE 제거
+    if target_link in ARTICLE_CACHE:
+        del ARTICLE_CACHE[target_link]
+    for k in list(ARTICLE_CACHE.keys()):
+        if norm_url and canonicalize_url(k) == norm_url:
+            del ARTICLE_CACHE[k]
+
+    # 5. RAW 이미지/제목 캐시 정리
+    if target_link in RAW_ORIGIN_IMAGE_CACHE:
+        del RAW_ORIGIN_IMAGE_CACHE[target_link]
+    if target_link in RAW_ORIGIN_TITLE_CACHE:
+        del RAW_ORIGIN_TITLE_CACHE[target_link]
+
+    # 6. 스냅샷 영구 저장
+    save_snapshot()
+
+    return True, f"'{deleted_title or '선택한 기사'}' 기사가 정상적으로 삭제되었습니다."
+
 def parse_news_timestamp(date_str):
     """기사 날짜 문자열(09.08 11:04, 2026-09-08 등)을 비교 가능한 유닉스 타임스탬프로 변환"""
     now = datetime.now(KST)
@@ -2467,6 +2553,34 @@ def admin_add_custom_news():
     except Exception as e:
         print(f"[Custom News Add Error]: {e}")
         return jsonify({'success': False, 'message': f'처리 중 오류가 발생했습니다: {str(e)}'})
+
+@app.route('/admin/api/custom_news/list', methods=['GET'])
+def admin_get_custom_news_list():
+    """관리자가 현재 수동/AI 등록된 뉴스 목록을 최신순으로 조회"""
+    if not is_admin():
+        abort(403)
+    items = load_custom_news()
+    return jsonify({
+        'success': True,
+        'count': len(items),
+        'items': items
+    })
+
+@app.route('/admin/api/custom_news/delete', methods=['POST'])
+def admin_delete_custom_news():
+    """관리자가 실수로 잘못 넣은 뉴스를 지정하여 영구 삭제"""
+    if not is_admin():
+        abort(403)
+    data = request.get_json(silent=True) or {}
+    link = (data.get('link') or data.get('url') or '').strip()
+    if not link:
+        return jsonify({'success': False, 'message': '삭제할 기사 식별값(URL/링크)을 입력해주세요.'})
+
+    ok, msg = delete_custom_news_item(link)
+    if ok:
+        return jsonify({'success': True, 'message': msg})
+    else:
+        return jsonify({'success': False, 'message': msg})
 
 # ---- 사이트 설정 (광고·티커) ----
 @app.route('/admin/api/site_config', methods=['GET'])
