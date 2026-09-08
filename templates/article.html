@@ -152,12 +152,9 @@
             <span>목록으로 돌아가기</span>
         </button>
         <div class="article-top-actions">
-            <button class="article-share-btn" onclick="copyArticleUrl()" title="링크 복사">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                </svg>
-                <span id="copyText">링크 복사</span>
+            <button class="article-share-btn" onclick="copyArticleUrl()" title="네이버 공식 우회 링크 복사" style="display:inline-flex; align-items:center; gap:5px;">
+                <span style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; background:#03c75a; color:#fff; border-radius:3px; font-size:10px; font-weight:900;">N</span>
+                <span id="copyText">네이버 우회 링크 복사</span>
             </button>
         </div>
     </div>
@@ -379,20 +376,21 @@ function goBackOrHome() {
     }
 }
 
-// 기사 링크 복사 (카카오톡/SNS 공유 시 원본 사진과 제목이 100% 노출되는 정식 기사 URL 복사)
-function copyArticleUrl(useNaverBridge = false) {
+// 기사 링크 복사 (네이버 공식 브릿지로 100% 자동 우회 변환하여 복사)
+function copyArticleUrl() {
     const currentLoc = window.location.href;
-    // 깔끔한 우리 사이트 기사 원본 URL
+    // 이전 캐시 파라미터 정리
     const cleanUrl = currentLoc.split('&_t=')[0].split('?_t=')[0];
     
-    // 네이버 브릿지 우회 링크가 필요한 경우 vs 카톡/SNS 사진 100% 노출형 공식 링크
-    let urlToCopy = cleanUrl;
-    if (useNaverBridge) {
-        urlToCopy = 'https://link.naver.com/bridge?url=' + encodeURIComponent(cleanUrl) + '&dst=' + encodeURIComponent(cleanUrl);
-    }
+    // 카카오톡 스크랩 캐시 미스 방지용 타임스탬프 (5분 단위)
+    const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
+    const ourUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + cacheKey;
+    
+    // 네이버 공식 브릿지 우회 링크 생성 (dst 명시로 안전 이동 보장)
+    const naverBridgeUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
 
     const copyTxt = document.getElementById('copyText');
-    const originalText = copyTxt ? copyTxt.textContent : '링크 복사';
+    const originalText = copyTxt ? copyTxt.textContent : '네이버 우회 링크 복사';
 
     function showSuccess(msg) {
         if (copyTxt) {
@@ -401,20 +399,20 @@ function copyArticleUrl(useNaverBridge = false) {
         }
     }
 
-    navigator.clipboard.writeText(urlToCopy).then(() => {
-        showSuccess('✅ 링크 복사 완료!');
+    navigator.clipboard.writeText(naverBridgeUrl).then(() => {
+        showSuccess('✅ 네이버 우회링크 복사됨!');
     }).catch(() => {
         const el = document.createElement('textarea');
-        el.value = urlToCopy;
+        el.value = naverBridgeUrl;
         el.style.position = 'fixed';
         el.style.opacity = '0';
         document.body.appendChild(el);
         el.select();
         try {
             document.execCommand('copy');
-            showSuccess('✅ 링크 복사 완료!');
+            showSuccess('✅ 네이버 우회링크 복사됨!');
         } catch(e) {
-            alert('복사할 링크:\n' + urlToCopy);
+            alert('복사할 링크:\n' + naverBridgeUrl);
         }
         document.body.removeChild(el);
     });
