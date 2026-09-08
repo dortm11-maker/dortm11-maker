@@ -2403,25 +2403,34 @@
                         </div>
                     </div>
 
-                    <!-- 1. 카톡 전송용 완성 텍스트 (모바일 네이버 공유 규격) -->
+                    <!-- 1. 카톡 전송용 완성 텍스트 -->
                     <div
                         style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:14px; margin-bottom:16px;">
                         <div
                             style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:8px;">
                             <span
                                 style="font-size:13px; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:6px;">
-                                <span>💬</span> <span>카카오톡 전송 완성 문구 (네이버 모바일 공유와 100% 동일 포맷)</span>
+                                <span>💬</span> <span>카카오톡 전송 문구 선택 복사</span>
                             </span>
-                            <button type="button" class="btn" onclick="copyKakaoText()"
-                                style="background:#2563eb; color:#fff; font-size:13px; font-weight:700; padding:7px 16px; border-radius:6px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-                                <span>📋</span> <span>카톡 텍스트 원클릭 복사</span>
-                            </button>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <button type="button" class="btn" onclick="copyDirectKakaoText()"
+                                    style="background:#e11d48; color:#fff; font-size:12.5px; font-weight:700; padding:7px 14px; border-radius:6px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:5px;"
+                                    title="카톡에 원본 기사 사진과 제목이 큼직하게 100% 뜹니다.">
+                                    <span>📸</span> <span>기사 사진 노출형 복사 (추천)</span>
+                                </button>
+                                <button type="button" class="btn" onclick="copyKakaoText()"
+                                    style="background:#15803d; color:#fff; font-size:12.5px; font-weight:700; padding:7px 14px; border-radius:6px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:5px;"
+                                    title="link.naver.com 도메인으로 우회됩니다.">
+                                    <span>🟢</span> <span>네이버 우회형 복사</span>
+                                </button>
+                            </div>
                         </div>
                         <pre id="resKakaoText"
                             style="margin:0; background:#fff; border:1px solid #e2e8f0; border-radius:6px; padding:12px; font-family:'Noto Sans KR', sans-serif; font-size:13.5px; color:#0f172a; line-height:1.6; white-space:pre-wrap; word-break:break-all; font-weight:600;"></pre>
-                        <div style="margin-top:8px; font-size:11px; color:#64748b;">
-                            👉 복사한 뒤 PC 카카오톡 대화방에 <strong>[Ctrl + V]</strong>로 붙여넣고 전송하시면, 상단 텍스트와 함께 하단에 <strong>네이버 공식
-                                링크 카드(link.naver.com)</strong>가 자동으로 뜹니다!
+                        <div style="margin-top:8px; font-size:11.5px; color:#475569; line-height:1.5;">
+                            💡 <strong>비교 안내:</strong><br>
+                            • <span style="color:#e11d48; font-weight:700;">📸 기사 사진 노출형</span>: 카톡에 붙여넣으면 원본 뉴스와 동일하게 <strong>기사 대표 사진 + 제목 카드</strong>가 큼직하게 뜹니다.<br>
+                            • <span style="color:#15803d; font-weight:700;">🟢 네이버 우회형</span>: link.naver.com 도메인으로 우회되나, 카카오톡 정책상 초록색 N 앱 아이콘 카드로 표시될 수 있습니다.
                         </div>
                     </div>
 
@@ -3710,6 +3719,30 @@
             }
         }
 
+        function copyDirectKakaoText() {
+            if (!lastConvertedData || !lastConvertedData.kakao_text_direct) {
+                const title = document.getElementById('resArticleTitle')?.textContent || '최신 주요 뉴스';
+                const ourUrl = document.getElementById('resOurUrl')?.textContent;
+                if (!ourUrl || ourUrl === '-') {
+                    showToast('먼저 링크를 변환해주세요.');
+                    return;
+                }
+                const fallbackText = `${title}\n - ${ourUrl}`;
+                navigator.clipboard.writeText(fallbackText).then(() => {
+                    showToast('📸 기사 사진 노출형 카톡 문구가 복사되었습니다!');
+                }).catch(() => {
+                    copyFallback(fallbackText, '카톡 문구가 복사되었습니다.');
+                });
+                return;
+            }
+            const text = lastConvertedData.kakao_text_direct;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('📸 기사 사진 노출형 카톡 문구가 복사되었습니다! 카톡에 [Ctrl+V] 하세요.');
+            }).catch(() => {
+                copyFallback(text, '카톡 문구가 복사되었습니다.');
+            });
+        }
+
         function copyKakaoText() {
             const text = document.getElementById('resKakaoText')?.textContent;
             if (!text) {
@@ -3717,7 +3750,7 @@
                 return;
             }
             navigator.clipboard.writeText(text).then(() => {
-                showToast('📋 카카오톡 전송 문구가 클립보드에 복사되었습니다! 카톡에 [Ctrl+V] 하세요.');
+                showToast('📋 네이버 우회 카톡 문구가 복사되었습니다! 카톡에 [Ctrl+V] 하세요.');
             }).catch(() => {
                 copyFallback(text, '카톡 문구가 복사되었습니다.');
             });

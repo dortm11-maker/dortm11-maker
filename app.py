@@ -1339,7 +1339,7 @@ def fetch_article_detail(url):
             (clean_cur_t == clean_news_title(existing.get('original_title', '')))
         )
         is_meaningless = is_meaningless_news(existing.get('original_title', ''), text=" ".join(paras))
-        is_too_short = sum(len(p) for p in paras) < 500 or len(paras) < 8
+        is_too_short = sum(len(p) for p in paras) < 180 or len(paras) < 3
         has_incomplete_summary = any(
             re.search(r'[\s,]+(?:을|를|이|가|에|의|과|와|로|으로|는|은|도|며|고|서|이라는|라고)$', s.strip()) or
             s.strip().endswith(('‘', '’', '“', '”', '\"', '\'')) or
@@ -2221,9 +2221,10 @@ def admin_convert_share_link():
         publisher = article_data.get('publisher') or '언론사'
         image = article_data.get('og_img') or article_data.get('main_img') or ''
 
-        # 4. 우리 사이트 배포 URL 기준 뷰어 링크 구성
+        # 4. 우리 사이트 배포 URL 기준 뷰어 링크 구성 (카카오톡 스크랩 캐시 미스 방지 파라미터 포함)
         base_host = "https://news-now-82jg.onrender.com"
-        our_article_url = f"{base_host}/article?url={urllib.parse.quote(target_news_url)}"
+        cache_key = f"_t={int(time.time() // 300)}"
+        our_article_url = f"{base_host}/article?url={urllib.parse.quote(target_news_url)}&{cache_key}"
 
         # 5. 네이버 공식 우회 브릿지 링크 (link.naver.com - 모바일에서 네이버홈으로 튕기지 않도록 dst 명시)
         naver_bridge_url = f"https://link.naver.com/bridge?url={urllib.parse.quote(our_article_url)}&dst={urllib.parse.quote(our_article_url)}"
