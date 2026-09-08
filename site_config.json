@@ -71,7 +71,7 @@
     "apply_target": "article",
     "trigger_mode": "either",
     "time_seconds": 120,
-    "scroll_percent": 99,
+    "scroll_percent": 100,
     "prevent_repeat": true
   },
   "share": {
