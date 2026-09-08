@@ -57,7 +57,7 @@ function switchCategory(cat) {
 // ============================================================
 // 초고속 브라우저 로컬 캐시 & 스켈레톤 관리
 // ============================================================
-const LOCAL_CACHE_PREFIX = 'news_cache_v7_';
+const LOCAL_CACHE_PREFIX = 'news_cache_v8_';
 
 function getLocalCache(category) {
     try {

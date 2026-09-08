@@ -603,23 +603,19 @@ def save_site_config(config):
     with open(SITE_CONFIG_FILE, 'w', encoding='utf-8') as f:
         json.dump(config, f, ensure_ascii=False, indent=2)
     # 관리자가 저장할 때마다 GitHub에 자동 push (Render 재배포 시에도 설정 영구 유지)
-    _auto_push_site_config_to_github(config)
+    push_config_to_github(config)
 
-def _auto_push_site_config_to_github(config):
-    """
-    GitHub REST API를 통해 site_config.json을 자동으로 레포에 커밋/push.
-    환경변수 GITHUB_TOKEN이 설정된 경우에만 동작.
-    """
+def push_file_to_github(local_file_path, repo_rel_path, commit_message='[auto] update data file'):
+    """지정된 로컬 파일을 GitHub REST API를 통해 레포(main)에 커밋/push. Render 임시 디스크 리셋 방지."""
     token = os.environ.get('GITHUB_TOKEN', '').strip()
-    if not token:
-        return  # 토큰 없으면 조용히 건너뜀
+    if not token or not os.path.exists(local_file_path):
+        return False
 
     try:
         import base64
         GITHUB_OWNER = 'dortm11-maker'
         GITHUB_REPO  = 'dortm11-maker'
-        GITHUB_PATH  = 'site_config.json'
-        API_BASE     = f'https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{GITHUB_PATH}'
+        API_BASE = f'https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{repo_rel_path}'
 
         headers = {
             'Authorization': f'token {token}',
@@ -628,19 +624,17 @@ def _auto_push_site_config_to_github(config):
             'X-GitHub-Api-Version': '2022-11-28'
         }
 
-        # 1. 현재 파일의 SHA 가져오기 (업데이트에 필요)
-        get_resp = requests.get(API_BASE, headers=headers, timeout=8)
         sha = None
+        get_resp = requests.get(API_BASE, headers=headers, timeout=8)
         if get_resp.status_code == 200:
             sha = get_resp.json().get('sha', '')
 
-        # 2. 파일 내용 base64 인코딩
-        content_str = json.dumps(config, ensure_ascii=False, indent=2)
+        with open(local_file_path, 'r', encoding='utf-8') as f:
+            content_str = f.read()
         content_b64 = base64.b64encode(content_str.encode('utf-8')).decode('ascii')
 
-        # 3. PUT 요청으로 파일 업데이트
         put_body = {
-            'message': '[auto] admin: save site_config.json',
+            'message': commit_message,
             'content': content_b64,
             'branch': 'main'
         }
@@ -649,11 +643,42 @@ def _auto_push_site_config_to_github(config):
 
         put_resp = requests.put(API_BASE, headers=headers, json=put_body, timeout=10)
         if put_resp.status_code in (200, 201):
-            print(f"[GitHub Auto-Push] site_config.json 업데이트 성공 ✅")
+            print(f"[GitHub Auto-Push] {repo_rel_path} 업데이트 성공 ✅")
+            return True
         else:
-            print(f"[GitHub Auto-Push] 실패: {put_resp.status_code} {put_resp.text[:200]}")
+            print(f"[GitHub Auto-Push] {repo_rel_path} 실패: {put_resp.status_code} {put_resp.text[:150]}")
+            return False
     except Exception as e:
-        print(f"[GitHub Auto-Push] 예외: {e}")
+        print(f"[GitHub Auto-Push] {repo_rel_path} 예외: {e}")
+        return False
+
+def push_config_to_github(config):
+    """site_config.json을 GitHub에 자동 푸시"""
+    threading.Thread(target=push_file_to_github, args=(SITE_CONFIG_FILE, 'site_config.json', '[auto] admin: save site_config.json'), daemon=True).start()
+
+def sync_custom_news_from_github():
+    """서버 부팅 시 GitHub에서 최신 custom_news.json을 다운로드하여 영구 복원"""
+    token = os.environ.get('GITHUB_TOKEN', '').strip()
+    if not token:
+        return
+    try:
+        import base64
+        url = 'https://api.github.com/repos/dortm11-maker/dortm11-maker/contents/custom_news.json'
+        headers = {
+            'Authorization': f'token {token}',
+            'Accept': 'application/vnd.github.v3+json',
+            'X-GitHub-Api-Version': '2022-11-28'
+        }
+        resp = requests.get(url, headers=headers, timeout=8)
+        if resp.status_code == 200:
+            content_b64 = resp.json().get('content', '')
+            if content_b64:
+                raw = base64.b64decode(content_b64).decode('utf-8')
+                with open(CUSTOM_NEWS_FILE, 'w', encoding='utf-8') as f:
+                    f.write(raw)
+                print("[CustomNews] GitHub에서 최신 custom_news.json 복원 성공 ✅")
+    except Exception as e:
+        print(f"[CustomNews] GitHub 복원 예외: {e}")
 
 def get_admin_password():
     try:
@@ -1690,7 +1715,7 @@ def load_custom_news():
     return items
 
 def save_custom_news_item(item):
-    """새로운 수동 등록 기사를 custom_news.json 최상단에 영구 추가 보관 (언론사 실명 필터링 적용)"""
+    """새로운 수동 등록 기사를 custom_news.json 최상단에 영구 추가 보관 (언론사 실명 필터링 및 GitHub 즉시 백업)"""
     try:
         if isinstance(item, dict):
             item['source'] = clean_display_source(item.get('source'), item.get('category'))
@@ -1703,6 +1728,9 @@ def save_custom_news_item(item):
         items = items[:150]
         with open(CUSTOM_NEWS_FILE, 'w', encoding='utf-8') as f:
             json.dump(items, f, ensure_ascii=False, indent=1)
+        
+        # GitHub 원격 저장소에 비동기 즉각 영구 푸시 (Render 재배포 시에도 100% 영구 보존)
+        threading.Thread(target=push_file_to_github, args=(CUSTOM_NEWS_FILE, 'custom_news.json', f'[auto] save custom news: {item.get("title", "")[:30]}'), daemon=True).start()
         return True
     except Exception as e:
         print(f"[save_custom_news_item error]: {e}")
@@ -1710,9 +1738,9 @@ def save_custom_news_item(item):
 
 def parse_news_timestamp(date_str):
     """기사 날짜 문자열(09.08 11:04, 2026-09-08 등)을 비교 가능한 유닉스 타임스탬프로 변환"""
-    if not date_str:
-        return 0
     now = datetime.now(KST)
+    if not date_str:
+        return now.timestamp() - 1800
     s = str(date_str).strip()
     
     # YYYY-MM-DD HH:MM or YYYY.MM.DD HH:MM
@@ -1733,21 +1761,24 @@ def parse_news_timestamp(date_str):
         m, d = map(int, m_day.groups())
         return datetime(now.year, m, d, 0, 0, tzinfo=KST).timestamp()
 
-    return 0
+    return now.timestamp() - 1800
 
 def save_snapshot():
-    """최신 캐시 뉴스를 파일로 영구 보관하여 서버 재부팅 시에도 0.00초 즉시 제공"""
+    """최신 캐시 뉴스를 파일로 영구 보관하여 서버 재부팅 시에도 0.00초 즉시 제공 (GitHub 자동 백업 포함)"""
     try:
         with RSS_CACHE_LOCK:
             data = {cat: entry['news'] for cat, entry in RSS_CACHE.items() if entry.get('news')}
         if data:
             with open(NEWS_SNAPSHOT_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=1)
+            # GitHub 영구 푸시
+            threading.Thread(target=push_file_to_github, args=(NEWS_SNAPSHOT_FILE, 'news_snapshot.json', '[auto] update news snapshot'), daemon=True).start()
     except Exception as e:
         print(f"[Snapshot save error]: {e}")
 
 def load_snapshot():
-    """서버 부팅 즉시 파일 스냅샷을 메모리 캐시로 로드 (0.001초 콜드 스타트 제거)"""
+    """서버 부팅 즉시 GitHub 복원 및 파일 스냅샷을 메모리 캐시로 로드 (0.001초 콜드 스타트 제거)"""
+    sync_custom_news_from_github()
     if os.path.exists(NEWS_SNAPSHOT_FILE):
         try:
             from services.ai_rewriter import clean_news_summary, clean_news_title
@@ -1762,7 +1793,7 @@ def load_snapshot():
                             if n.get('title'):
                                 n['title'] = clean_news_title(n['title'])
                         
-                        # 최신순 정렬 보장
+                        # 커스텀 기사 최우선 + 최신순 정렬 보장
                         news_list.sort(key=lambda x: (not x.get('is_custom', False), -parse_news_timestamp(x.get('date'))))
 
                         RSS_CACHE[cat] = {
@@ -1801,7 +1832,7 @@ def do_fetch_category_news(category, max_per_feed=15):
         t.start()
         threads.append(t)
     for t in threads:
-        t.join(timeout=2.5)
+        t.join(timeout=4.5)
     for i in range(len(feeds)):
         for it in results.get(i, []):
             it['category'] = category
@@ -1856,10 +1887,23 @@ def do_fetch_category_news(category, max_per_feed=15):
             'cluster_sources': cluster_sources
         })
 
+    # 2.5 이전 캐시와의 스마트 머지 (언론사 피드 일시 지연 시 최신 뉴스 누락/깜빡임 원천 차단)
+    with RSS_CACHE_LOCK:
+        prev_entry = RSS_CACHE.get(category)
+        prev_news = prev_entry.get('news', []) if prev_entry else []
+    if prev_news:
+        curr_links = {it.get('link') for it in curated_items if it.get('link')}
+        for pn in prev_news:
+            if not pn.get('is_custom') and pn.get('link') and pn.get('link') not in curr_links:
+                ts = parse_news_timestamp(pn.get('date'))
+                if time.time() - ts < 4 * 3600:  # 4시간 이내의 최신 기사만 보존
+                    curated_items.append(pn)
+                    curr_links.add(pn.get('link'))
+
     # 3. 날짜별 최신순 정렬 (제일 위부터 최신 뉴스글 순서로 정렬)
     curated_items.sort(key=lambda x: parse_news_timestamp(x.get('date')), reverse=True)
 
-    # 4. 관리자 수동 등록 뉴스(custom_news) 영구 병합 (해당 카테고리 및 전체 홈 최상단 고정 노출)
+    # 4. 관리자 수동 등록 뉴스(custom_news) 영구 병합 (해당 카테고리 및 전체 홈 최상단 0번 인덱스에 무조건 고정 노출!)
     custom_news_all = load_custom_news()
     if custom_news_all:
         cat_customs = []
@@ -1868,6 +1912,8 @@ def do_fetch_category_news(category, max_per_feed=15):
             if category == '전체' or cn.get('category') == category:
                 cn_copy = dict(cn)
                 cn_copy['source'] = clean_display_source(cn.get('source'), category if category != '전체' else cn.get('category'))
+                if not cn_copy.get('date') or cn_copy.get('date') == '최근':
+                    cn_copy['date'] = datetime.now(KST).strftime('%m.%d %H:%M')
                 cat_customs.append(cn_copy)
         
         if cat_customs:
