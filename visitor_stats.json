@@ -1,13 +1,8 @@
 {
-  "total_uv": 104,
-  "total_pv": 170,
-  "current_date": "2026-09-08",
-  "today_vids": [
-    "118.235.69.211",
-    "35.227.160.149",
-    "127.0.0.1",
-    "35.227.183.65"
-  ],
+  "total_uv": 105,
+  "total_pv": 172,
+  "current_date": "2026-09-09",
+  "today_vids": [],
   "daily": {
     "2026-09-06": {
       "uv": 11,
@@ -18,8 +13,12 @@
       "pv": 142
     },
     "2026-09-08": {
-      "uv": 4,
-      "pv": 5
+      "uv": 5,
+      "pv": 7
+    },
+    "2026-09-09": {
+      "uv": 0,
+      "pv": 0
     }
   },
   "visitor_logs": {
@@ -44,10 +43,10 @@
     "127.0.0.1": {
       "ip": "127.0.0.1",
       "device": "💻 PC",
-      "visit_count": 2,
+      "visit_count": 0,
       "first_seen": "17:06:22",
-      "last_seen": "23:53:39",
-      "last_seen_ts": 1788879219.0586767,
+      "last_seen": "23:59:42",
+      "last_seen_ts": 1788879582.8970058,
       "last_page": "🌐 메인 뉴스 홈"
     },
     "35.199.162.116": {
@@ -262,8 +261,8 @@
       "device": "💻 PC",
       "visit_count": 0,
       "first_seen": "20:13:38",
-      "last_seen": "20:13:38",
-      "last_seen_ts": 1788779618.4659054,
+      "last_seen": "23:59:49",
+      "last_seen_ts": 1788879589.69526,
       "last_page": "🌐 메인 뉴스 홈"
     },
     "116.126.126.253": {
@@ -800,7 +799,7 @@
     "35.227.183.65": {
       "ip": "35.227.183.65",
       "device": "💻 PC",
-      "visit_count": 1,
+      "visit_count": 0,
       "first_seen": "17:01:53",
       "last_seen": "17:01:53",
       "last_seen_ts": 1788854513.5173688,
@@ -809,7 +808,7 @@
     "118.235.69.211": {
       "ip": "118.235.69.211",
       "device": "📱 모바일",
-      "visit_count": 1,
+      "visit_count": 0,
       "first_seen": "17:02:39",
       "last_seen": "17:02:39",
       "last_seen_ts": 1788854559.6263957,
@@ -818,7 +817,7 @@
     "35.227.160.149": {
       "ip": "35.227.160.149",
       "device": "💻 PC",
-      "visit_count": 1,
+      "visit_count": 0,
       "first_seen": "23:53:43",
       "last_seen": "23:53:43",
       "last_seen_ts": 1788879223.2592478,
@@ -842,7 +841,7 @@
       "center": 0,
       "popup": 0,
       "link": 0,
-      "auto_redirect": 4,
+      "auto_redirect": 0,
       "mobile": 0,
       "unknown": 0
     },
@@ -881,6 +880,17 @@
           "auto_redirect": 4,
           "mobile": 0,
           "unknown": 0
+        }
+      },
+      "2026-09-09": {
+        "pure_total": 0,
+        "by_type": {
+          "left": 0,
+          "right": 0,
+          "center": 0,
+          "popup": 0,
+          "link": 0,
+          "auto_redirect": 0
         }
       }
     },
