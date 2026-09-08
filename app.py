@@ -1321,7 +1321,11 @@ def fetch_article_detail(url):
             ('고부가 제품군' in current_ai_t and '고부가' not in orig_t) or
             ('흐름 뚜렷' in current_ai_t and current_ai_t.count('흐름 뚜렷') > 1) or
             bool(re.search(r'([가-힣]{2,})\s+\1\b', current_ai_t)) or
-            ('지속 흐름 뚜렷' in current_ai_t)
+            ('지속 흐름 뚜렷' in current_ai_t) or
+            ('시장 파급 전망' in current_ai_t) or
+            ('배경과 시장' in current_ai_t) or
+            ('일간 2만' in current_ai_t) or
+            ('핵심 쟁점과 향후' in current_ai_t)
         )
         has_wrong_og_img = bool(
             ai_cnt.get('og_img') and

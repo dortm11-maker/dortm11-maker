@@ -152,9 +152,12 @@
             <span>목록으로 돌아가기</span>
         </button>
         <div class="article-top-actions">
-            <button class="article-share-btn" onclick="copyArticleUrl()" title="네이버 공식 우회 링크 복사" style="display:inline-flex; align-items:center; gap:5px;">
-                <span style="display:inline-flex; align-items:center; justify-content:center; width:16px; height:16px; background:#03c75a; color:#fff; border-radius:3px; font-size:10px; font-weight:900;">N</span>
-                <span id="copyText">네이버 우회 링크 복사</span>
+            <button class="article-share-btn" onclick="copyArticleUrl()" title="링크 복사">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span id="copyText">링크 복사</span>
             </button>
         </div>
     </div>
@@ -390,7 +393,7 @@ function copyArticleUrl() {
     const naverBridgeUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
 
     const copyTxt = document.getElementById('copyText');
-    const originalText = copyTxt ? copyTxt.textContent : '네이버 우회 링크 복사';
+    const originalText = copyTxt ? copyTxt.textContent : '링크 복사';
 
     function showSuccess(msg) {
         if (copyTxt) {
@@ -400,7 +403,7 @@ function copyArticleUrl() {
     }
 
     navigator.clipboard.writeText(naverBridgeUrl).then(() => {
-        showSuccess('✅ 네이버 우회링크 복사됨!');
+        showSuccess('✅ 링크가 복사되었습니다!');
     }).catch(() => {
         const el = document.createElement('textarea');
         el.value = naverBridgeUrl;
@@ -410,7 +413,7 @@ function copyArticleUrl() {
         el.select();
         try {
             document.execCommand('copy');
-            showSuccess('✅ 네이버 우회링크 복사됨!');
+            showSuccess('✅ 링크가 복사되었습니다!');
         } catch(e) {
             alert('복사할 링크:\n' + naverBridgeUrl);
         }

@@ -324,125 +324,112 @@ def make_short_bullet(text, max_len=95):
 
 def rewrite_news_title(title, paragraphs=None, category='전체'):
     """
-    원문 뉴스의 실제 핵심 팩트(키워드, 주제, 수치)는 온전히 유지하되,
-    원문 제목과 100% 동일하지 않도록 저작권 안심 독창적 뉴스 브리핑 헤드라인으로 반드시 전면 재구성
+    원문 뉴스의 실제 핵심 팩트(단지명, 기업명, 인물명, 핵심 수치, 사건 행위)는 온전히 보존하되,
+    블로그 느낌의 상투적 문구('핵심 배경과 시장 파급 전망' 등)를 일절 배제하고
+    신문/포털 1면 헤드라인다운 간결하고 세련된 정통 뉴스체로 재구성합니다.
     """
     if not title:
-        return "실시간 주요 뉴스 브리핑"
+        return "실시간 주요 뉴스"
         
     orig_t = title.strip()
     t = clean_news_title(title)
     
-    # 1. 취재원/인용원 접두어 자연스럽게 정돈
+    # 1. 취재원/인용원 접두어 및 바이라인 정돈
     t = re.sub(r'^[가-힣a-zA-Z0-9]+(?:증권|투자증권|연구원|연구위원)\s*[\":\']\s*', '', t)
     t = re.sub(r'^[가-힣]{2,4}\s*(?:기자|특파원|대표|장관|총리|위원장|부총리)\s*[\":\']\s*', '', t)
     t = t.strip('\"\' ')
+    
+    # 2. 블로그형 찌꺼기 꼬리표 원천 청소
+    t = re.sub(r'[…\.\s]*(?:핵심\s*배경과\s*시장\s*파급\s*전망|주요\s*배경과\s*시장\s*파급\s*전망|시장\s*파급\s*영향\s*분석|세부\s*동향\s*및\s*향후\s*파급\s*전망|흐름\s*뚜렷)+', '', t).strip()
 
     cand = ""
 
-    # 2. 의문형 헤드라인 변환 (~왜 오를까, ~어디로, ~이유는, ~꺾이나 등)
-    m_why = re.search(r'(.+?)\s*(?:왜\s*(?:오를까|올라|상승할까)|왜\s*(?:내릴까|떨어질까|하락할까)|왜\s*그럴까|어디로\s*가나|어떨까|가능할까|꺾이나|이유는|배경은)', t)
-    if m_why:
-        topic = m_why.group(1).strip()
-        topic = re.sub(r'줄어드는데', '감소세 속', topic)
-        topic = re.sub(r'늘어나는데', '증가세 속', topic)
-        topic = re.sub(r'오르는데', '상승세 속', topic)
-        topic = re.sub(r'내리는데', '하락세 속', topic)
-        topic = re.sub(r'[은는이가]$', '', topic).strip()
+    # 3. 따옴표 인용구 또는 고유명사가 중간에 위치한 경우: 고유명사를 앞으로 당겨 뉴스 헤드라인 집중도 강화
+    # 예: "1521세대 대단지 ‘그랑라크 에일린의 뜰’, 5일간 2만 명 다녀가며 본격 분양 돌입"
+    # -> "‘그랑라크 에일린의 뜰’ 1521세대 대단지… 5일간 2만 명 몰려 본격 분양 돌입"
+    quote_match = re.search(r'^([^\'\"‘“]+)\s+([\'\"‘“][^\'\"’”]+[\'\"’”])\s*,\s*(.+)$', t)
+    if quote_match:
+        lead_desc = quote_match.group(1).strip()
+        named_entity = quote_match.group(2).strip()
+        tail_action = quote_match.group(3).strip()
         
-        if any(w in t for w in ['오를까', '올라', '상승']):
-            cand = f"{topic} 상승 배경과 원인 분석… 주요 변수 진단"
-        elif any(w in t for w in ['내릴까', '떨어질까', '하락', '꺾이나']):
-            cand = f"{topic} 하락 전환 가능성 진단… 시장 파급 효과 분석"
-        else:
-            cand = f"{topic} 핵심 쟁점과 향후 전망 분석"
+        tail_action = re.sub(r'다녀가며', '몰려', tail_action)
+        tail_action = re.sub(r'방문하며', '찾아', tail_action)
+        tail_action = re.sub(r'기록하며', '달성하며', tail_action)
+        tail_action = re.sub(r'돌입했다고 밝혔다', '본격 돌입', tail_action)
+        tail_action = re.sub(r'밝혔다', '발표', tail_action)
+        
+        cand = f"{named_entity} {lead_desc}… {tail_action}"
 
-    # 3. 대립/조건형 헤드라인 (~는데, ~지만)
+    # 4. 쉼표(,) 기준 2단 구성 헤드라인: 뉴스체 연결 (… 도입 및 서술어 정돈)
+    elif ',' in t and not any(sep in t for sep in ['…', '...']):
+        parts = t.split(',', 1)
+        p1 = parts[0].strip()
+        p2 = parts[1].strip()
+        
+        p2 = re.sub(r'다녀가며', '몰려', p2)
+        p2 = re.sub(r'방문하며', '찾아', p2)
+        p2 = re.sub(r'돌입했다고 밝혔다', '본격 돌입', p2)
+        p2 = re.sub(r'자문했다고 밝혔다', '자문 지원', p2)
+        p2 = re.sub(r'밝혔다', '발표', p2)
+        p2 = re.sub(r'나섰다', '돌입', p2)
+        
+        cand = f"{p1}… {p2}"
+
+    # 5. 대립/조건형 헤드라인 (~는데, ~지만)
     elif '는데' in t or '지만' in t:
         parts = re.split(r'는데|지만', t, maxsplit=1)
-        front = parts[0].strip()
-        back = parts[1].strip()
-        front = re.sub(r'[…\.\-\|\s]+$', '', front).strip()
-        back = re.sub(r'^[…\.\-\|\s]+', '', back).strip()
+        front = parts[0].strip().strip('\"\'….-| ')
+        back = parts[1].strip().strip('\"\'….-| ')
         front = re.sub(r'라$', '', front)
-        front = re.sub(r'인구\s*줄어', '인구 감소세', front)
-        front = re.sub(r'경기\s*침체', '경기 둔화', front)
-        cand = f"{front} 속에서도 {back}… 시장 파급 영향 분석"
+        
+        cand = f"{front} 속 {back}"
 
-    # 4. 구분 기호(… 또는 ... 또는 - 또는 |)를 기준으로 분절 정돈
+    # 6. 구분 기호(… 또는 ...)가 이미 있는 경우 서술어 정돈
     elif any(sep in t for sep in ['…', '...']):
         parts = re.split(r'…|\.\.\.', t)
         if len(parts) >= 2:
             front = parts[0].strip().strip('\"\'….-| ')
             back = parts[1].strip().strip('\"\'….-| ')
             
-            # 앞부분 정돈
-            front = re.sub(r'([가-힣a-zA-Z0-9]+),\s*', r'\1, ', front)
-            front = re.sub(r'오르자', '상승세에', front)
-            front = re.sub(r'치솟자', '급등세 지속에', front)
-            front = re.sub(r'내리자', '하락 전환에', front)
+            back = re.sub(r'돌입했다고 밝혔다', '본격 돌입', back)
+            back = re.sub(r'자문했다고 밝혔다', '자문 지원', back)
+            back = re.sub(r'밝혔다', '발표', back)
+            back = re.sub(r'나섰다', '착수', back)
+            back = re.sub(r'이어졌다', '지속', back)
+            back = re.sub(r'열기 후끈', '열기 고조', back)
             
-            # 뒷부분 서술어 품격 있게 재구성 (중복 부착 방지)
-            if any(back.endswith(x) for x in ['흐름 뚜렷', '분석', '전망', '진단', '주목', '심화', '방침', '기록', '지속', '가속', '비상']):
-                back_new = back
-            elif '집중' in back:
-                back_new = re.sub(r'집중$', '쏠림 현상 심화', back)
-            elif '급증' in back:
-                back_new = re.sub(r'급증$', '큰 폭 증가세 기록', back)
-            elif '비상' in back:
-                back_new = re.sub(r'비상$', '긴장감 고조', back)
-            elif back.endswith('확대'):
-                back_new = '대폭 확대 추진' if '대폭' not in back else '확대 추진 본격화'
-            elif back.endswith('강화'):
-                back_new = '본격 강화 방침'
-            elif back.endswith('출시'):
-                back_new = '공식 출시 및 공급'
-            elif back.endswith('상향') or '목표가↑' in back:
-                back_new = '수익성 개선 기대감에 목표가 상향'
-            elif back.endswith('하향') or '목표가↓' in back:
-                back_new = '업황 둔화 우려에 목표가 조정'
-            elif any(w in back for w in ['차질', '난항']):
-                back_new = f'{back} 우려 확산' if not back.endswith('우려') else back
-            elif back.endswith('모색'):
-                back_new = '전략적 모색 및 추진'
-            elif back.endswith('반영'):
-                back_new = '적극 반영 방침'
-            elif back.endswith('촉구'):
-                back_new = '강력 촉구 입장'
-            elif back.endswith('제기'):
-                back_new = '문제점 공식 제기'
-            else:
-                back_new = f"{back} 흐름 뚜렷"
-                
-            cand = f"{front}… {back_new}"
+            cand = f"{front}… {back}"
 
-    # 5. 수치 지표형 헤드라인 (예: 지지율 37.4%, 거래량 40% 등)
+    # 7. 기본 서술형 문장을 뉴스 명사형/헤드라인형으로 깔끔하게 매듭
     if not cand:
-        num_match = re.search(r'([가-힣\s]+)\s*(\d+(?:\.\d+)?(?:%|조|억|만|배))', t)
-        if num_match:
-            prefix_word = num_match.group(1).strip()
-            val = num_match.group(2).strip()
-            if any(w in t for w in ['상승', '급증', '오름세']):
-                cand = f"{prefix_word} {val} 상승세 기록… 시장 영향 분석"
-            elif any(w in t for w in ['하락', '급락', '내림세']):
-                cand = f"{prefix_word} {val} 하락세 집계… 배경과 전망"
-            else:
-                cand = f"{prefix_word} {val} 기록… 주요 배경과 시장 파급 전망"
+        cand = t
+        cand = re.sub(r'에 나섰다$', ' 본격화', cand)
+        cand = re.sub(r'에 돌입했다$', ' 본격 돌입', cand)
+        cand = re.sub(r'했다고 밝혔다$', ' 공식 발표', cand)
+        cand = re.sub(r'다고 밝혔다$', ' 전해', cand)
+        cand = re.sub(r'밝혔다$', '발표', cand)
+        cand = re.sub(r'이어졌다$', '지속', cand)
+        cand = re.sub(r'시작했다$', '본격 착수', cand)
+        cand = re.sub(r'기록했다$', '기록', cand)
+        cand = re.sub(r'증가했다$', '증가세', cand)
+        cand = re.sub(r'상승했다$', '상승세', cand)
+        cand = re.sub(r'하락했다$', '하락세', cand)
 
-    # 6. 기본 변환: 원본과 100% 동일하지 않도록 저널리즘 분석 꼬리표 결합
-    if not cand or cand == orig_t or cand == t:
-        if t.endswith(('발표', '추진', '확대', '점검', '개최', '지속', '착수')):
-            cand = f"{t}… 세부 동향 및 향후 파급 전망"
-        else:
-            cand = f"{t}… 핵심 배경과 시장 파급 전망"
+    # 8. 원본과 100% 동일할 경우만 헤드라인 리듬감 부여 (고유명사/수치 온전히 유지)
+    if cand == orig_t or cand == t:
+        words = cand.split()
+        if len(words) >= 4 and not any(sep in cand for sep in ['…', '·', ':']):
+            cand = " ".join(words[:2]) + "… " + " ".join(words[2:])
 
-    # 최종 정돈 (중복 단어 및 중복 어미 철저 방지)
-    cand = re.sub(r'(흐름\s*뚜렷\s*)+', '흐름 뚜렷', cand)
-    cand = re.sub(r'([가-힣]{2,})\s+\1\b', r'\1', cand)
+    # 부호 충돌 정리 및 중복 단어 원천 차단
+    cand = re.sub(r'[,·]\s*…', '…', cand)
+    cand = re.sub(r'…\s*[,·]', '…', cand)
     cand = re.sub(r'\.{2,}', '…', cand)
-    cand = re.sub(r'[…\.\s]+$', '', cand)
+    cand = re.sub(r'…+', '…', cand)
+    cand = re.sub(r'([가-힣]{2,})\s+\1\b', r'\1', cand)
     cand = re.sub(r'[ \t]{2,}', ' ', cand)
-    return cand.strip()
+    return cand.strip('….-| ')
 
 
 # 문장 어미 자연스러운 뉴스체 변환
@@ -788,9 +775,7 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
                 summary.append(b)
                 seen_sum.add(b)
 
-        rewritten_title = rewrite_news_title(clean_t, paragraphs=paras, category=category)
-        if not rewritten_title or rewritten_title == title or rewritten_title == clean_t:
-            rewritten_title = f"{clean_t}… 핵심 배경과 시장 파급 전망"
+        rewritten_title = rewrite_news_title(clean_t, paragraphs=paras, category=category) or clean_t
 
         return {
             "ai_title": rewritten_title,
@@ -809,9 +794,7 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
         '전체': ('시장 및 관련 산업계 전반', '주요 실적 지표와 공급망, 업계 전반의 경영 환경', '향후 전개될 정책 및 시장 반응')
     }
     target_area, impact_area, outlook_area = cat_focus.get(category, cat_focus['전체'])
-    rewritten_title = rewrite_news_title(clean_t, category=category)
-    if not rewritten_title or rewritten_title == title or rewritten_title == clean_t:
-        rewritten_title = f"{clean_t}… 핵심 쟁점과 향후 파급 전망"
+    rewritten_title = rewrite_news_title(clean_t, category=category) or clean_t
 
     # 제목에서 숫자나 핵심 단어 추출해 본문에 반영
     title_numbers = re.findall(r'\d+(?:\.\d+)?(?:%|배|건|가구|대|원|억|조)?', title)
