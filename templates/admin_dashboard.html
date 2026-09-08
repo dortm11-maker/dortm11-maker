@@ -4153,7 +4153,41 @@
                 });
                 const data = await resp.json();
 
-                if (data.success && data.item) {
+                if (data.is_duplicate) {
+                    const item = data.item || {};
+                    if (statusBox) {
+                        statusBox.style.display = 'block';
+                        statusBox.style.background = '#fffbeb';
+                        statusBox.style.color = '#92400e';
+                        statusBox.style.border = '1.5px solid #fde68a';
+                        statusBox.innerHTML = `
+                            <div style="font-size:15px; font-weight:700; margin-bottom:6px; color:#b45309;">⚠️ 이미 등록되어 있는 뉴스 기사입니다! (중복 등록 제외)</div>
+                            <div style="font-size:13px; color:#4b5563; margin-bottom:12px; word-break:break-all;">등록된 제목: <strong>${esc(item.title || '')}</strong></div>
+                            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                                <a href="${escAttr(data.article_url)}" target="_blank" class="btn" style="display:inline-flex; align-items:center; gap:6px; background:#2563eb; color:#fff; padding:9px 18px; border-radius:8px; font-weight:700; font-size:14px; text-decoration:none; box-shadow:0 2px 6px rgba(37,99,235,0.25);">
+                                    <span>👉 이미 작성된 글 보러가기</span>
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                </a>
+                                <button type="button" onclick="navigator.clipboard.writeText(window.location.origin + '${escAttr(data.article_url)}'); showToast('📋 기사 주소가 복사되었습니다!');" style="display:inline-flex; align-items:center; gap:6px; background:#f8fafc; color:#334155; padding:9px 14px; border:1px solid #cbd5e1; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;">
+                                    <span>📋 기사 링크 복사</span>
+                                </button>
+                            </div>
+                        `;
+                    }
+
+                    if (resultCard && item.title) {
+                        resultCard.style.display = 'block';
+                        document.getElementById('cnResultImg').src = item.image || '/static/img/ai/default.jpg';
+                        document.getElementById('cnResultCat').textContent = item.category || '전체';
+                        document.getElementById('cnResultSource').textContent = (item.logo || '⚡') + ' ' + (item.source || '실시간 속보');
+                        document.getElementById('cnResultDate').textContent = item.date || '기존 등록';
+                        document.getElementById('cnResultTitle').textContent = item.title;
+                        document.getElementById('cnResultSummary').textContent = item.summary || '이미 등록되어 있는 뉴스 기사입니다.';
+                        document.getElementById('cnResultLink').href = data.article_url;
+                    }
+
+                    showToast('⚠️ 이미 등록된 기사입니다! 작성된 글 보기 버튼이 생성되었습니다.');
+                } else if (data.success && data.item) {
                     const item = data.item;
                     if (statusBox) {
                         statusBox.style.background = '#f0fdf4';

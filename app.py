@@ -2221,6 +2221,42 @@ def admin_add_custom_news():
         return jsonify({'success': False, 'message': '올바른 뉴스 기사 URL(http:// 또는 https://)을 입력해주세요.'})
 
     try:
+        from services.news_cluster import canonicalize_url
+        norm_url = canonicalize_url(url)
+
+        # 1. 기존 등록 기사 URL 중복 검사 (URL 정규화 매칭)
+        existing_customs = load_custom_news()
+        found_existing = None
+        for it in existing_customs:
+            it_url = it.get('link', '')
+            if it_url == url or canonicalize_url(it_url) == norm_url:
+                found_existing = it
+                break
+
+        if not found_existing:
+            from services.curation_db import get_curated_article_by_url
+            db_art = get_curated_article_by_url(url)
+            if db_art:
+                found_existing = {
+                    'title': db_art.get('ai_title') or db_art.get('original_title'),
+                    'original_title': db_art.get('original_title'),
+                    'link': db_art.get('original_url'),
+                    'category': db_art.get('category') or '전체',
+                    'image': db_art.get('ai_image', ''),
+                    'date': db_art.get('published_at') or '등록됨'
+                }
+
+        if found_existing:
+            target_link = found_existing.get('link') or url
+            article_view_url = f"/article?url={urllib.parse.quote(target_link)}"
+            return jsonify({
+                'success': False,
+                'is_duplicate': True,
+                'message': '이미 등록되어 있는 뉴스 기사입니다.',
+                'article_url': article_view_url,
+                'item': found_existing
+            })
+
         from services.ai_rewriter import (
             extract_factual_data,
             build_full_news_article,
@@ -2241,7 +2277,7 @@ def admin_add_custom_news():
         html_text = decode_html_bytes(resp.content, resp.headers)
         soup = BeautifulSoup(html_text, 'html.parser')
 
-        # 1. 원문 제목 추출
+        # 2. 원문 제목 추출
         og_t = soup.find('meta', property='og:title') or soup.find('meta', attrs={'name': 'title'})
         raw_title = (og_t.get('content') if og_t else '') or (soup.title.string if soup.title else '')
         raw_title = clean_html(raw_title)
@@ -2250,6 +2286,22 @@ def admin_add_custom_news():
 
         if not clean_raw_t:
             return jsonify({'success': False, 'message': '해당 링크에서 기사 제목을 추출할 수 없습니다.'})
+
+        # 3. 제목 기반 중복 검사 (URL 파라미터가 다르거나 모바일 URL인 경우 방어)
+        for it in existing_customs:
+            if it.get('original_title') == raw_title or (clean_raw_t and it.get('title') == clean_raw_t):
+                found_existing = it
+                break
+        if found_existing:
+            target_link = found_existing.get('link') or url
+            article_view_url = f"/article?url={urllib.parse.quote(target_link)}"
+            return jsonify({
+                'success': False,
+                'is_duplicate': True,
+                'message': '동일한 내용의 뉴스가 이미 등록되어 있습니다.',
+                'article_url': article_view_url,
+                'item': found_existing
+            })
 
         # 2. 언론사 추출
         publisher, pub_logo = get_publisher_info(url, soup=soup)
