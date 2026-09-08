@@ -1,9 +1,10 @@
 {
-  "total_uv": 103,
-  "total_pv": 168,
+  "total_uv": 104,
+  "total_pv": 170,
   "current_date": "2026-09-08",
   "today_vids": [
     "118.235.69.211",
+    "35.227.160.149",
     "127.0.0.1",
     "35.227.183.65"
   ],
@@ -17,8 +18,8 @@
       "pv": 142
     },
     "2026-09-08": {
-      "uv": 3,
-      "pv": 3
+      "uv": 4,
+      "pv": 5
     }
   },
   "visitor_logs": {
@@ -43,10 +44,10 @@
     "127.0.0.1": {
       "ip": "127.0.0.1",
       "device": "💻 PC",
-      "visit_count": 1,
+      "visit_count": 2,
       "first_seen": "17:06:22",
-      "last_seen": "17:01:48",
-      "last_seen_ts": 1788854508.3176687,
+      "last_seen": "23:53:39",
+      "last_seen_ts": 1788879219.0586767,
       "last_page": "🌐 메인 뉴스 홈"
     },
     "35.199.162.116": {
@@ -81,8 +82,8 @@
       "device": "💻 PC",
       "visit_count": 0,
       "first_seen": "19:47:38",
-      "last_seen": "00:00:37",
-      "last_seen_ts": 1788793237.9625254,
+      "last_seen": "23:53:52",
+      "last_seen_ts": 1788879232.4602234,
       "last_page": "📰 기사 상세 읽는 중"
     },
     "106.101.73.56": {
@@ -813,6 +814,15 @@
       "last_seen": "17:02:39",
       "last_seen_ts": 1788854559.6263957,
       "last_page": "📰 기사 상세 읽는 중"
+    },
+    "35.227.160.149": {
+      "ip": "35.227.160.149",
+      "device": "💻 PC",
+      "visit_count": 1,
+      "first_seen": "23:53:43",
+      "last_seen": "23:53:43",
+      "last_seen_ts": 1788879223.2592478,
+      "last_page": "🌐 메인 뉴스 홈"
     }
   },
   "ad_clicks": {
@@ -822,7 +832,7 @@
       "center": 8,
       "popup": 6,
       "link": 0,
-      "auto_redirect": 16,
+      "auto_redirect": 17,
       "mobile": 6,
       "unknown": 1
     },
@@ -832,7 +842,7 @@
       "center": 0,
       "popup": 0,
       "link": 0,
-      "auto_redirect": 3,
+      "auto_redirect": 4,
       "mobile": 0,
       "unknown": 0
     },
@@ -868,7 +878,7 @@
           "center": 0,
           "popup": 0,
           "link": 0,
-          "auto_redirect": 3,
+          "auto_redirect": 4,
           "mobile": 0,
           "unknown": 0
         }
@@ -1180,6 +1190,15 @@
         "label": "자동 자리이동",
         "page": "오세훈 “서울이 전월세 지옥되고 있어… 특단의 대책 필요”",
         "ts": 1788854537.7840822
+      },
+      {
+        "time": "23:53:52",
+        "ip": "15.165.229.249",
+        "device": "📱 모바일",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "주담대 조이 속 LH 직원은 1.4억까지 사내대출 펑펑｜동아일보",
+        "ts": 1788879232.7595546
       }
     ]
   }
