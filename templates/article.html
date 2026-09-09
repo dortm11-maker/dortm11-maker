@@ -383,22 +383,19 @@ function goBackOrHome() {
     }
 }
 
-// 기사 링크 복사 (카카오톡 썸네일 정상 표시 + 네이버 브릿지 자동 우회)
-// 복사되는 URL = 우리 사이트 URL → 카톡이 og:image(원본 썸네일) 정상 스크랩
-// 사용자가 링크 클릭 시 → 우리 사이트에서 네이버 브릿지로 자동 리다이렉트
+// 기사 링크 복사 (네이버 공식 브릿지 자동 우회 링크 복사)
 function copyArticleUrl() {
-    const originalArticleUrl = window.__ORIGINAL_ARTICLE_URL__ || '';
-    let shareUrl;
-    if (originalArticleUrl) {
-        shareUrl = 'https://news-now-82jg.onrender.com/article?url=' + encodeURIComponent(originalArticleUrl);
-    } else {
-        let cleanUrl = window.location.href.split('&_t=')[0].split('?_t=')[0];
-        if (cleanUrl.includes('localhost') || cleanUrl.includes('127.0.0.1')) {
-            const pathAndQuery = window.location.pathname + window.location.search;
-            cleanUrl = 'https://news-now-82jg.onrender.com' + pathAndQuery.split('&_t=')[0].split('?_t=')[0];
-        }
-        shareUrl = cleanUrl;
+    let cleanUrl = window.location.href.split('&_t=')[0].split('?_t=')[0];
+    if (cleanUrl.includes('localhost') || cleanUrl.includes('127.0.0.1')) {
+        const pathAndQuery = window.location.pathname + window.location.search;
+        cleanUrl = 'https://news-now-82jg.onrender.com' + pathAndQuery.split('&_t=')[0].split('?_t=')[0];
     }
+    if (!cleanUrl.includes('url=') && window.__ORIGINAL_ARTICLE_URL__) {
+        cleanUrl = 'https://news-now-82jg.onrender.com/article?url=' + encodeURIComponent(window.__ORIGINAL_ARTICLE_URL__);
+    }
+    const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
+    const ourUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + cacheKey;
+    const targetUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
 
     const copyTxt = document.getElementById('copyText');
     const originalText = copyTxt ? copyTxt.textContent : '링크 복사';
@@ -411,13 +408,13 @@ function copyArticleUrl() {
     }
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(shareUrl).then(() => {
+        navigator.clipboard.writeText(targetUrl).then(() => {
             showSuccess('✅ 링크 복사됨!');
         }).catch(() => {
-            fallbackCopy(shareUrl, showSuccess);
+            fallbackCopy(targetUrl, showSuccess);
         });
     } else {
-        fallbackCopy(shareUrl, showSuccess);
+        fallbackCopy(targetUrl, showSuccess);
     }
 }
 
@@ -512,24 +509,6 @@ document.addEventListener('DOMContentLoaded', initArticleAds);
 <script>
 window.SITE_CONFIG = {{ site_config | tojson }};
 window.__ORIGINAL_ARTICLE_URL__ = {{ article.url | tojson }};
-
-// ── 카카오톡 인앱브라우저 → 네이버 브릿지 자동 우회 ──────────────────────
-// 복사된 링크(우리 사이트 URL)를 카톡에서 클릭하면 네이버 브릿지로 자동 이동
-// 카톡봇·검색엔진·일반 브라우저는 리다이렉트 없이 og:image 정상 스크랩
-(function() {
-    const ua = navigator.userAgent || '';
-    const urlParams = new URLSearchParams(window.location.search);
-    // ?nobridge=1 이면 이미 브릿지 경유한 것 - 리다이렉트 없음
-    if (urlParams.get('nobridge') === '1') return;
-    // 카카오톡 인앱브라우저만 리다이렉트
-    const isKakao = /KAKAOTALK|kakaotalk/i.test(ua);
-    if (!isKakao) return;
-    const origUrl = window.__ORIGINAL_ARTICLE_URL__;
-    if (!origUrl) return;
-    const ourArticleUrl = 'https://news-now-82jg.onrender.com/article?url=' + encodeURIComponent(origUrl) + '&nobridge=1';
-    const bridgeUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourArticleUrl) + '&dst=' + encodeURIComponent(ourArticleUrl);
-    window.location.replace(bridgeUrl);
-})();
 </script>
 <script src="/static/js/ad_tracker.js?v=20260906_1"></script>
 <script src="/static/js/auto_redirect.js?v=20260906_1"></script>
