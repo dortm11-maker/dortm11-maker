@@ -513,12 +513,32 @@
    "is_custom": true
   },
   {
+   "title": "전국에 구름… 많고 낮밤의 기온차 크다",
+   "original_title": "전국에 구름… 많고 낮밤의 기온차 크다",
+   "link": "https://www.hani.co.kr/arti/society/environment/1277101.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:22",
+   "source": "실시간 속보",
+   "logo": "⚡",
+   "category": "전체",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레",
+     "title": "전국에 구름… 많고 낮밤의 기온차 크다",
+     "url": "https://www.hani.co.kr/arti/society/environment/1277101.html",
+     "date": "09.10 08:22"
+    }
+   ]
+  },
+  {
    "title": "노르웨이 총리 “젤렌스키 탄 비행기… 이륙 순간 드론 충돌할 뻔”",
    "original_title": "노르웨이 총리 “젤렌스키 탄 비행기… 이륙 순간 드론 충돌할 뻔”",
    "link": "https://www.hani.co.kr/arti/international/international_general/1277100.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "종합 이슈 (3개사)",
    "logo": "⚡",
    "category": "전체",
@@ -528,7 +548,7 @@
      "source_name": "한겨레",
      "title": "노르웨이 총리 “젤렌스키 탄 비행기… 이륙 순간 드론 충돌할 뻔”",
      "url": "https://www.hani.co.kr/arti/international/international_general/1277100.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     },
     {
      "source_name": "경향신문",
@@ -550,7 +570,7 @@
    "link": "https://www.hani.co.kr/arti/specialsection/esc_section/1277099.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "실시간 속보",
    "logo": "⚡",
    "category": "전체",
@@ -560,7 +580,7 @@
      "source_name": "한겨레",
      "title": "수월하게 오른 1400m 발왕산… 주목 천국 보니 기가 ‘뻥’ 뚫리네",
      "url": "https://www.hani.co.kr/arti/specialsection/esc_section/1277099.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -569,8 +589,8 @@
    "original_title": "정부, 수출입 실적 조작 ‘재정·금융범죄’로 규정… 특별수사단 구성",
    "link": "https://www.hani.co.kr/arti/economy/economy_general/1277098.html",
    "summary": "",
-   "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "image": "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:22",
    "source": "실시간 속보",
    "logo": "⚡",
    "category": "전체",
@@ -580,7 +600,7 @@
      "source_name": "한겨레",
      "title": "정부, 수출입 실적 조작 ‘재정·금융범죄’로 규정… 특별수사단 구성",
      "url": "https://www.hani.co.kr/arti/economy/economy_general/1277098.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -590,7 +610,7 @@
    "link": "https://www.hani.co.kr/arti/international/international_general/1277097.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "종합 이슈 (4개사)",
    "logo": "⚡",
    "category": "전체",
@@ -600,7 +620,7 @@
      "source_name": "한겨레",
      "title": "트럼프 “중간선거 직후 이란 전쟁 끝날 것… 유가도 급락할 것”",
      "url": "https://www.hani.co.kr/arti/international/international_general/1277097.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     },
     {
      "source_name": "경향신문",
@@ -628,7 +648,7 @@
    "link": "https://www.hani.co.kr/arti/area/jeju/1277096.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "실시간 속보",
    "logo": "⚡",
    "category": "전체",
@@ -638,7 +658,7 @@
      "source_name": "한겨레",
      "title": "3년간 219억 손실보전?… 제주도, ‘칭다오 협정’ 바꿀 수 있을까",
      "url": "https://www.hani.co.kr/arti/area/jeju/1277096.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -648,7 +668,7 @@
    "link": "https://www.hani.co.kr/arti/society/labor/1277095.html",
    "summary": "",
    "image": "/static/img/ai/hyundai_car.jpg",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "실시간 속보",
    "logo": "⚡",
    "category": "전체",
@@ -658,7 +678,7 @@
      "source_name": "한겨레",
      "title": "현대차… 이 대통령 발언 근거로 “성과급은 단체교섭 대상 아냐” 주장",
      "url": "https://www.hani.co.kr/arti/society/labor/1277095.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -668,7 +688,7 @@
    "link": "https://www.hani.co.kr/arti/society/society_general/1277094.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "실시간 속보",
    "logo": "⚡",
    "category": "전체",
@@ -678,7 +698,7 @@
      "source_name": "한겨레",
      "title": "경찰, ‘수사경과 자진반납’ 작년치 넘어… 수사 질 저하 우려",
      "url": "https://www.hani.co.kr/arti/society/society_general/1277094.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -688,7 +708,7 @@
    "link": "https://www.hani.co.kr/arti/economy/economy_general/1277093.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "실시간 속보",
    "logo": "⚡",
    "category": "전체",
@@ -698,7 +718,7 @@
      "source_name": "한겨레",
      "title": "미국… 한국 2천억달러 대미투자 ‘최종 안전판’ 깼다",
      "url": "https://www.hani.co.kr/arti/economy/economy_general/1277093.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -708,7 +728,7 @@
    "link": "https://www.hani.co.kr/arti/animalpeople/human_animal/1277092.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "실시간 속보",
    "logo": "⚡",
    "category": "전체",
@@ -718,7 +738,7 @@
      "source_name": "한겨레",
      "title": "밀수·유기된 멸종위기종 ‘가득’… 국립생태원, 미어터진다",
      "url": "https://www.hani.co.kr/arti/animalpeople/human_animal/1277092.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -728,7 +748,7 @@
    "link": "https://www.hani.co.kr/arti/opinion/column/1277091.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "실시간 속보",
    "logo": "⚡",
    "category": "전체",
@@ -738,7 +758,7 @@
      "source_name": "한겨레",
      "title": "외국인의 반말 세계",
      "url": "https://www.hani.co.kr/arti/opinion/column/1277091.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -748,7 +768,7 @@
    "link": "https://www.hani.co.kr/arti/society/environment/1277090.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "실시간 속보",
    "logo": "⚡",
    "category": "전체",
@@ -758,7 +778,7 @@
      "source_name": "한겨레",
      "title": "부채 210조 한전, 웨스팅하우스 지분 인수?… 도시바엔 ‘파산 원인’",
      "url": "https://www.hani.co.kr/arti/society/environment/1277090.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -768,7 +788,7 @@
    "link": "https://www.hani.co.kr/arti/society/labor/1277089.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:22",
    "source": "종합 이슈 (2개사)",
    "logo": "⚡",
    "category": "전체",
@@ -778,13 +798,13 @@
      "source_name": "한겨레",
      "title": "“건설현장 산재 없애자” 마주앉은 원·하청… 변화 물꼬 튼 노란봉투법",
      "url": "https://www.hani.co.kr/arti/society/labor/1277089.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     },
     {
      "source_name": "한겨레",
      "title": "원·하청 ‘안전’ 교섭 물꼬 튼 노란봉투법",
      "url": "https://www.hani.co.kr/arti/opinion/editorial/1277087.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -793,8 +813,8 @@
    "original_title": "‘휠체어석 목소리’… 들은 K팝 팬덤",
    "link": "https://www.hani.co.kr/arti/opinion/column/1277088.html",
    "summary": "",
-   "image": "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "image": "https://images.unsplash.com/photo-1526178613552-2b45c6c302f0?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:22",
    "source": "실시간 속보",
    "logo": "⚡",
    "category": "전체",
@@ -804,7 +824,7 @@
      "source_name": "한겨레",
      "title": "‘휠체어석 목소리’… 들은 K팝 팬덤",
      "url": "https://www.hani.co.kr/arti/opinion/column/1277088.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:22"
     }
    ]
   },
@@ -825,6 +845,26 @@
      "title": "이 대통령, 프랑스 국빈방문 마무리… 하원의장·OECD 총장과 협력 논의",
      "url": "https://www.hani.co.kr/arti/politics/bluehouse/1277086.html",
      "date": "09.10 08:19"
+    }
+   ]
+  },
+  {
+   "title": "“신규 사업 점진 확대”… 중부발전, LS ELECTRIC과 재생에너지 전주기 협력 맞손",
+   "original_title": "“신규 사업 점진 확대”… 중부발전, LS ELECTRIC과 재생에너지 전주기 협력 맞손",
+   "link": "https://www.mk.co.kr/news/business/12148987",
+   "summary": "재생에너지 사업개발·투자·시공·운영 등 가치사슬(Value Chain) 전반 협력한국중부발전이 LS ELECTRIC과 재생에너지 사업 전반을 아우르는 전주기 협력체계 구축에 나선.",
+   "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:17",
+   "source": "실시간 속보",
+   "logo": "⚡",
+   "category": "전체",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "매일경제",
+     "title": "“신규 사업 점진 확대”… 중부발전, LS ELECTRIC과 재생에너지 전주기 협력 맞손",
+     "url": "https://www.mk.co.kr/news/business/12148987",
+     "date": "09.10 08:17"
     }
    ]
   },
@@ -873,7 +913,7 @@
    "original_title": "“모기 조심하세요”… 올해 첫 일본뇌염 환자는 60대 여성",
    "link": "https://www.mk.co.kr/news/society/12148985",
    "summary": "국내에서 올해 첫 일본뇌염 환자가 확인됐다. 지난해보다 약 5주 이른 시점으로, 방역당국은 모기 활동이 시작된 만큼 예방수칙을 지켜달라고 당부했다. 질병관리청은 고열과 오한, 구토.",
-   "image": "https://images.unsplash.com/photo-1506617420156-8e4536971650?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 08:10",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -1025,7 +1065,7 @@
    "original_title": "‘얌체복직’ 논란… 방학 중 조기복직 교사 296명, 사유 살펴보니",
    "link": "https://www.khan.co.kr/article/202609100801001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
    "summary": "지난 7월 서울 노원구 중평초등학교 2학년 2반 학생들이 방학식을 끝내고 즐거운 표정으로 교실을 나서고 있다.휴직 중인 정규 교사가 방학이나 명절을 앞두고 복직해 급여나 수당을 받고, 이를 대체하던 기간제 교사가 계약기간을 채우지 못한다는 이른바 ‘얌체복직’ 논란이 이...",
-   "image": "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 08:01",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -1377,7 +1417,7 @@
    "original_title": "지지율, 한 번에 11%P 급등했다… 역대 최고치 찍은 캐나다 총리, 비결은",
    "link": "https://www.mk.co.kr/news/world/12148972",
    "summary": "美-캐나다 무역 보복 격화 관세법상 ‘차별’ 근거로 금지 “車 50% 관세 여전히 유효” 카니 캐나다 총리 지지율 급등 62% 찍으며 초당적 인기도널드 트럼프 미국 행정부가 수주.",
-   "image": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:41",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -1477,7 +1517,7 @@
    "original_title": "“자신있으면 숏 쳐봐라” 외환시장 으름장… 베센트의 의도는",
    "link": "https://www.mk.co.kr/news/economy/12148971",
    "summary": "불앤베어 포커스반도체 투심과 매크로의 치열한 주도권 다툼이 끝나지 않고 있습니다. 챗GPT 신모델 ASTRA 출시 필두로 반도체 주목도가 급격하게 올라가고 있지만, 유가 상승 압력.",
-   "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1535320903710-d993d3d77d29?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:38",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -1657,7 +1697,7 @@
    "original_title": "에어포스원 괜찮나…트럼프 타려 속 비상 슬라이드 오작동",
    "link": "https://www.donga.com/news/Inter/article/all/20260910/134639995/1",
    "summary": "도널드 트럼프 미국 대통령이 미국 댈러스에서 열리는 공화당 중간선거 전당대회에 참석하기 위해 이동하던 중 대통령 전용기 에어포스원의 비상 탈출 슬라이드가 펼쳐지는 사고가 발생해 출발이 20여 분간 지연됐다.9일(현지시간) 블룸버그에 따르면 미국 메릴랜드주에 위치한 앤드...",
-   "image": "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:28",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -1757,7 +1797,7 @@
    "original_title": "실종괴담 팔걷은 제주지사… “범죄율 1위 통계는 착시, CCTV 확 늘릴것”",
    "link": "https://www.mk.co.kr/news/society/12148964",
    "summary": "범죄계산서 1300만 관광객 제외 제주 안전 종합대책 이달중 시행 해안가·야간 취약지역 집중관리 “안전망 강화…안심하고 와달라”“제주 올레길과 해안가, 야간 취약지역을 중심으로 안.",
-   "image": "https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:26",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -1897,7 +1937,7 @@
    "original_title": "김정은… 정권수립일 기념식서 “러 파병 군인에 특별한 감사”",
    "link": "https://www.donga.com/news/Politics/article/all/20260910/134639951/1",
    "summary": "김정은 북한 국무위원장이 정권 수립 기념일(9·9절) 78주년을 맞아 국기게양식과 중앙선서모임 등 주요 경축 행사에 참석해 당·정·군 간부 및 주민들의 충성과 내부 결속을 다졌다.10일 북한 노동당 기관지 노동신문은 전날(9일) 평양의사당에서 정권 수립 78주년 기념 ...",
-   "image": "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:05",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -1977,7 +2017,7 @@
    "original_title": "‘헤어질 결심’ 오래된 게임과의… 엔딩에도 룰은 있는가",
    "link": "https://www.mk.co.kr/news/society/12148054",
    "summary": "세계로 번진 게임 보존 논쟁과 한국의 새로운 고민 박주성 법무법인 태평양 변호사서버 종료가 불러온 디지털 보존 논쟁2024년 3월, 유비소프트의 레이싱 게임 ‘더 크루(The Cr.",
-   "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:00",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -1997,7 +2037,7 @@
    "original_title": "매경이 전하는 세상의 지식 (매-세-지… 9월 10일)",
    "link": "https://www.mk.co.kr/news/society/12148545",
    "summary": "1. 인공지능(AI)이 기술혁신 차원을 넘어 인간이 주도해온 ‘진화’의 흐름을 바꿔놓을 새로운 존재로 부상할 것이라는 전망이 나왔습니다. 세계적인 진화생물학자 리처드 도킨스 옥스퍼.",
-   "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:00",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -2077,7 +2117,7 @@
    "original_title": "“한강러닝 다녀오겠단 아들, 그 속 몰랐습니다”… 생명의전화 절반이 1020",
    "link": "https://www.mk.co.kr/news/economy/12148955",
    "summary": "한강교량 설치된 SOS생명의전화 전화 이용자 57%가 청년·청소년 대인관계·진로·학업 순으로 고민한강 교량 20곳에 설치된 SOS생명의전화를 찾는 시민 중 10·20대가 절반 이상.",
-   "image": "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 06:57",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -2097,7 +2137,7 @@
    "original_title": "유럽 폭염이 키운 ‘K-히트펌프’… 에어컨보다 뜬 이유",
    "link": "https://www.donga.com/news/Economy/article/all/20260910/134639934/1",
    "summary": "유럽의 기록적 폭염이 냉방 수요를 끌어올리면서 난방·급탕과 냉방을 함께 제공하는 가역식 공기열 히트펌프가 대안으로 주목받고 있다. 히트펌프의 확산 배경은 실외기 설치 규제 등을 피했기 때문이 아니라 가스·기름보일러를 대체하는 건물 난방 전기화 설비로서 받은 보조금·세제...",
-   "image": "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 06:50",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -2137,7 +2177,7 @@
    "original_title": "‘뉴진스 퇴출’ 다니엘, 또 법정으로… 어도어와 331억 소송 5차전",
    "link": "https://www.mk.co.kr/news/society/12148811",
    "summary": "어도어와 그룹 뉴진스 전 멤버 다니엘, 민희진 전 어도어 대표가 약 331억원 규모의 손해배상 청구 소송에서 다시 한 번 맞붙는다. 서울중앙지방법원 민사합의31부(부장판사 남인수).",
-   "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1540910419892-4a36d2c3266c?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 06:40",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -2237,7 +2277,7 @@
    "original_title": "이 정부 장관 후보자 ‘낙마의 법칙’···청문회 고수하고… 3~4주 만에 결판",
    "link": "https://www.khan.co.kr/article/202609100600031/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
    "summary": "김승원 법무부 장관 후보자(왼쪽)와 용혜인 성평등가족부 장관 후보자.김승원 법무부, 용혜인 성평등가족부 장관 후보자를 둘러싼 의혹과 논란이 확산되는 가운데 이재명 정부 들어 중도 낙마한 장관 후보자들의 사례가 재조명되고 있다.지난해 6월 이재명 정부 출범 이후 부처 장...",
-   "image": "https://images.unsplash.com/photo-1568992687947-868a62a9f521?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1575320181282-9afab399332c?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 06:00",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -2297,7 +2337,7 @@
    "original_title": "전남광주교육청… 교육부 가이드북 ‘성소수자 차별금지 제외’ 찬성했다",
    "link": "https://www.khan.co.kr/article/202609100600001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
    "summary": "배재고 5·18조롱 사태뒤 예방 가이드북 제작교육부 의견조회에 “성소수자 제외 찬성” 답신비판 커지자 수정의견 냈지만 명확한 입장 없어차별금지법제정연대 등 인권시민사회단체 활동가들이 지난 1일 서울 종로구 광화문광장 이순신동상 앞에서 ‘교육부의 성소수자 차별 조장 규탄...",
-   "image": "https://images.unsplash.com/photo-1514565131-fce0801e5785?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 06:00",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -2317,7 +2357,7 @@
    "original_title": "트럼프 “이란, 더 못 버텨… 11월 선거 끝나면 전쟁도 끝”",
    "link": "https://www.donga.com/news/Inter/article/all/20260910/134639896/1",
    "summary": "도널드 트럼프 미국 대통령이 오는 11월 중간선거 직후 이란과의 전쟁이 끝나고 국제유가도 급락할 것이라고 전망했다. 그는 이란과의 협상 가능성은 열어두면서도 단순한 핵합의를 추진하는 것은 아니라고 강조했다.9일(현지시간) AFP·로이터통신 등에 따르면 트럼프 대통령은 ...",
-   "image": "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 05:55",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -2863,7 +2903,7 @@
    "original_title": "“잃어버린 고대사 되찾기… 객관적 검증 거쳐야”",
    "link": "https://www.donga.com/news/Culture/article/all/20260910/134638873/2",
    "summary": "“‘환단고기’는 학계에서 재론의 여지가 없는, 위서(僞書)로 결론 난 책입니다.” 4일 경기 부천시 가톨릭대 성심교정에서 만난 기경량 교수는 최근 다시 주목받은 ‘환단고기’ 논란에 대해 단호하게 선을 그었다. 1911년 계연수가 썼다는 이 책은 1979년에 세상에 알려...",
-   "image": "https://images.unsplash.com/photo-1501854140801-50d01698950b?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 04:30",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -2883,7 +2923,7 @@
    "original_title": "김승원-용혜인 낙마 가능성은?",
    "link": "https://www.donga.com/news/Entertainment/article/all/20260910/134638394/2",
    "summary": "김승원 법무부 장관 후보자와 용혜인 성평등가족부 장관 후보자를 둘러싼 의혹들이 점입가경이다. 야권에서 지명 철회를 압박하는 가운데 여당에서도 우려의 목소리가 나오고 있다. 두 사람을 둘러싼 논란의 쟁점과 청와대의 지명 철회 가능성을 예상해 본다.",
-   "image": "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 04:30",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -2903,7 +2943,7 @@
    "original_title": "고난도 시술… 인프라 갖춘 충남 ‘중증 응급’ 최후의 보루",
    "link": "https://www.donga.com/news/It/article/all/20260910/134638086/2",
    "summary": "지역의료 소멸과 상급종합병원(3차 병원) 쏠림 현상은 한국 의료의 가장 큰 난제다. 그런데 수도권이나 대형 대학병원에 가지 않고도 살던 곳 근처에서 중증질환을 치료할 수 있는 환경을 만들어 온 지역 거점 병원이 있다. 영서의료재단 산하 천안충무병원과 아산충무병원이다. ...",
-   "image": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 04:30",
    "source": "실시간 속보",
    "logo": "⚡",
@@ -3192,7 +3232,7 @@
    "link": "https://www.hani.co.kr/arti/politics/politics_general/1277080.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "종합 이슈 (3개사)",
    "logo": "⚡",
    "category": "정치",
@@ -3202,13 +3242,13 @@
      "source_name": "한겨레 정치",
      "title": "한동훈 ‘김승원 녹취’ 공개… 한성숙 “수사자료 유출 경위 확인 지시”",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277080.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     },
     {
      "source_name": "한겨레 정치",
      "title": "한 총리… 한동훈 ‘김승원 녹취’ 공개에 “위법 여부 확인 지시하겠다”",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277010.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     },
     {
      "source_name": "경향신문 정치",
@@ -3224,7 +3264,7 @@
    "link": "https://www.hani.co.kr/arti/politics/politics_general/1277078.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "정치 속보",
    "logo": "⚡",
    "category": "정치",
@@ -3234,7 +3274,7 @@
      "source_name": "한겨레 정치",
      "title": "‘검사 정원 2292명’ 공소청 직제안… 윤호중 “필요하면 다시 입법 예고”",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277078.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -3244,7 +3284,7 @@
    "link": "https://www.hani.co.kr/arti/politics/politics_general/1277075.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "정치 속보",
    "logo": "⚡",
    "category": "정치",
@@ -3254,7 +3294,7 @@
      "source_name": "한겨레 정치",
      "title": "정부 “네팔 파견 긴급구호대 1진 11일 귀국… 2진 파견 준비 중”",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277075.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -3264,7 +3304,7 @@
    "link": "https://www.hani.co.kr/arti/politics/politics_general/1277072.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "정치 속보",
    "logo": "⚡",
    "category": "정치",
@@ -3274,7 +3314,7 @@
      "source_name": "한겨레 정치",
      "title": "대정부질문 첫날… 연임 개헌·개각·대법관 제청 두고 여야 공방",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277072.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -3284,7 +3324,7 @@
    "link": "https://www.hani.co.kr/arti/politics/defense/1277063.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "정치 속보",
    "logo": "⚡",
    "category": "정치",
@@ -3294,7 +3334,7 @@
      "source_name": "한겨레 정치",
      "title": "호르무즈 파병… 국민 소통·지연 전략 필요하다",
      "url": "https://www.hani.co.kr/arti/politics/defense/1277063.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -3304,7 +3344,7 @@
    "link": "https://www.hani.co.kr/arti/politics/politics_general/1277056.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "정치 속보",
    "logo": "⚡",
    "category": "정치",
@@ -3314,7 +3354,7 @@
      "source_name": "한겨레 정치",
      "title": "“호르무즈 파병 명분 없어” “휘말리면 안 돼”… 민주당 내 신중론 잇따라",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277056.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -3324,7 +3364,7 @@
    "link": "https://www.hani.co.kr/arti/politics/politics_general/1277045.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "종합 이슈 (3개사)",
    "logo": "⚡",
    "category": "정치",
@@ -3334,7 +3374,7 @@
      "source_name": "한겨레 정치",
      "title": "김민석 ‘서울시장 후보, 훈식 원식 청래’ 메모… “이번엔 수첩으로 때리냐”",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277045.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     },
     {
      "source_name": "경향신문 정치",
@@ -3356,7 +3396,7 @@
    "link": "https://www.hani.co.kr/arti/politics/politics_general/1277018.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "정치 속보",
    "logo": "⚡",
    "category": "정치",
@@ -3366,7 +3406,7 @@
      "source_name": "한겨레 정치",
      "title": "김민석 “한동훈 ‘유출’ 조사”… 정치검찰 잔재 청산으로 ‘표적’ 전환",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277018.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -3376,7 +3416,7 @@
    "link": "https://www.hani.co.kr/arti/politics/politics_general/1277014.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1535320903710-d993d3d77d29?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "종합 이슈 (2개사)",
    "logo": "⚡",
    "category": "정치",
@@ -3386,7 +3426,7 @@
      "source_name": "한겨레 정치",
      "title": "신장식 “국민들, 민주당 개혁 의지 의심… 검찰개혁 후퇴하면 관계 심각히 검토”",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277014.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     },
     {
      "source_name": "경향신문 정치",
@@ -3402,7 +3442,7 @@
    "link": "https://www.hani.co.kr/arti/politics/politics_general/1277007.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1628348068343-c6a848d2b6dd?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "종합 이슈 (3개사)",
    "logo": "⚡",
    "category": "정치",
@@ -3412,7 +3452,7 @@
      "source_name": "한겨레 정치",
      "title": "국힘 “김승원 청문회… 증인 44명 채택해야” 민주 “한 명도 안 돼”",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277007.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     },
     {
      "source_name": "동아 정치",
@@ -3434,7 +3474,7 @@
    "link": "https://www.hani.co.kr/arti/politics/politics_general/1276984.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "정치 속보",
    "logo": "⚡",
    "category": "정치",
@@ -3444,7 +3484,7 @@
      "source_name": "한겨레 정치",
      "title": "기본소득당… 송영길 향해 “국힘의 일차원적 비난에 동참 말라”",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1276984.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -3850,7 +3890,7 @@
      "source_name": "한겨레 정치",
      "title": "이 대통령, 프랑스 국빈방문 마무리… 하원의장·OECD 총장과 협력 논의",
      "url": "https://www.hani.co.kr/arti/politics/bluehouse/1277086.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -4128,13 +4168,13 @@
      "source_name": "한겨레 정치",
      "title": "이 대통령 “제 임기 헌법상 명확히 제한”… 연임 개헌 논란 중 첫 언급",
      "url": "https://www.hani.co.kr/arti/politics/politics_general/1277082.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     },
     {
      "source_name": "한겨레 정치",
      "title": "이 대통령… “제 임기는 헌법상 명확하게 제한되어 있다”",
      "url": "https://www.hani.co.kr/arti/politics/bluehouse/1277074.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     },
     {
      "source_name": "경향신문 정치",
@@ -4301,6 +4341,66 @@
      "title": "“신규 사업 점진 확대”… 중부발전, LS ELECTRIC과 재생에너지 전주기 협력 맞손",
      "url": "https://www.mk.co.kr/news/business/12148987",
      "date": "09.10 08:17"
+    }
+   ]
+  },
+  {
+   "title": "로보티즈… 허깅페이스향 액추에이터 공급 증가 예상",
+   "original_title": "로보티즈… 허깅페이스향 액추에이터 공급 증가 예상",
+   "link": "https://www.yna.co.kr/view/AKR20260910024000008",
+   "summary": "한국투자증권은 10일 로보티즈에 대해 허깅페이스향 액추에이터 공급 물량이 증가할 것으로 보인다며.",
+   "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:16",
+   "source": "경제 속보",
+   "logo": "⚡",
+   "category": "경제",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "연합뉴스 경제",
+     "title": "로보티즈… 허깅페이스향 액추에이터 공급 증가 예상",
+     "url": "https://www.yna.co.kr/view/AKR20260910024000008",
+     "date": "09.10 08:16"
+    }
+   ]
+  },
+  {
+   "title": "추석맞이 농산물… 가격안정 할인 행사",
+   "original_title": "추석맞이 농산물… 가격안정 할인 행사",
+   "link": "https://www.yna.co.kr/view/AKR20260910020000051",
+   "summary": "▲ 부산시, 추석맞이 농산물 가격안정 할인 행사 = 부산시는 추석 명절을 맞아 10일부터 사흘간 추석맞이 농산물 가격안정 할인.",
+   "image": "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:15",
+   "source": "경제 속보",
+   "logo": "⚡",
+   "category": "경제",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "연합뉴스 경제",
+     "title": "추석맞이 농산물… 가격안정 할인 행사",
+     "url": "https://www.yna.co.kr/view/AKR20260910020000051",
+     "date": "09.10 08:15"
+    }
+   ]
+  },
+  {
+   "title": "부산건축상'에 동래별장… 현대적 해석한 '로띠 포레스트' 선정",
+   "original_title": "부산건축상'에 동래별장… 현대적 해석한 '로띠 포레스트' 선정",
+   "link": "https://www.yna.co.kr/view/AKR20260910019800051",
+   "summary": "부산시는 지역 내에서 별도 운영되던 건축상을 하나로 통합한 부산건축상 수상작을 선정했다고 10일 밝혔다.",
+   "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:13",
+   "source": "경제 속보",
+   "logo": "⚡",
+   "category": "경제",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "연합뉴스 경제",
+     "title": "부산건축상'에 동래별장… 현대적 해석한 '로띠 포레스트' 선정",
+     "url": "https://www.yna.co.kr/view/AKR20260910019800051",
+     "date": "09.10 08:13"
     }
    ]
   },
@@ -4609,7 +4709,7 @@
    "original_title": "아프리카 지속가능… 발전에 한국 정책자문 KSP 사업이 촉매제",
    "link": "https://www.yna.co.kr/view/AKR20260909172100898",
    "summary": "\"아프리카 국가들의 지속 가능한 발전에 한국의 발전 경험을 바탕으로 하는 정책 자문 사업인 경제발전경험공유사업.",
-   "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:01",
    "source": "경제 속보",
    "logo": "⚡",
@@ -4669,7 +4769,7 @@
    "original_title": "해외직구 식품 10개중 1개서 위해성분… 의약·마약성분도",
    "link": "https://www.yna.co.kr/view/AKR20260909149500017",
    "summary": "다이어트나 근육 강화 효과 등을 표방하는 해외 직접구매(직구) 식품 10개 중 1개꼴로 의약품 성분이나 식품에.",
-   "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:00",
    "source": "경제 속보",
    "logo": "⚡",
@@ -4689,7 +4789,7 @@
    "original_title": "아프리카의 한류… 이제는 함께 만들어 보자",
    "link": "https://www.yna.co.kr/view/AKR20260827158800898",
    "summary": "[※ 편집자 주 =글로벌문화교류단이 국내 주요 대학 아프리카 연구기관 등과 손잡고 '우분투 칼럼'을 게재합니다. 우분투 칼럼에는 인류.",
-   "image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:00",
    "source": "경제 속보",
    "logo": "⚡",
@@ -4829,7 +4929,7 @@
    "original_title": "끊이지 않는 설계공모 '로비' 논란… 징계받고도 심사위원으로",
    "link": "https://www.yna.co.kr/view/AKR20260909159700003",
    "summary": "세금으로 짓는 학교와 체육관, 공공청사 등의 설계자를 뽑는 공공건축 설계공모를 둘러싸고 심사위원 사전접촉 등 .",
-   "image": "https://images.unsplash.com/photo-1582407947304-fd86f028f716?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 06:03",
    "source": "경제 속보",
    "logo": "⚡",
@@ -5245,7 +5345,7 @@
    "link": "https://www.hani.co.kr/arti/economy/economy_general/1277098.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5255,7 +5355,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "정부, 수출입 실적 조작 ‘재정·금융범죄’로 규정… 특별수사단 구성",
      "url": "https://www.hani.co.kr/arti/economy/economy_general/1277098.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5265,7 +5365,7 @@
    "link": "https://www.hani.co.kr/arti/economy/economy_general/1277093.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5275,7 +5375,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "미국… 한국 2천억달러 대미투자 ‘최종 안전판’ 깼다",
      "url": "https://www.hani.co.kr/arti/economy/economy_general/1277093.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5285,7 +5385,7 @@
    "link": "https://www.hani.co.kr/arti/economy/car/1277031.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5295,7 +5395,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "기아… 중소 특장업체에 공장 내주고 PV5·PV7 설계도까지 보여준다",
      "url": "https://www.hani.co.kr/arti/economy/car/1277031.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5305,7 +5405,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277017.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1556761175-5973dc0f32e7?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5315,7 +5415,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "원광디지털대 요가명상학과… ‘김각을 깨우고 나를 만나는’ 가을 MT 성료",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277017.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5325,7 +5425,7 @@
    "link": "https://www.hani.co.kr/arti/economy/it/1277012.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5335,7 +5435,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "일터 파고든 챗지피티… 국내 기업용 이용자 1년새 28배 늘었다",
      "url": "https://www.hani.co.kr/arti/economy/it/1277012.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5345,7 +5445,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277006.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5355,7 +5455,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "민주화운동기념사업회 제9대… 이사장에문국주 6월민주항쟁계승사업회 이사장취임",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277006.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5365,7 +5465,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277004.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5375,7 +5475,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "연세대학교… 고려대 김동원 총장에게 명예철학박사 학위 수여",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277004.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5385,7 +5485,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277003.html",
    "summary": "",
    "image": "/static/img/ai/hyundai_car.jpg",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5395,7 +5495,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "서강대학교 사회학과 학부생 5인… 2027 ISA 세계사회학대회 학술 서포터즈 우수 논문발표상 대상 수상",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277003.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5405,7 +5505,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277002.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5415,7 +5515,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "이재오 민주화운동기념사업회 이사장 퇴임 - 3년여 임기 마무리… 직원들과 조촐한 퇴임식",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277002.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5425,7 +5525,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277001.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1518972559570-7cc1309f3229?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5435,7 +5535,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "명지대학교 건축대학… 예비 건축가 79인의 창의적 공간과 미래 비전 담은 졸업전시회 개최",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277001.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5445,7 +5545,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1276999.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5455,7 +5555,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "서울여자대학교–장로회신학대학교… 교육·연구 및 AI 기반 디지털 전환을 위한 협약 체결",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1276999.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5465,7 +5565,7 @@
    "link": "https://www.hani.co.kr/arti/economy/property/1276998.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5475,7 +5575,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "대출한도 높이려 오피스텔 ‘업 계약’… 부동산 거래질서 교란 행위 기승",
      "url": "https://www.hani.co.kr/arti/economy/property/1276998.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5485,7 +5585,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1276996.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5495,7 +5595,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "세종대 공공정책대학원… 서울시와 함께 AI기반 통합돌봄 전문인재 양성 나선다",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1276996.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -5505,7 +5605,7 @@
    "link": "https://news.sbs.co.kr/news/endPage.do?news_id=N1008745928&plink=RSSLINK&cooper=RSSREADER",
    "summary": "첫 번째 알찬 뉴스입니다.보증금 올라도 그냥 살아요.전월세 사시는 분들 많으시죠?그런데 최근 워낙 전월세 구하기 어려워지면서 보증금 월세가 올라…",
    "image": "https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 07:52",
+   "date": "09.10 08:21",
    "source": "부동산 속보",
    "logo": "⚡",
    "category": "부동산",
@@ -5515,7 +5615,7 @@
      "source_name": "SBS 부동산/경제",
      "title": "보증금 올라도 \"그냥 살래요… 안 떠나는 이유",
      "url": "https://news.sbs.co.kr/news/endPage.do?news_id=N1008745928&plink=RSSLINK&cooper=RSSREADER",
-     "date": "09.10 07:52"
+     "date": "09.10 08:21"
     }
    ]
   },
@@ -6153,7 +6253,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "코스피, ‘5수’ 끝 7천선 탈환… 단타 몰린 ‘개미’ 되돌리고 안착할까",
      "url": "https://www.hani.co.kr/arti/economy/finance/1277005.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6179,7 +6279,7 @@
      "source_name": "한겨레 경제/부동산",
      "title": "오픈AI “90년된 수학 난제 풀어… 1만개 에이전트로 88시간 만에 해결”",
      "url": "https://www.hani.co.kr/arti/economy/it/1276982.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6723,7 +6823,7 @@
    "link": "https://www.hani.co.kr/arti/economy/economy_general/1277098.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6733,7 +6833,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "정부, 수출입 실적 조작 ‘재정·금융범죄’로 규정… 특별수사단 구성",
      "url": "https://www.hani.co.kr/arti/economy/economy_general/1277098.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6743,7 +6843,7 @@
    "link": "https://www.hani.co.kr/arti/economy/economy_general/1277093.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6753,7 +6853,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "미국… 한국 2천억달러 대미투자 ‘최종 안전판’ 깼다",
      "url": "https://www.hani.co.kr/arti/economy/economy_general/1277093.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6763,7 +6863,7 @@
    "link": "https://www.hani.co.kr/arti/economy/car/1277031.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6773,7 +6873,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "기아… 중소 특장업체에 공장 내주고 PV5·PV7 설계도까지 보여준다",
      "url": "https://www.hani.co.kr/arti/economy/car/1277031.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6783,7 +6883,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277017.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6793,7 +6893,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "원광디지털대 요가명상학과… ‘김각을 깨우고 나를 만나는’ 가을 MT 성료",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277017.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6803,7 +6903,7 @@
    "link": "https://www.hani.co.kr/arti/economy/it/1277012.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6813,7 +6913,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "일터 파고든 챗지피티… 국내 기업용 이용자 1년새 28배 늘었다",
      "url": "https://www.hani.co.kr/arti/economy/it/1277012.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6823,7 +6923,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277006.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6833,7 +6933,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "민주화운동기념사업회 제9대… 이사장에문국주 6월민주항쟁계승사업회 이사장취임",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277006.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6843,7 +6943,7 @@
    "link": "https://www.hani.co.kr/arti/economy/finance/1277005.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "종합 이슈 (2개사)",
    "logo": "⚡",
    "category": "증권",
@@ -6853,7 +6953,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "코스피, ‘5수’ 끝 7천선 탈환… 단타 몰린 ‘개미’ 되돌리고 안착할까",
      "url": "https://www.hani.co.kr/arti/economy/finance/1277005.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     },
     {
      "source_name": "SBS 경제/증권",
@@ -6869,7 +6969,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277004.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6879,7 +6979,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "연세대학교… 고려대 김동원 총장에게 명예철학박사 학위 수여",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277004.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6889,7 +6989,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277003.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6899,7 +6999,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "서강대학교 사회학과 학부생 5인… 2027 ISA 세계사회학대회 학술 서포터즈 우수 논문발표상 대상 수상",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277003.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6909,7 +7009,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277002.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6919,7 +7019,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "이재오 민주화운동기념사업회 이사장 퇴임 - 3년여 임기 마무리… 직원들과 조촐한 퇴임식",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277002.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6929,7 +7029,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1277001.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1518972559570-7cc1309f3229?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6939,7 +7039,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "명지대학교 건축대학… 예비 건축가 79인의 창의적 공간과 미래 비전 담은 졸업전시회 개최",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1277001.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6949,7 +7049,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1276999.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6959,7 +7059,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "서울여자대학교–장로회신학대학교… 교육·연구 및 AI 기반 디지털 전환을 위한 협약 체결",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1276999.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6969,7 +7069,7 @@
    "link": "https://www.hani.co.kr/arti/economy/property/1276998.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6979,7 +7079,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "대출한도 높이려 오피스텔 ‘업 계약’… 부동산 거래질서 교란 행위 기승",
      "url": "https://www.hani.co.kr/arti/economy/property/1276998.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -6989,7 +7089,7 @@
    "link": "https://www.hani.co.kr/arti/economy/biznews/1276996.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "증권 속보",
    "logo": "⚡",
    "category": "증권",
@@ -6999,7 +7099,27 @@
      "source_name": "한겨레 경제/금융",
      "title": "세종대 공공정책대학원… 서울시와 함께 AI기반 통합돌봄 전문인재 양성 나선다",
      "url": "https://www.hani.co.kr/arti/economy/biznews/1276996.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "보증금 올라도 \"그냥 살래요… 안 떠나는 이유",
+   "original_title": "보증금 올라도 \"그냥 살래요… 안 떠나는 이유",
+   "link": "https://news.sbs.co.kr/news/endPage.do?news_id=N1008745928&plink=RSSLINK&cooper=RSSREADER",
+   "summary": "첫 번째 알찬 뉴스입니다.보증금 올라도 그냥 살아요.전월세 사시는 분들 많으시죠?그런데 최근 워낙 전월세 구하기 어려워지면서 보증금 월세가 올라…",
+   "image": "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:21",
+   "source": "증권 속보",
+   "logo": "⚡",
+   "category": "증권",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "SBS 경제/증권",
+     "title": "보증금 올라도 \"그냥 살래요… 안 떠나는 이유",
+     "url": "https://news.sbs.co.kr/news/endPage.do?news_id=N1008745928&plink=RSSLINK&cooper=RSSREADER",
+     "date": "09.10 08:21"
     }
    ]
   },
@@ -7040,26 +7160,6 @@
      "title": "유가 100달러·美국채금리 상승… 국내 증시 하락 출발 전망",
      "url": "https://view.asiae.co.kr/article/2026091007521455500",
      "date": "09.10 07:56"
-    }
-   ]
-  },
-  {
-   "title": "보증금 올라도 \"그냥 살래요… 안 떠나는 이유",
-   "original_title": "보증금 올라도 \"그냥 살래요… 안 떠나는 이유",
-   "link": "https://news.sbs.co.kr/news/endPage.do?news_id=N1008745928&plink=RSSLINK&cooper=RSSREADER",
-   "summary": "첫 번째 알찬 뉴스입니다.보증금 올라도 그냥 살아요.전월세 사시는 분들 많으시죠?그런데 최근 워낙 전월세 구하기 어려워지면서 보증금 월세가 올라…",
-   "image": "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 07:52",
-   "source": "증권 속보",
-   "logo": "⚡",
-   "category": "증권",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "SBS 경제/증권",
-     "title": "보증금 올라도 \"그냥 살래요… 안 떠나는 이유",
-     "url": "https://news.sbs.co.kr/news/endPage.do?news_id=N1008745928&plink=RSSLINK&cooper=RSSREADER",
-     "date": "09.10 07:52"
     }
    ]
   },
@@ -7937,7 +8037,7 @@
      "source_name": "한겨레 경제/금융",
      "title": "오픈AI “90년된 수학 난제 풀어… 1만개 에이전트로 88시간 만에 해결”",
      "url": "https://www.hani.co.kr/arti/economy/it/1276982.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -8224,6 +8324,306 @@
  ],
  "연예": [
   {
+   "title": "광주·부산·베네치아 작가들, 대만관 논란에… “국가주의 물러가라!”",
+   "original_title": "광주·부산·베네치아 작가들, 대만관 논란에… “국가주의 물러가라!”",
+   "link": "https://www.hani.co.kr/arti/culture/culture_general/1277027.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "광주·부산·베네치아 작가들, 대만관 논란에… “국가주의 물러가라!”",
+     "url": "https://www.hani.co.kr/arti/culture/culture_general/1277027.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "K팝 공연도 ‘저탄소 기준’ 만든다… 하이브∙SM·JYP 베타테스트",
+   "original_title": "K팝 공연도 ‘저탄소 기준’ 만든다… 하이브∙SM·JYP 베타테스트",
+   "link": "https://www.hani.co.kr/arti/culture/music/1276975.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "K팝 공연도 ‘저탄소 기준’ 만든다… 하이브∙SM·JYP 베타테스트",
+     "url": "https://www.hani.co.kr/arti/culture/music/1276975.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "체 게바라·살만 루슈디·장 뤽 고다르… DMZ다큐영화제서 만난다",
+   "original_title": "체 게바라·살만 루슈디·장 뤽 고다르… DMZ다큐영화제서 만난다",
+   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276963.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "체 게바라·살만 루슈디·장 뤽 고다르… DMZ다큐영화제서 만난다",
+     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276963.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "한국뮤지컬제작사협회 ‘캐스팅… 콩쿠르’ 대상에 이홍섭",
+   "original_title": "한국뮤지컬제작사협회 ‘캐스팅… 콩쿠르’ 대상에 이홍섭",
+   "link": "https://www.hani.co.kr/arti/culture/music/1276958.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "한국뮤지컬제작사협회 ‘캐스팅… 콩쿠르’ 대상에 이홍섭",
+     "url": "https://www.hani.co.kr/arti/culture/music/1276958.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "‘고려 쌍사자 석등’ 고달사 터… 반세기 서울살이 끝내고 고향 간다",
+   "original_title": "‘고려 쌍사자 석등’ 고달사 터… 반세기 서울살이 끝내고 고향 간다",
+   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276956.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "‘고려 쌍사자 석등’ 고달사 터… 반세기 서울살이 끝내고 고향 간다",
+     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276956.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "정감 어린… 이 땅의 풍경 그린 금동원 화가 별세",
+   "original_title": "정감 어린… 이 땅의 풍경 그린 금동원 화가 별세",
+   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276900.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "정감 어린… 이 땅의 풍경 그린 금동원 화가 별세",
+     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276900.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "오늘도 냠냠냠: 천안 원조 할머니 학화호도과자",
+   "original_title": "오늘도 냠냠냠: 천안 원조 할머니 학화호도과자",
+   "link": "https://www.hani.co.kr/arti/culture/book/1276876.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "오늘도 냠냠냠: 천안 원조 할머니 학화호도과자",
+     "url": "https://www.hani.co.kr/arti/culture/book/1276876.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "29살부터 ‘식당 쓰레기’ 골라 먹고살기… 돈 없어도 잘 살게 된 후",
+   "original_title": "29살부터 ‘식당 쓰레기’ 골라 먹고살기… 돈 없어도 잘 살게 된 후",
+   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276853.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "29살부터 ‘식당 쓰레기’ 골라 먹고살기… 돈 없어도 잘 살게 된 후",
+     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276853.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "“노래의 힘 믿고 간다”… 안치환이 환갑 넘어 마주한 ‘오늘’의 노래",
+   "original_title": "“노래의 힘 믿고 간다”… 안치환이 환갑 넘어 마주한 ‘오늘’의 노래",
+   "link": "https://www.hani.co.kr/arti/culture/music/1276807.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "“노래의 힘 믿고 간다”… 안치환이 환갑 넘어 마주한 ‘오늘’의 노래",
+     "url": "https://www.hani.co.kr/arti/culture/music/1276807.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "출판단체 19곳 “제지사 불법 담합 가격… ‘정상 가격’ 둔갑” 반발",
+   "original_title": "출판단체 19곳 “제지사 불법 담합 가격… ‘정상 가격’ 둔갑” 반발",
+   "link": "https://www.hani.co.kr/arti/culture/book/1276803.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "출판단체 19곳 “제지사 불법 담합 가격… ‘정상 가격’ 둔갑” 반발",
+     "url": "https://www.hani.co.kr/arti/culture/book/1276803.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "‘데이터·소리의 거장’ 이케다 료지… 제9회 백남준예술상 수상",
+   "original_title": "‘데이터·소리의 거장’ 이케다 료지… 제9회 백남준예술상 수상",
+   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276797.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "‘데이터·소리의 거장’ 이케다 료지… 제9회 백남준예술상 수상",
+     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276797.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "슈뢰더·재닛 옐런·최태원… EBS ‘위대한 수업’ 정부 지원 다시 받는다",
+   "original_title": "슈뢰더·재닛 옐런·최태원… EBS ‘위대한 수업’ 정부 지원 다시 받는다",
+   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276795.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "슈뢰더·재닛 옐런·최태원… EBS ‘위대한 수업’ 정부 지원 다시 받는다",
+     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276795.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "규슈 탄광에 핀 제비꽃 ‘스미레 미용실’… 정의신의 ‘재일 코리안 3부작’ 완결판",
+   "original_title": "규슈 탄광에 핀 제비꽃 ‘스미레 미용실’… 정의신의 ‘재일 코리안 3부작’ 완결판",
+   "link": "https://www.hani.co.kr/arti/culture/music/1276789.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 연예/문화",
+     "title": "규슈 탄광에 핀 제비꽃 ‘스미레 미용실’… 정의신의 ‘재일 코리안 3부작’ 완결판",
+     "url": "https://www.hani.co.kr/arti/culture/music/1276789.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "‘대체불가 가창력’ 황가람… ‘사랑이 온다’ OST ‘우리의 시간을 읽는다’ 12일 공개",
+   "original_title": "‘대체불가 가창력’ 황가람… ‘사랑이 온다’ OST ‘우리의 시간을 읽는다’ 12일 공개",
+   "link": "https://sports.donga.com/ent/article/all/20260910/134640183/1",
+   "summary": "가수 황가람이 ‘사랑이 온다’의 이별 감성을 다시 한번 책임진다. 앞서 송하예와 각각 남녀 버전 OST를 선보인 데 이어 이번에는 홀로 짙은 여운을 남긴다.황가람이 가창한 KBS2 주말드라마 ‘사랑이 온다’ OST ‘우리의 시간을 읽는다’가 오는 12일 오후 6시 각종...",
+   "image": "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:19",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "동아 연예",
+     "title": "‘대체불가 가창력’ 황가람… ‘사랑이 온다’ OST ‘우리의 시간을 읽는다’ 12일 공개",
+     "url": "https://sports.donga.com/ent/article/all/20260910/134640183/1",
+     "date": "09.10 08:19"
+    }
+   ]
+  },
+  {
+   "title": "‘감옥의 맛’ 이선빈·박지환·배현성… 촬영 종료",
+   "original_title": "‘감옥의 맛’ 이선빈·박지환·배현성… 촬영 종료…유쾌한 캐릭터 앙상블 예고",
+   "link": "https://sports.donga.com/ent/article/all/20260910/134640174/1",
+   "summary": "이선빈, 박지환, 배현성 등이 출연하는 코미디 영화 ‘감옥의 맛’이 촬영을 마치고 본격적인 후반 작업에 들어간다.‘감옥의 맛’은 스타 셰프가 하루아침에 교도소 주방으로 출근하게 되면서 벌어지는 이야기를 그린 미식 코미디다. 주인공 제시카와 수감자들이 예상하지 못한 레시...",
+   "image": "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:19",
+   "source": "연예 속보",
+   "logo": "⚡",
+   "category": "연예",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "동아 연예",
+     "title": "‘감옥의 맛’ 이선빈·박지환·배현성… 촬영 종료…유쾌한 캐릭터 앙상블 예고",
+     "url": "https://sports.donga.com/ent/article/all/20260910/134640174/1",
+     "date": "09.10 08:19"
+    }
+   ]
+  },
+  {
    "title": "마음 편했던 적 없다… 이진호, 징역형 집행유예 확정",
    "original_title": "마음 편했던 적 없다… 이진호, 징역형 집행유예 확정",
    "link": "https://news.sbs.co.kr/news/endPage.do?news_id=N1008745943&plink=RSSLINK&cooper=RSSREADER",
@@ -8239,266 +8639,6 @@
      "source_name": "SBS 연예",
      "title": "마음 편했던 적 없다… 이진호, 징역형 집행유예 확정",
      "url": "https://news.sbs.co.kr/news/endPage.do?news_id=N1008745943&plink=RSSLINK&cooper=RSSREADER",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "광주·부산·베네치아 작가들, 대만관 논란에… “국가주의 물러가라!”",
-   "original_title": "광주·부산·베네치아 작가들, 대만관 논란에… “국가주의 물러가라!”",
-   "link": "https://www.hani.co.kr/arti/culture/culture_general/1277027.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1559526324-593bc073d938?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "광주·부산·베네치아 작가들, 대만관 논란에… “국가주의 물러가라!”",
-     "url": "https://www.hani.co.kr/arti/culture/culture_general/1277027.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "K팝 공연도 ‘저탄소 기준’ 만든다… 하이브∙SM·JYP 베타테스트",
-   "original_title": "K팝 공연도 ‘저탄소 기준’ 만든다… 하이브∙SM·JYP 베타테스트",
-   "link": "https://www.hani.co.kr/arti/culture/music/1276975.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "K팝 공연도 ‘저탄소 기준’ 만든다… 하이브∙SM·JYP 베타테스트",
-     "url": "https://www.hani.co.kr/arti/culture/music/1276975.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "체 게바라·살만 루슈디·장 뤽 고다르… DMZ다큐영화제서 만난다",
-   "original_title": "체 게바라·살만 루슈디·장 뤽 고다르… DMZ다큐영화제서 만난다",
-   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276963.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1518458028785-8fbcd101ebb9?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "체 게바라·살만 루슈디·장 뤽 고다르… DMZ다큐영화제서 만난다",
-     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276963.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "한국뮤지컬제작사협회 ‘캐스팅… 콩쿠르’ 대상에 이홍섭",
-   "original_title": "한국뮤지컬제작사협회 ‘캐스팅… 콩쿠르’ 대상에 이홍섭",
-   "link": "https://www.hani.co.kr/arti/culture/music/1276958.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "한국뮤지컬제작사협회 ‘캐스팅… 콩쿠르’ 대상에 이홍섭",
-     "url": "https://www.hani.co.kr/arti/culture/music/1276958.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "‘고려 쌍사자 석등’ 고달사 터… 반세기 서울살이 끝내고 고향 간다",
-   "original_title": "‘고려 쌍사자 석등’ 고달사 터… 반세기 서울살이 끝내고 고향 간다",
-   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276956.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "‘고려 쌍사자 석등’ 고달사 터… 반세기 서울살이 끝내고 고향 간다",
-     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276956.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "정감 어린… 이 땅의 풍경 그린 금동원 화가 별세",
-   "original_title": "정감 어린… 이 땅의 풍경 그린 금동원 화가 별세",
-   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276900.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1579532537598-459ecdaf39cc?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "정감 어린… 이 땅의 풍경 그린 금동원 화가 별세",
-     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276900.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "오늘도 냠냠냠: 천안 원조 할머니 학화호도과자",
-   "original_title": "오늘도 냠냠냠: 천안 원조 할머니 학화호도과자",
-   "link": "https://www.hani.co.kr/arti/culture/book/1276876.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "오늘도 냠냠냠: 천안 원조 할머니 학화호도과자",
-     "url": "https://www.hani.co.kr/arti/culture/book/1276876.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "29살부터 ‘식당 쓰레기’ 골라 먹고살기… 돈 없어도 잘 살게 된 후",
-   "original_title": "29살부터 ‘식당 쓰레기’ 골라 먹고살기… 돈 없어도 잘 살게 된 후",
-   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276853.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "29살부터 ‘식당 쓰레기’ 골라 먹고살기… 돈 없어도 잘 살게 된 후",
-     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276853.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "“노래의 힘 믿고 간다”… 안치환이 환갑 넘어 마주한 ‘오늘’의 노래",
-   "original_title": "“노래의 힘 믿고 간다”… 안치환이 환갑 넘어 마주한 ‘오늘’의 노래",
-   "link": "https://www.hani.co.kr/arti/culture/music/1276807.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "“노래의 힘 믿고 간다”… 안치환이 환갑 넘어 마주한 ‘오늘’의 노래",
-     "url": "https://www.hani.co.kr/arti/culture/music/1276807.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "출판단체 19곳 “제지사 불법 담합 가격… ‘정상 가격’ 둔갑” 반발",
-   "original_title": "출판단체 19곳 “제지사 불법 담합 가격… ‘정상 가격’ 둔갑” 반발",
-   "link": "https://www.hani.co.kr/arti/culture/book/1276803.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "출판단체 19곳 “제지사 불법 담합 가격… ‘정상 가격’ 둔갑” 반발",
-     "url": "https://www.hani.co.kr/arti/culture/book/1276803.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "‘데이터·소리의 거장’ 이케다 료지… 제9회 백남준예술상 수상",
-   "original_title": "‘데이터·소리의 거장’ 이케다 료지… 제9회 백남준예술상 수상",
-   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276797.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "‘데이터·소리의 거장’ 이케다 료지… 제9회 백남준예술상 수상",
-     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276797.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "슈뢰더·재닛 옐런·최태원… EBS ‘위대한 수업’ 정부 지원 다시 받는다",
-   "original_title": "슈뢰더·재닛 옐런·최태원… EBS ‘위대한 수업’ 정부 지원 다시 받는다",
-   "link": "https://www.hani.co.kr/arti/culture/culture_general/1276795.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "슈뢰더·재닛 옐런·최태원… EBS ‘위대한 수업’ 정부 지원 다시 받는다",
-     "url": "https://www.hani.co.kr/arti/culture/culture_general/1276795.html",
-     "date": "09.10 08:19"
-    }
-   ]
-  },
-  {
-   "title": "규슈 탄광에 핀 제비꽃 ‘스미레 미용실’… 정의신의 ‘재일 코리안 3부작’ 완결판",
-   "original_title": "규슈 탄광에 핀 제비꽃 ‘스미레 미용실’… 정의신의 ‘재일 코리안 3부작’ 완결판",
-   "link": "https://www.hani.co.kr/arti/culture/music/1276789.html",
-   "summary": "",
-   "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
-   "source": "연예 속보",
-   "logo": "⚡",
-   "category": "연예",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "한겨레 연예/문화",
-     "title": "규슈 탄광에 핀 제비꽃 ‘스미레 미용실’… 정의신의 ‘재일 코리안 3부작’ 완결판",
-     "url": "https://www.hani.co.kr/arti/culture/music/1276789.html",
      "date": "09.10 08:19"
     }
    ]
@@ -8668,7 +8808,7 @@
    "original_title": "‘경주기행’ 과몰입… 유발 ‘찐 모녀 케미’ 가족 사진 공개",
    "link": "https://sports.donga.com/ent/article/all/20260910/134640099/1",
    "summary": "영화 ‘경주기행’이 개봉 3주차에도 흥행을 이어가는 가운데, 관객의 과몰입을 유발하는 ‘경주네 가족사진’을 공개해 눈길을 끈다.‘경주기행’은 수학여행에서 돌아오지 못한 막내딸 경주를 위해 8년을 기다린 네 모녀가 복수를 위해 여행을 떠나는 가족 복수극이다. 개봉 이후 ...",
-   "image": "https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1518972559570-7cc1309f3229?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 08:05",
    "source": "연예 속보",
    "logo": "⚡",
@@ -8688,7 +8828,7 @@
    "original_title": "‘부활남’ 구교환 와이어 액션부터 EDM까지… 장르 쾌감 높인 프로덕션",
    "link": "https://sports.donga.com/ent/article/all/20260910/134640082/1",
    "summary": "영화 ‘부활남: 더 레드’가 와이어 액션과 디지털 캐릭터, 캐릭터별 스타일링, EDM 사운드 등을 활용해 장르적 재미를 끌어올린다.오는 30일 개봉하는 ‘부활남: 더 레드’는 근거 없는 자신감이 유일한 스펙인 취준생 석환(구교환)이 죽은 뒤 72시간이 지나면 부활하는 ...",
-   "image": "https://images.unsplash.com/photo-1518972559570-7cc1309f3229?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 08:01",
    "source": "연예 속보",
    "logo": "⚡",
@@ -8768,7 +8908,7 @@
    "original_title": "33기 현숙, 0표 고독정식에 눈물… “내 모솔 신세 떠올라 속상” (나는 SOLO)",
    "link": "https://sports.donga.com/ent/article/all/20260910/134640008/1",
    "summary": "현숙이 ‘고독정식’ 앞에서 눈물을 보였다.9일 방송된 SBS Plus와 ENA의 리얼 데이팅 프로그램 ‘나는 SOLO’에서는 33기 모솔남녀들의 ‘손잡고 랜덤 데이트’와 ‘7시간 전 모솔남들의 선택’이 공개됐다.이날 현숙은 상철과 ‘꽃구경 데이트’를 했다. 두 사람은 ...",
-   "image": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:38",
    "source": "연예 속보",
    "logo": "⚡",
@@ -9117,7 +9257,7 @@
      "source_name": "한겨레 연예/문화",
      "title": "‘5만원권 신사임당·5천원권 이이’ 그린 한국화 대가 이종상 화백 별세",
      "url": "https://www.hani.co.kr/arti/culture/culture_general/1276899.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9143,7 +9283,7 @@
      "source_name": "한겨레 연예/문화",
      "title": "“징역형 실형” 장원영 허위영상 유포자… 추가 고소",
      "url": "https://www.hani.co.kr/arti/culture/music/1277044.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9423,12 +9563,32 @@
    "is_custom": true
   },
   {
+   "title": "전국에 구름… 많고 낮밤의 기온차 크다",
+   "original_title": "전국에 구름… 많고 낮밤의 기온차 크다",
+   "link": "https://www.hani.co.kr/arti/society/environment/1277101.html",
+   "summary": "",
+   "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
+   "source": "사회 속보",
+   "logo": "⚡",
+   "category": "사회",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "한겨레 사회",
+     "title": "전국에 구름… 많고 낮밤의 기온차 크다",
+     "url": "https://www.hani.co.kr/arti/society/environment/1277101.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
    "title": "현대차… 이 대통령 발언 근거로 “성과급은 단체교섭 대상 아냐” 주장",
    "original_title": "현대차… 이 대통령 발언 근거로 “성과급은 단체교섭 대상 아냐” 주장",
    "link": "https://www.hani.co.kr/arti/society/labor/1277095.html",
    "summary": "",
    "image": "/static/img/ai/hyundai_car.jpg",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9438,7 +9598,7 @@
      "source_name": "한겨레 사회",
      "title": "현대차… 이 대통령 발언 근거로 “성과급은 단체교섭 대상 아냐” 주장",
      "url": "https://www.hani.co.kr/arti/society/labor/1277095.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9448,7 +9608,7 @@
    "link": "https://www.hani.co.kr/arti/society/society_general/1277094.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1577495508048-b635879837f1?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9458,7 +9618,7 @@
      "source_name": "한겨레 사회",
      "title": "경찰, ‘수사경과 자진반납’ 작년치 넘어… 수사 질 저하 우려",
      "url": "https://www.hani.co.kr/arti/society/society_general/1277094.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9468,7 +9628,7 @@
    "link": "https://www.hani.co.kr/arti/society/environment/1277090.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9478,7 +9638,7 @@
      "source_name": "한겨레 사회",
      "title": "부채 210조 한전, 웨스팅하우스 지분 인수?… 도시바엔 ‘파산 원인’",
      "url": "https://www.hani.co.kr/arti/society/environment/1277090.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9487,8 +9647,8 @@
    "original_title": "“건설현장 산재 없애자” 마주앉은 원·하청… 변화 물꼬 튼 노란봉투법",
    "link": "https://www.hani.co.kr/arti/society/labor/1277089.html",
    "summary": "",
-   "image": "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "image": "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9498,7 +9658,7 @@
      "source_name": "한겨레 사회",
      "title": "“건설현장 산재 없애자” 마주앉은 원·하청… 변화 물꼬 튼 노란봉투법",
      "url": "https://www.hani.co.kr/arti/society/labor/1277089.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9507,8 +9667,8 @@
    "original_title": "용산기지·광주 군 공항 오염토 ‘반출 정화’ 허용… 개발 기간 6개월 단축 효과",
    "link": "https://www.hani.co.kr/arti/society/environment/1277079.html",
    "summary": "",
-   "image": "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "image": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9518,7 +9678,7 @@
      "source_name": "한겨레 사회",
      "title": "용산기지·광주 군 공항 오염토 ‘반출 정화’ 허용… 개발 기간 6개월 단축 효과",
      "url": "https://www.hani.co.kr/arti/society/environment/1277079.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9527,8 +9687,8 @@
    "original_title": "‘불법촬영 피해자 신상 노출’ 구글의… 전 세계가 당했다",
    "link": "https://www.hani.co.kr/arti/society/media/1277077.html",
    "summary": "",
-   "image": "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "image": "https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
    "source": "종합 이슈 (2개사)",
    "logo": "⚡",
    "category": "사회",
@@ -9538,13 +9698,13 @@
      "source_name": "한겨레 사회",
      "title": "‘불법촬영 피해자 신상 노출’ 구글의… 전 세계가 당했다",
      "url": "https://www.hani.co.kr/arti/society/media/1277077.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     },
     {
      "source_name": "한겨레 사회",
      "title": "구글 “의도치 않았다”… ‘불법촬영 피해자 신상 노출’ 또 부실 사과",
      "url": "https://www.hani.co.kr/arti/society/media/1277054.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9553,8 +9713,8 @@
    "original_title": "김강립 전 식약처장… 김승원 ‘민원’에 “개별 회사 언급 예외적이었다”",
    "link": "https://www.hani.co.kr/arti/society/society_general/1277073.html",
    "summary": "",
-   "image": "https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "image": "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9564,7 +9724,7 @@
      "source_name": "한겨레 사회",
      "title": "김강립 전 식약처장… 김승원 ‘민원’에 “개별 회사 언급 예외적이었다”",
      "url": "https://www.hani.co.kr/arti/society/society_general/1277073.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9573,8 +9733,8 @@
    "original_title": "정서위기 큰 청소년 성소수자… 학교 자살예방 대책은 ‘빈칸’",
    "link": "https://www.hani.co.kr/arti/society/rights/1277070.html",
    "summary": "",
-   "image": "https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9584,7 +9744,7 @@
      "source_name": "한겨레 사회",
      "title": "정서위기 큰 청소년 성소수자… 학교 자살예방 대책은 ‘빈칸’",
      "url": "https://www.hani.co.kr/arti/society/rights/1277070.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9593,8 +9753,8 @@
    "original_title": "개혁위·TF 이어 또 개혁단… 난립하는 ‘경찰 개혁 조직’",
    "link": "https://www.hani.co.kr/arti/society/society_general/1277062.html",
    "summary": "",
-   "image": "https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9604,7 +9764,7 @@
      "source_name": "한겨레 사회",
      "title": "개혁위·TF 이어 또 개혁단… 난립하는 ‘경찰 개혁 조직’",
      "url": "https://www.hani.co.kr/arti/society/society_general/1277062.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9614,7 +9774,7 @@
    "link": "https://www.hani.co.kr/arti/society/society_general/1277060.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1642543492481-44e81e3914a7?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9624,7 +9784,7 @@
      "source_name": "한겨레 사회",
      "title": "네팔 실종자 가족 “국가가 국민 버려”… 수색 재개 촉구",
      "url": "https://www.hani.co.kr/arti/society/society_general/1277060.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9634,7 +9794,7 @@
    "link": "https://www.hani.co.kr/arti/society/society_general/1277059.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9644,7 +9804,7 @@
      "source_name": "한겨레 사회",
      "title": "김승원 ‘로비 의혹’… 전 식약처장 “의원님 염려, 실무진에 잘 전했다”",
      "url": "https://www.hani.co.kr/arti/society/society_general/1277059.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9654,7 +9814,7 @@
    "link": "https://www.hani.co.kr/arti/society/media/1277057.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1612178991541-b48cc8e92a4d?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9664,7 +9824,7 @@
      "source_name": "한겨레 사회",
      "title": "KBS 새 사장 곧 공모, 법 따른 건데… 박장범 “왜 해임돼야 하나”",
      "url": "https://www.hani.co.kr/arti/society/media/1277057.html",
-     "date": "09.10 08:19"
+     "date": "09.10 08:23"
     }
    ]
   },
@@ -9674,7 +9834,7 @@
    "link": "https://www.hani.co.kr/arti/society/women/1277055.html",
    "summary": "",
    "image": "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 08:19",
+   "date": "09.10 08:23",
    "source": "사회 속보",
    "logo": "⚡",
    "category": "사회",
@@ -9684,6 +9844,26 @@
      "source_name": "한겨레 사회",
      "title": "‘노인 일자리 사업’ 정부… 여성이 남성보다 임금 적은 사업 내몰려",
      "url": "https://www.hani.co.kr/arti/society/women/1277055.html",
+     "date": "09.10 08:23"
+    }
+   ]
+  },
+  {
+   "title": "신안 해상서 조업하던 50대 선원… 어구에 끼여 숨져",
+   "original_title": "신안 해상서 조업하던 50대 선원… 어구에 끼여 숨져",
+   "link": "https://www.yna.co.kr/view/AKR20260910023800054",
+   "summary": "지난 9일 오전 6시 55분께 전남광주 신안군 자은도 인근 해상 어선에서 작업 중이던 A(50대)씨가 어구와 .",
+   "image": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 08:19",
+   "source": "사회 속보",
+   "logo": "⚡",
+   "category": "사회",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "연합뉴스 사회",
+     "title": "신안 해상서 조업하던 50대 선원… 어구에 끼여 숨져",
+     "url": "https://www.yna.co.kr/view/AKR20260910023800054",
      "date": "09.10 08:19"
     }
    ]
@@ -9913,7 +10093,7 @@
    "original_title": "지중선 파손에 정전피해… 책임공방·보상지연에 아파트주민 반발",
    "link": "https://www.yna.co.kr/view/AKR20260909137100065",
    "summary": "굴착 공사 중 지중선을 파손해 인근 아파트가 정전됐으나 책임 소재를 둘러싼 공방이 벌어져 주민들이 반발하고 있.",
-   "image": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:17",
    "source": "사회 속보",
    "logo": "⚡",
@@ -9933,7 +10113,7 @@
    "original_title": "외국인 유학생 지난해 50만 첫 돌파… 4년 새 6배 급증",
    "link": "https://www.yna.co.kr/view/AKR20260909067400005",
    "summary": "지난해 한국을 찾은 외국인 유학생이 처음으로 50만명을 넘은 것으로 나타났다.",
-   "image": "https://images.unsplash.com/photo-1532938911079-1b06ac7ceec7?auto=format&fit=crop&w=1200&q=85",
+   "image": "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=85",
    "date": "09.10 07:00",
    "source": "사회 속보",
    "logo": "⚡",
@@ -9989,26 +10169,6 @@
    ]
   },
   {
-   "title": "강도범이 몸싸움… 중 떨어진 권총 주워 경찰관 향해 방아쇠 당겨",
-   "original_title": "강도범이 몸싸움… 중 떨어진 권총 주워 경찰관 향해 방아쇠 당겨",
-   "link": "https://www.yna.co.kr/view/AKR20260909164200057",
-   "summary": "경찰관이 강도범을 검거하기 위해 몸싸움을 벌이는 과정에서 떨어진 권총을 강도범이 들고 경찰관을 향해 방아쇠를 .",
-   "image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85",
-   "date": "09.10 07:00",
-   "source": "사회 속보",
-   "logo": "⚡",
-   "category": "사회",
-   "cluster_count": 1,
-   "cluster_sources": [
-    {
-     "source_name": "연합뉴스 사회",
-     "title": "강도범이 몸싸움… 중 떨어진 권총 주워 경찰관 향해 방아쇠 당겨",
-     "url": "https://www.yna.co.kr/view/AKR20260909164200057",
-     "date": "09.10 07:00"
-    }
-   ]
-  },
-  {
    "title": "수사기관을 찾은… 성폭력 피해자는 어떻게 배신당하는가",
    "original_title": "수사기관을 찾은… 성폭력 피해자는 어떻게 배신당하는가",
    "link": "https://www.khan.co.kr/article/202609100700001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=society_news",
@@ -10024,6 +10184,26 @@
      "source_name": "경향 사회",
      "title": "수사기관을 찾은… 성폭력 피해자는 어떻게 배신당하는가",
      "url": "https://www.khan.co.kr/article/202609100700001/",
+     "date": "09.10 07:00"
+    }
+   ]
+  },
+  {
+   "title": "강도범이 몸싸움… 중 떨어진 권총 주워 경찰관 향해 방아쇠 당겨",
+   "original_title": "강도범이 몸싸움… 중 떨어진 권총 주워 경찰관 향해 방아쇠 당겨",
+   "link": "https://www.yna.co.kr/view/AKR20260909164200057",
+   "summary": "경찰관이 강도범을 검거하기 위해 몸싸움을 벌이는 과정에서 떨어진 권총을 강도범이 들고 경찰관을 향해 방아쇠를 .",
+   "image": "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=85",
+   "date": "09.10 07:00",
+   "source": "사회 속보",
+   "logo": "⚡",
+   "category": "사회",
+   "cluster_count": 1,
+   "cluster_sources": [
+    {
+     "source_name": "연합뉴스 사회",
+     "title": "강도범이 몸싸움… 중 떨어진 권총 주워 경찰관 향해 방아쇠 당겨",
+     "url": "https://www.yna.co.kr/view/AKR20260909164200057",
      "date": "09.10 07:00"
     }
    ]
