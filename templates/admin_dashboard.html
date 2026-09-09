@@ -4306,6 +4306,13 @@
             const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
             const ourUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + cacheKey;
             const naverUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
+            try {
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(ourUrl);
+                } else {
+                    fetch(ourUrl, { method: 'GET', mode: 'no-cors', cache: 'no-cache' }).catch(() => {});
+                }
+            } catch(e) {}
             navigator.clipboard.writeText(naverUrl).then(() => {
                 showToast('✅ 네이버 우회 링크 복사 완료! 카톡에 붙여넣으시면 됩니다.');
             }).catch(() => {
@@ -4487,6 +4494,13 @@
             const cacheKey = '_t=' + Math.floor(Date.now() / 300000);
             const ourUrl = fullUrl + (fullUrl.includes('?') ? '&' : '?') + cacheKey;
             const naverUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
+            try {
+                if (navigator.sendBeacon) {
+                    navigator.sendBeacon(ourUrl);
+                } else {
+                    fetch(ourUrl, { method: 'GET', mode: 'no-cors', cache: 'no-cache' }).catch(() => {});
+                }
+            } catch(e) {}
             navigator.clipboard.writeText(naverUrl).then(() => {
                 showToast('✅ 네이버 우회 링크 복사 완료! 카톡에 붙여넣으시면 됩니다.');
             }).catch(() => {

@@ -397,6 +397,15 @@ function copyArticleUrl() {
     const ourUrl = cleanUrl + (cleanUrl.includes('?') ? '&' : '?') + cacheKey;
     const targetUrl = 'https://link.naver.com/bridge?url=' + encodeURIComponent(ourUrl) + '&dst=' + encodeURIComponent(ourUrl);
 
+    // 즉시 사전 캐시 웜업 요청 (네이버 브릿지 타임아웃 1.5초 완벽 방지)
+    try {
+        if (navigator.sendBeacon) {
+            navigator.sendBeacon(ourUrl);
+        } else {
+            fetch(ourUrl, { method: 'GET', mode: 'no-cors', cache: 'no-cache' }).catch(() => {});
+        }
+    } catch(e) {}
+
     const copyTxt = document.getElementById('copyText');
     const originalText = copyTxt ? copyTxt.textContent : '링크 복사';
 

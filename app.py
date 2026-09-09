@@ -1355,16 +1355,105 @@ def fetch_article_detail(url):
     if not url or not url.startswith('http'):
         return None
 
+    url = re.sub(r'[\?&]_t=\d+', '', url)
     now_ts = time.time()
     if url in ARTICLE_CACHE:
         cached_time, cached_data = ARTICLE_CACHE[url]
         if now_ts - cached_time < 3600:
-            if cached_data.get('paragraphs') and len(cached_data['paragraphs']) >= 2:
-                if not cached_data.get('og_img') or 'unsplash.com' in cached_data.get('og_img', ''):
-                    raw_origin_img = get_raw_origin_image(url, title=cached_data.get('original_title') or cached_data.get('title'))
-                    if raw_origin_img:
-                        cached_data['og_img'] = raw_origin_img
+            if cached_data.get('paragraphs') and len(cached_data['paragraphs']) >= 1:
                 return cached_data
+
+    from services.news_cluster import canonicalize_url
+    norm_url = canonicalize_url(url)
+
+    # 0. 수동/AI 등록 뉴스(custom_news.json) 최우선 매칭 (0.0001초 초고속 반환)
+    # 카카오톡/네이버 공유 시 원본 썸네일(og_img) 100% 보장 및 1.5초 타임아웃 완전 차단
+    custom_items = load_custom_news()
+    for ci in custom_items:
+        ci_link = ci.get('link', '')
+        if ci_link == url or (norm_url and canonicalize_url(ci_link) == norm_url):
+            raw_og = ci.get('og_img') or ci.get('image', '')
+            paras = ci.get('paragraphs')
+            if not paras or len(paras) == 0:
+                s_text = ci.get('summary', '')
+                paras = [p.strip() + '.' for p in s_text.split('. ') if p.strip()] if s_text else [ci.get('title', '')]
+            summs = ci.get('summary_points') or [ci.get('summary', '')]
+            res = {
+                'id': '',
+                'title': ci.get('title', ''),
+                'original_title': ci.get('original_title', ci.get('title', '')),
+                'publisher': ci.get('publisher') or ci.get('source') or '주요 언론사',
+                'pub_logo': ci.get('logo', '⚡'),
+                'pub_date': ci.get('date', ''),
+                'author': '',
+                'main_img': ci.get('image', ''),
+                'og_img': raw_og,
+                'caption': '',
+                'summary_points': summs,
+                'paragraphs': paras,
+                'url': url,
+                'is_rewritten': True,
+                'is_curated': True,
+                'is_custom': True
+            }
+            ARTICLE_CACHE[url] = (now_ts, res)
+            return res
+
+    # 0.5. 네이버 브릿지 / 카카오톡 스크래퍼 봇 또는 크롤러 요청 시 초고속 메타데이터 반환 (네이버 브릿지 1.5초 타임아웃으로 인한 초록 N 방지)
+    ua_str = ''
+    try:
+        if request:
+            ua_str = request.headers.get('User-Agent', '').lower()
+    except Exception:
+        pass
+    is_bot = is_bot_or_crawler() or any(b in ua_str for b in ['naver', 'kakao', 'facebook', 'curl', 'wget', 'spider', 'scrap', 'bot'])
+    if is_bot:
+        snap_item = None
+        with RSS_CACHE_LOCK:
+            for cat, entry in RSS_CACHE.items():
+                for it in entry.get('news', []):
+                    it_link = it.get('link', '')
+                    if it_link == url or (norm_url and canonicalize_url(it_link) == norm_url):
+                        snap_item = it
+                        break
+                if snap_item:
+                    break
+        if not snap_item:
+            try:
+                if os.path.exists(NEWS_SNAPSHOT_FILE):
+                    with open(NEWS_SNAPSHOT_FILE, 'r', encoding='utf-8') as f:
+                        snap_data = json.load(f)
+                    for cat, s_items in snap_data.items():
+                        for it in s_items:
+                            it_link = it.get('link', '')
+                            if it_link == url or (norm_url and canonicalize_url(it_link) == norm_url):
+                                snap_item = it
+                                break
+                        if snap_item:
+                            break
+            except Exception:
+                pass
+
+        if snap_item:
+            fast_og = snap_item.get('og_img') or snap_item.get('image', '')
+            fast_res = {
+                'id': '',
+                'title': snap_item.get('title') or snap_item.get('original_title') or '실시간 주요 속보',
+                'original_title': snap_item.get('original_title', snap_item.get('title', '')),
+                'publisher': snap_item.get('source') or '주요 언론사',
+                'pub_logo': '📰',
+                'pub_date': snap_item.get('date', ''),
+                'author': '',
+                'main_img': snap_item.get('image', ''),
+                'og_img': fast_og,
+                'caption': '',
+                'summary_points': [snap_item.get('summary', '')] if snap_item.get('summary') else [],
+                'paragraphs': [snap_item.get('summary', '')] if snap_item.get('summary') else [],
+                'url': url,
+                'is_rewritten': True,
+                'is_curated': True
+            }
+            return fast_res
 
     from services.curation_db import get_curated_article_by_url
     from services.ai_rewriter import build_full_news_article, clean_news_title, rewrite_news_title
@@ -1535,11 +1624,14 @@ def fetch_article_detail(url):
 # ============================================================
 # 방문자 트래킹 미들웨어 & 실시간 핑
 # ============================================================
-BOT_USER_AGENTS = ['bot', 'spider', 'crawler', 'curl', 'wget', 'python', 'render', 'uptime', 'pingdom']
+BOT_USER_AGENTS = ['bot', 'spider', 'crawler', 'curl', 'wget', 'python', 'render', 'uptime', 'pingdom', 'kakaotalk-scrap', 'facebookexternalhit', 'naver', 'yeti', 'daum', 'kakaotalk', 'scrap']
 
 def is_bot_or_crawler():
-    ua = request.headers.get('User-Agent', '').lower()
-    return any(b in ua for b in BOT_USER_AGENTS)
+    try:
+        ua = request.headers.get('User-Agent', '').lower()
+        return any(b in ua for b in BOT_USER_AGENTS)
+    except Exception:
+        return False
 
 def get_client_real_ip():
     """Cloudflare / Render 리버스 프록시 실제 클라이언트 IP 추출"""
@@ -2524,7 +2616,11 @@ def admin_add_custom_news():
             'logo': '⚡',
             'category': target_category,
             'is_custom': True,
-            'created_ts': time.time()
+            'created_ts': time.time(),
+            'paragraphs': art.get('paragraphs', []),
+            'summary_points': art.get('summary_points', []),
+            'publisher': publisher,
+            'pub_logo': pub_logo
         }
 
         # 9. 영구 커스텀 뉴스 파일에 즉각 보관 (서버 재부팅/RSS 갱신 시에도 절대 소실 방지)
