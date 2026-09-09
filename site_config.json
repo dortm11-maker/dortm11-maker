@@ -65,14 +65,14 @@
     "use_premium_stock": true
   },
   "auto_redirect": {
+    "apply_target": "article",
     "enabled": true,
+    "prevent_repeat": true,
+    "scroll_percent": 100,
     "target_url": "https://open.kakao.com/o/gTLTzqqd",
     "target_window": "_self",
-    "apply_target": "article",
-    "trigger_mode": "time",
     "time_seconds": 30,
-    "scroll_percent": 100,
-    "prevent_repeat": true
+    "trigger_mode": "time"
   },
   "share": {
     "description": "국내 주요 언론사 실시간 속보 및 오늘의 주요 헤드라인을 신속하고 정확하게 전달합니다.",
@@ -81,42 +81,42 @@
     "title": "뉴스NOW - 오늘의 실시간 주요 속보 종합"
   },
   "ticker": {
-    "badge": "🔴 실시간 이슈",
     "enabled": true,
+    "badge": "🔴 실시간 이슈",
+    "speed": 30,
     "items": [
       {
-        "link": "https://www.yna.co.kr/view/AKR20260904160300530",
-        "title": "🔥 [속보] '건설 추락사고 예방' 아이디어 공모전…숏폼·정책제안 접수"
+        "title": "🔥 [속보] 유치원 입학도 준비금 지원… 충남도의회 조례 개정 추진",
+        "link": "https://www.yna.co.kr/view/AKR20260909109100063"
       },
       {
-        "link": "https://www.yna.co.kr/view/AKR20260904124200030",
-        "title": "🔥 [속보] 추석 앞두고 수산물 원산지 표시 특별 점검…성수품 집중 단속"
+        "title": "🔥 [속보] 소음문제 대구도시철도 4호선… 시민의견 묻는다",
+        "link": "https://www.hani.co.kr/arti/area/yeongnam/1276960.html"
       },
       {
-        "link": "https://www.hani.co.kr/arti/society/society_general/1276423.html",
-        "title": "🔥 [속보] 법원, ‘의대 증원’ 반발 사직 전공의 제기 ‘입영대기 처분’ 취소소송 각하"
+        "title": "🔥 [속보] “문경새재 케이블카, 30년간 100억~720억 손실 예상… 당장 중단해야”",
+        "link": "https://www.hani.co.kr/arti/society/environment/1276959.html"
       },
       {
-        "link": "https://www.hani.co.kr/arti/economy/marketing/1276422.html",
-        "title": "🔥 [IFA 2026] 가전 넘어 일상으로…LG·삼성이 그린 ‘AI 홈’"
+        "title": "🔥 [속보] 병원 비급여 한 달 7499억원···1인실·도수치료에만 1113억원",
+        "link": "https://www.khan.co.kr/article/202609091352001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news"
       },
       {
-        "link": "https://www.khan.co.kr/article/202609061107001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
-        "title": "🔥 [속보] ‘몸과 마음 치유’···경북, 7~13일 ‘웰니스 여행지’ 최대 반값 할인"
+        "title": "🔥 [속보] 부천시… 추석 맞아 전통시장서 농축수산물 사면 최대 4만원 환급",
+        "link": "https://www.khan.co.kr/article/202609091335001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news"
       },
       {
-        "link": "https://www.khan.co.kr/article/202609061101001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
-        "title": "🔥 [속보] ‘물고문·담뱃불에 성 착취물까지’ 10대 여학생들 집유 확정"
+        "title": "🔥 [속보] 볼빅… 360도 정렬 라인 적용 ‘엑시아 프리즘’ 출시",
+        "link": "https://www.donga.com/news/Sports/article/all/20260909/134633960/1"
       },
       {
-        "link": "https://www.donga.com/news/Economy/article/all/20260904/134606351/2",
-        "title": "🔥 [속보] 日 청년 투자열풍 뒤엔 그림자…“하루 한 끼만 먹고 투자한다”"
+        "title": "🔥 [속보] 시노펙스… ‘대한민국 국제물주간 2026’서 수처리 필터 솔루션 공개",
+        "link": "https://www.donga.com/news/Economy/article/all/20260909/134633373/1"
       },
       {
-        "link": "https://www.donga.com/news/Economy/article/all/20260906/134611999/1",
-        "title": "🔥 [속보] 서학개미, 반도체 개별주는 팔고 3배 레버리지는 샀다"
+        "title": "🔥 [속보] “발전소 지어도 송전망 없으면 무용지물”… 전력난 해법에 필요한 발상의 전환",
+        "link": "https://www.mk.co.kr/news/journalist/12148178"
       }
-    ],
-    "speed": 30
+    ]
   }
 }
