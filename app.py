@@ -146,13 +146,13 @@ class VisitorTracker:
             print(f"[VisitorStats] GitHub 동기화 예외: {e}")
 
     def _auto_sync_loop(self):
-        """백그라운드에서 3분마다 변동사항이 있을 때 GitHub에 자동 동기화"""
+        """백그라운드에서 5분마다 방문자/클릭 변동사항이 있을 때 GitHub에 통계 자동 백업"""
         while True:
             time.sleep(30)
             try:
                 should_sync = False
                 with self.lock:
-                    if self.dirty and (time.time() - self.last_github_sync >= 180):
+                    if self.dirty and (time.time() - self.last_github_sync >= 300):
                         should_sync = True
                 if should_sync:
                     self._sync_to_github()
@@ -2025,15 +2025,13 @@ def parse_news_timestamp(date_str):
     return now.timestamp() - 1800
 
 def save_snapshot():
-    """최신 캐시 뉴스를 파일로 영구 보관하여 서버 재부팅 시에도 0.00초 즉시 제공 (GitHub 자동 백업 포함)"""
+    """최신 캐시 뉴스를 로컬 파일로 보관하여 메모리 캐시 및 콜드 스타트 제거"""
     try:
         with RSS_CACHE_LOCK:
             data = {cat: entry['news'] for cat, entry in RSS_CACHE.items() if entry.get('news')}
         if data:
             with open(NEWS_SNAPSHOT_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=1)
-            # GitHub 영구 푸시
-            threading.Thread(target=push_file_to_github, args=(NEWS_SNAPSHOT_FILE, 'news_snapshot.json', '[auto] update news snapshot'), daemon=True).start()
     except Exception as e:
         print(f"[Snapshot save error]: {e}")
 

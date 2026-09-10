@@ -8,3 +8,10 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
+    buildFilter:
+      ignoredPaths:
+        - visitor_stats.json
+        - site_config.json
+        - custom_news.json
+        - news_snapshot.json
+        - feeds_config.json
