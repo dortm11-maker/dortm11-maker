@@ -1750,6 +1750,20 @@ def index():
     with RSS_CACHE_LOCK:
         cached = RSS_CACHE.get('전체')
         initial_news = cached.get('news', []) if cached else []
+
+    # 실시간 속보 마퀴 티커: 실시간 최신 기사가 있으면 상위 8개 기사로 자동 동기화
+    if site_cfg.get('ticker', {}).get('enabled', True) and initial_news:
+        dynamic_tickers = []
+        for it in initial_news[:8]:
+            t = it.get('title', '').strip()
+            l = it.get('link', '#')
+            c = it.get('category', '전체')
+            pfx = '🔥 [속보]' if c == '전체' else f"📢 [{c}]"
+            disp = t if (t.startswith('[') or t.startswith('(') or t.startswith('🔥') or t.startswith('📢')) else f"{pfx} {t}"
+            dynamic_tickers.append({'title': disp, 'link': l})
+        if dynamic_tickers:
+            site_cfg['ticker']['items'] = dynamic_tickers
+
     is_mobile = detect_device() == '📱 모바일'
     return render_template('index.html', categories=categories, site_config=site_cfg, initial_news=initial_news, is_mobile=is_mobile)
 
@@ -2052,11 +2066,11 @@ def load_snapshot():
                             if n.get('title'):
                                 n['title'] = clean_news_title(n['title'])
                         
-                        # 커스텀 기사 최우선 + 최신순 정렬 보장
-                        news_list.sort(key=lambda x: (not x.get('is_custom', False), -parse_news_timestamp(x.get('date'))))
+                        # 최신순 정렬 보장 (발행 날짜 최신순)
+                        news_list.sort(key=lambda x: parse_news_timestamp(x.get('date')), reverse=True)
 
                         RSS_CACHE[cat] = {
-                            'timestamp': time.time() - 30,
+                            'timestamp': 0,  # 0으로 설정하여 부팅 즉시 백그라운드 최신 RSS 갱신 유도 (0.001초 폴백은 즉각 제공)
                             'news': news_list,
                             'count': len(news_list),
                             'is_refreshing': False
@@ -2159,27 +2173,32 @@ def do_fetch_category_news(category, max_per_feed=15):
                     curated_items.append(pn)
                     curr_links.add(pn.get('link'))
 
-    # 3. 날짜별 최신순 정렬 (제일 위부터 최신 뉴스글 순서로 정렬)
-    curated_items.sort(key=lambda x: parse_news_timestamp(x.get('date')), reverse=True)
-
-    # 4. 관리자 수동 등록 뉴스(custom_news) 영구 병합 (해당 카테고리 및 전체 홈 최상단 0번 인덱스에 무조건 고정 노출!)
+    # 3. 관리자 수동 등록 뉴스(custom_news) 스마트 병합
     custom_news_all = load_custom_news()
     if custom_news_all:
-        cat_customs = []
+        curr_links = {it.get('link') for it in curated_items if it.get('link')}
         for cn in custom_news_all:
             # 전체 카테고리이거나 해당 카테고리와 일치하는 경우
             if category == '전체' or cn.get('category') == category:
-                cn_copy = dict(cn)
-                cn_copy['source'] = clean_display_source(cn.get('source'), category if category != '전체' else cn.get('category'))
-                if not cn_copy.get('date') or cn_copy.get('date') == '최근':
-                    cn_copy['date'] = datetime.now(KST).strftime('%m.%d %H:%M')
-                cat_customs.append(cn_copy)
-        
-        if cat_customs:
-            custom_links = {cn.get('link') for cn in cat_customs if cn.get('link')}
-            filtered_curated = [n for n in curated_items if n.get('link') not in custom_links]
-            return cat_customs + filtered_curated
+                if cn.get('link') not in curr_links:
+                    cn_copy = dict(cn)
+                    cn_copy['source'] = clean_display_source(cn.get('source'), category if category != '전체' else cn.get('category'))
+                    if not cn_copy.get('date') or cn_copy.get('date') == '최근':
+                        cn_copy['date'] = datetime.now(KST).strftime('%m.%d %H:%M')
+                    curated_items.append(cn_copy)
+                    curr_links.add(cn.get('link'))
 
+    # 4. 날짜별 최신순 정렬 (제일 위부터 최신 뉴스글 순서로 정렬)
+    # 당일(24시간 이내) 등록된 커스텀 뉴스는 최신 기사들 중에서도 상단 우선 노출되도록 보장
+    now_ts = time.time()
+    def get_sort_key(item):
+        ts = parse_news_timestamp(item.get('date'))
+        # 24시간 이내의 커스텀 뉴스인 경우 최신 우선 보너스 부여 (+2시간)
+        if item.get('is_custom') and (now_ts - ts < 24 * 3600):
+            return ts + 7200
+        return ts
+
+    curated_items.sort(key=get_sort_key, reverse=True)
     return curated_items
 
 @app.route('/api/get_image')
@@ -2222,8 +2241,30 @@ def background_refresh_category(category):
 
 def auto_rss_refresh_daemon():
     """서버 시작 시 사전 캐시를 빌드하고, 이후 3분마다 24시간 실시간 최신 뉴스를 자동 수집/대체"""
-    time.sleep(1)
+    # 서버 기동 즉시 전체 및 주요 카테고리 최신 뉴스 우선 1회 백그라운드 갱신
+    try:
+        feeds_config = load_feeds_config()
+        target_cats = list(feeds_config.keys()) if feeds_config else ['전체', '경제', '부동산', '정치', '사회', '증권', '연예', 'IT/과학', '스포츠']
+        for cat in target_cats[:4]:
+            try:
+                news = do_fetch_category_news(cat)
+                if news:
+                    with RSS_CACHE_LOCK:
+                        RSS_CACHE[cat] = {
+                            'timestamp': time.time(),
+                            'news': news,
+                            'count': len(news),
+                            'is_refreshing': False
+                        }
+            except Exception:
+                pass
+            time.sleep(1)
+        save_snapshot()
+    except Exception as e:
+        print(f"[Initial RSS Warmup Error]: {e}")
+
     while True:
+        time.sleep(180)  # 3분(180초)마다 자동으로 새로운 뉴스를 수집해 교체
         try:
             feeds_config = load_feeds_config()
             target_cats = list(feeds_config.keys()) if feeds_config else ['전체', '경제', '부동산', '정치', '사회', '증권', '연예', 'IT/과학', '스포츠']
@@ -2244,7 +2285,6 @@ def auto_rss_refresh_daemon():
             save_snapshot()
         except Exception as e:
             print(f"[Auto RSS Refresh Error]: {e}")
-        time.sleep(180)  # 3분(180초)마다 자동으로 새로운 뉴스를 수집해 교체
 
 # 24시간 실시간 뉴스 자동 갱신 데몬 시작
 threading.Thread(target=auto_rss_refresh_daemon, daemon=True).start()

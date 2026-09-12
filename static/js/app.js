@@ -64,8 +64,17 @@ function getLocalCache(category) {
         const raw = localStorage.getItem(LOCAL_CACHE_PREFIX + category);
         if (!raw) return null;
         const parsed = JSON.parse(raw);
-        // 캐시가 2분 이내인 경우 즉시 활용 (이후 서버 최신 동기화)
+        // 캐시가 2분 이내인 경우 즉시 활용
         if (Date.now() - parsed.savedAt < 2 * 60 * 1000) {
+            // 캐시 내 첫 기사가 오늘 기사인지 검사 (오늘 기사가 아니면 즉시 만료하여 최신 서버 데이터 수신)
+            if (parsed.news && parsed.news.length > 0) {
+                const firstDate = parsed.news[0].date || '';
+                const now = new Date();
+                const todayPrefix = String(now.getMonth() + 1).padStart(2, '0') + '.' + String(now.getDate()).padStart(2, '0');
+                if (firstDate && !firstDate.startsWith(todayPrefix) && (Date.now() - parsed.savedAt > 15 * 1000)) {
+                    return null;
+                }
+            }
             return parsed.news;
         }
     } catch (e) {}
@@ -164,6 +173,24 @@ async function loadNews(category) {
             // 사용자가 아직 동일 카테고리에 머물고 있다면 최신 뉴스로 갱신
             if (currentCategory === category) {
                 renderTopFirst(data.news);
+            }
+
+            // 서버 응답이 stale(콜드 부팅 이전 캐시)인 경우, 서버 백그라운드 갱신 완료 후 최신 뉴스 자동 재수신
+            if (data.stale) {
+                setTimeout(async () => {
+                    if (currentCategory === category) {
+                        try {
+                            const freshResp = await fetch(`/api/rss?category=${encodeURIComponent(category)}&max=15&fresh=1`);
+                            const freshData = await freshResp.json();
+                            if (freshData.success && freshData.news && freshData.news.length > 0) {
+                                setLocalCache(category, freshData.news);
+                                if (currentCategory === category) {
+                                    renderTopFirst(freshData.news);
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                }, 2500);
             }
         }
     } catch (e) {
