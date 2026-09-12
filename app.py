@@ -2245,7 +2245,7 @@ def auto_rss_refresh_daemon():
     try:
         feeds_config = load_feeds_config()
         target_cats = list(feeds_config.keys()) if feeds_config else ['전체', '경제', '부동산', '정치', '사회', '증권', '연예', 'IT/과학', '스포츠']
-        for cat in target_cats[:4]:
+        for cat in target_cats:
             try:
                 news = do_fetch_category_news(cat)
                 if news:
@@ -2258,7 +2258,7 @@ def auto_rss_refresh_daemon():
                         }
             except Exception:
                 pass
-            time.sleep(1)
+            time.sleep(0.5)
         save_snapshot()
     except Exception as e:
         print(f"[Initial RSS Warmup Error]: {e}")
@@ -2267,8 +2267,8 @@ def auto_rss_refresh_daemon():
         time.sleep(180)  # 3분(180초)마다 자동으로 새로운 뉴스를 수집해 교체
         try:
             feeds_config = load_feeds_config()
-            target_cats = list(feeds_config.keys()) if feeds_config else ['전체', '경제', '부동산', '정치', '사회', '증권', '연예', 'IT/과학', '스포츠']
-            for cat in target_cats[:7]:
+            target_cats = list(feeds_config.keys()) if feeds_config else ['전체', '경제', '부동산', '정치', '사회', '증권', '연예', 'IT/과학', '스포츠', '세계', '문화']
+            for cat in target_cats:
                 try:
                     news = do_fetch_category_news(cat)
                     if news:
@@ -2281,7 +2281,7 @@ def auto_rss_refresh_daemon():
                             }
                 except Exception:
                     pass
-                time.sleep(1.5)
+                time.sleep(1.0)
             save_snapshot()
         except Exception as e:
             print(f"[Auto RSS Refresh Error]: {e}")
