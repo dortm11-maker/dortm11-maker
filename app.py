@@ -16,6 +16,7 @@ from datetime import datetime, timedelta, timezone
 import hashlib
 import re
 import urllib.parse
+import gzip
 
 # Windows 인코딩 안전 설정
 if sys.platform == 'win32':
@@ -29,6 +30,27 @@ app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 app.secret_key = 'news_now_secret_2026_!@#'
+
+@app.after_request
+def compress_response(response):
+    """500바이트 이상 응답을 Gzip 자동 압축하여 Render 대역폭(Bandwidth) 70~80% 절감"""
+    try:
+        accept_encoding = request.headers.get('Accept-Encoding', '')
+        if (response.status_code < 200 or response.status_code >= 300 or
+            response.direct_passthrough or 'gzip' not in accept_encoding.lower()):
+            return response
+
+        if response.mimetype in ('application/json', 'text/html', 'text/css', 'application/javascript', 'text/plain'):
+            content = response.get_data()
+            if len(content) > 500:
+                compressed = gzip.compress(content)
+                response.set_data(compressed)
+                response.headers['Content-Encoding'] = 'gzip'
+                response.headers['Content-Length'] = len(compressed)
+                response.headers['Vary'] = 'Accept-Encoding'
+    except Exception:
+        pass
+    return response
 
 # ============================================================
 # 관리자 설정 (비밀번호 변경 가능)
@@ -195,19 +217,23 @@ class VisitorTracker:
 
     def save(self):
         try:
-            saved_logs = dict(list(self.visitor_logs.items())[-100:])
-            saved_ad_logs = self.ad_clicks.get('recent_logs', [])[-100:]
+            # 7일 이전 지난 날짜 통계는 자동 정리하여 용량 팽창 방지 (FIFO)
+            cutoff_date = (datetime.now(KST) - timedelta(days=7)).strftime('%Y-%m-%d')
+            cleaned_daily = {d: v for d, v in self.daily.items() if d >= cutoff_date}
+            cleaned_ad_daily = {d: v for d, v in self.ad_clicks.get('daily', {}).items() if d >= cutoff_date}
+            saved_logs = dict(list(self.visitor_logs.items())[-50:])
+            saved_ad_logs = self.ad_clicks.get('recent_logs', [])[-50:]
             data = {
                 'total_uv': self.total_uv,
                 'total_pv': self.total_pv,
                 'current_date': self.current_date,
                 'today_vids': list(self.today_vids),
-                'daily': self.daily,
+                'daily': cleaned_daily,
                 'visitor_logs': saved_logs,
                 'ad_clicks': {
                     'by_type_total': self.ad_clicks.get('by_type_total', {}),
                     'by_type_today': self.ad_clicks.get('by_type_today', {}),
-                    'daily': self.ad_clicks.get('daily', {}),
+                    'daily': cleaned_ad_daily,
                     'recent_logs': saved_ad_logs
                 }
             }
@@ -1840,6 +1866,8 @@ CUSTOM_NEWS_FILE = os.path.join(os.path.dirname(__file__), 'custom_news.json')
 RSS_CACHE = {}          # category -> {"timestamp": float, "news": list, "count": int, "is_refreshing": bool}
 RSS_CACHE_LOCK = threading.Lock()
 CACHE_TTL = 90          # 90초(1.5분) 동안은 캐시에서 0.001초 만에 즉시 반환
+MAX_CATEGORY_NEWS = 30  # 카테고리당 최대 보관 기사 수 (새 뉴스 수집 시 오래된 뉴스 자동 탈락 / FIFO)
+MAX_CUSTOM_NEWS = 30    # 관리자 수동/AI 뉴스 최대 보관 수 (새 기사 등록 시 오래된 뉴스 자동 탈락)
 
 def clean_display_source(source, category=None):
     """언론사 실명(연합뉴스, 매일경제 등) 노출을 일체 배제하고 카테고리 속보명(경제 속보, 실시간 속보 등)으로 표준화"""
@@ -1913,8 +1941,8 @@ def save_custom_news_item(item):
         # 동일 기사 링크가 이미 있다면 제거 후 최신 데이터로 최상단 삽입
         items = [it for it in items if it.get('link') != target_link]
         items.insert(0, item)
-        # 최대 150개 보관
-        items = items[:150]
+        # 최대 MAX_CUSTOM_NEWS(30)개 보관 (새 기사 등록 시 오래된 기사 자동 삭제 / FIFO)
+        items = items[:MAX_CUSTOM_NEWS]
         with open(CUSTOM_NEWS_FILE, 'w', encoding='utf-8') as f:
             json.dump(items, f, ensure_ascii=False, indent=1)
         
@@ -2039,10 +2067,14 @@ def parse_news_timestamp(date_str):
     return now.timestamp() - 1800
 
 def save_snapshot():
-    """최신 캐시 뉴스를 로컬 파일로 보관하여 메모리 캐시 및 콜드 스타트 제거"""
+    """최신 캐시 뉴스를 로컬 파일로 보관하여 메모리 캐시 및 콜드 스타트 제거 (카테고리당 최신 30개만 보관하여 용량 팽창 방지)"""
     try:
         with RSS_CACHE_LOCK:
-            data = {cat: entry['news'] for cat, entry in RSS_CACHE.items() if entry.get('news')}
+            data = {}
+            for cat, entry in RSS_CACHE.items():
+                items = entry.get('news', [])
+                if items:
+                    data[cat] = items[:MAX_CATEGORY_NEWS]
         if data:
             with open(NEWS_SNAPSHOT_FILE, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=1)
@@ -2066,8 +2098,9 @@ def load_snapshot():
                             if n.get('title'):
                                 n['title'] = clean_news_title(n['title'])
                         
-                        # 최신순 정렬 보장 (발행 날짜 최신순)
+                        # 최신순 정렬 보장 및 카테고리당 상한 제한 (FIFO)
                         news_list.sort(key=lambda x: parse_news_timestamp(x.get('date')), reverse=True)
+                        news_list = news_list[:MAX_CATEGORY_NEWS]
 
                         RSS_CACHE[cat] = {
                             'timestamp': 0,  # 0으로 설정하여 부팅 즉시 백그라운드 최신 RSS 갱신 유도 (0.001초 폴백은 즉각 제공)
@@ -2199,7 +2232,8 @@ def do_fetch_category_news(category, max_per_feed=15):
         return ts
 
     curated_items.sort(key=get_sort_key, reverse=True)
-    return curated_items
+    # 카테고리당 항상 최신 MAX_CATEGORY_NEWS(30)개만 유지 (새 기사가 들어올 때마다 오래된 기사는 자동 삭제 / FIFO)
+    return curated_items[:MAX_CATEGORY_NEWS]
 
 @app.route('/api/get_image')
 def api_get_image():

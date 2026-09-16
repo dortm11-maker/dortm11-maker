@@ -95,6 +95,12 @@ def save_curated_article(data):
         ))
         conn.commit()
 
+    # 새 기사가 추가될 때마다 오래된 기사 자동 삭제 (FIFO 롤링)
+    try:
+        cleanup_old_curated_articles(days=3, max_per_cat=30)
+    except Exception:
+        pass
+
     return art_id
 
 def get_curated_article_by_url(url):
@@ -159,5 +165,30 @@ def delete_curated_article(url):
         print(f"[delete_curated_article error]: {e}")
         return False
 
-# 앱 시작 시 DB 초기화
+def cleanup_old_curated_articles(days=3, max_per_cat=30):
+    """3일(72시간) 이상 지난 오래된 큐레이션 기사 및 카테고리별 초과 기사를 자동 삭제(FIFO)하여 용량 무한 누적 방지"""
+    try:
+        with get_db() as conn:
+            # 1. 지정된 일수(기본 3일) 이상 지난 오래된 기사 일괄 삭제
+            conn.execute("DELETE FROM curated_articles WHERE created_at < datetime('now', 'localtime', ?)", (f"-{days} days",))
+            # 2. 각 카테고리별 최대 개수(max_per_cat) 초과분 삭제 (오래된 순서대로 삭제)
+            cats = [r[0] for r in conn.execute("SELECT DISTINCT category FROM curated_articles").fetchall() if r[0]]
+            for cat in cats:
+                conn.execute("""
+                    DELETE FROM curated_articles 
+                    WHERE category = ? AND id NOT IN (
+                        SELECT id FROM curated_articles 
+                        WHERE category = ? 
+                        ORDER BY created_at DESC 
+                        LIMIT ?
+                    )
+                """, (cat, cat, max_per_cat))
+            conn.commit()
+            conn.execute("VACUUM")
+    except Exception as e:
+        print(f"[cleanup_old_curated_articles error]: {e}")
+
+# 앱 시작 시 DB 초기화 및 오래된 기사 자동 청소
 init_db()
+cleanup_old_curated_articles(days=3, max_per_cat=30)
+
