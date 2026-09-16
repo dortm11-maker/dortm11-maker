@@ -1263,22 +1263,64 @@ def get_raw_origin_title(url):
     RAW_ORIGIN_TITLE_CACHE[url] = ''
     return ''
 
+def parse_date_info(entry):
+    """entry에서 발행 날짜 문자열(MM.DD HH:MM)과 유닉스 타임스탬프(float)를 정밀 추출"""
+    import email.utils
+
+    # 1. feedparser의 published_parsed / updated_parsed
+    for attr in ['published_parsed', 'updated_parsed']:
+        t_parsed = getattr(entry, attr, None)
+        if t_parsed:
+            try:
+                utc_dt = datetime(*t_parsed[:6], tzinfo=timezone.utc)
+                kst_dt = utc_dt.astimezone(KST)
+                return kst_dt.strftime('%m.%d %H:%M'), kst_dt.timestamp()
+            except Exception:
+                pass
+
+    # 2. entry의 원본 문자열 날짜 파싱 시도
+    raw_date_str = getattr(entry, 'published', '') or getattr(entry, 'updated', '') or getattr(entry, 'pubDate', '')
+    if raw_date_str:
+        s = str(raw_date_str).strip()
+        # RFC 822/2822
+        try:
+            # +09:00 -> +0900 호환
+            s_clean = re.sub(r'([+-]\d{2}):(\d{2})$', r'\1\2', s)
+            parsed_email = email.utils.parsedate_to_datetime(s_clean)
+            if parsed_email:
+                kst_dt = parsed_email.astimezone(KST)
+                return kst_dt.strftime('%m.%d %H:%M'), kst_dt.timestamp()
+        except Exception:
+            pass
+
+        # ISO 8601 (2026-09-16T22:43:00+09:00)
+        try:
+            iso_dt = datetime.fromisoformat(s)
+            if iso_dt.tzinfo is None:
+                iso_dt = iso_dt.replace(tzinfo=KST)
+            else:
+                iso_dt = iso_dt.astimezone(KST)
+            return iso_dt.strftime('%m.%d %H:%M'), iso_dt.timestamp()
+        except Exception:
+            pass
+
+        # YYYY-MM-DD HH:MM:SS
+        m = re.search(r'(\d{4})[-./](\d{1,2})[-./](\d{1,2})\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?', s)
+        if m:
+            try:
+                y, mo, d, h, mi = map(int, m.groups()[:5])
+                sec = int(m.group(6)) if m.group(6) else 0
+                dt = datetime(y, mo, d, h, mi, sec, tzinfo=KST)
+                return dt.strftime('%m.%d %H:%M'), dt.timestamp()
+            except Exception:
+                pass
+
+    now_dt = datetime.now(KST)
+    return now_dt.strftime('%m.%d %H:%M'), now_dt.timestamp()
+
 def parse_date(entry):
-    try:
-        if hasattr(entry, 'published_parsed') and entry.published_parsed:
-            utc_dt = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
-            kst_dt = utc_dt.astimezone(KST)
-            return kst_dt.strftime('%m.%d %H:%M')
-    except:
-        pass
-    try:
-        if hasattr(entry, 'updated_parsed') and entry.updated_parsed:
-            utc_dt = datetime(*entry.updated_parsed[:6], tzinfo=timezone.utc)
-            kst_dt = utc_dt.astimezone(KST)
-            return kst_dt.strftime('%m.%d %H:%M')
-    except:
-        pass
-    return datetime.now(KST).strftime('%m.%d %H:%M')
+    date_str, _ = parse_date_info(entry)
+    return date_str
 
 def fetch_rss(feed_url, source_name, logo, max_items=15):
     try:
@@ -1312,7 +1354,7 @@ def fetch_rss(feed_url, source_name, logo, max_items=15):
             if len(summary) > 150:
                 summary = summary[:150] + '...'
             image = get_image_from_entry(entry)
-            pub_date = parse_date(entry)
+            pub_date, pub_ts = parse_date_info(entry)
 
             items.append({
                 'title': distinct_title,
@@ -1321,6 +1363,7 @@ def fetch_rss(feed_url, source_name, logo, max_items=15):
                 'summary': summary,
                 'image': image,
                 'date': pub_date,
+                'date_ts': pub_ts,
                 'source': source_name,
                 'logo': logo,
             })
@@ -1898,11 +1941,12 @@ def load_custom_news():
         except Exception as e:
             print(f"[load_custom_news file error]: {e}")
 
-    # 파일이 비어있거나 부족할 때 DB(curated_articles)에서 복원 보강
+    # 파일이 비어있거나 부족할 때 DB(curated_articles)에서 복원 보강 (48시간 이내 최신 기사만 허용하여 오래된 기사 배제)
     if not items:
         try:
             from services.curation_db import get_recent_curated_articles
-            db_articles = get_recent_curated_articles(category='전체', limit=60)
+            db_articles = get_recent_curated_articles(category='전체', limit=30)
+            now_ts = time.time()
             for d in db_articles:
                 orig_url = d.get('original_url', '')
                 if not orig_url:
@@ -1912,6 +1956,12 @@ def load_custom_news():
                 summary_text = (paras[0][:140] + '...') if paras else (d.get('ai_title') or '')
                 created_str = str(d.get('created_at', ''))
                 date_display = d.get('published_at') or (created_str[5:16].replace('-', '.') if len(created_str) >= 16 else '최근')
+
+                # 48시간 이상 지난 과거 기사는 자동 배제 (오래된 기사 자동 소멸)
+                art_ts = parse_news_timestamp(date_display)
+                if now_ts - art_ts > 48 * 3600:
+                    continue
+
                 cat = d.get('category') or '전체'
                 items.append({
                     'title': d.get('ai_title') or d.get('original_title'),
@@ -1921,6 +1971,7 @@ def load_custom_news():
                     'image': d.get('ai_image', ''),
                     'og_img': ai_cnt.get('og_img') or d.get('ai_image', ''),
                     'date': date_display,
+                    'date_ts': art_ts,
                     'source': clean_display_source(d.get('source_name'), cat),
                     'logo': '⚡',
                     'category': cat,
@@ -2186,6 +2237,7 @@ def do_fetch_category_news(category, max_per_feed=15):
             'summary': primary.get('summary', ''),
             'image': safe_img,
             'date': primary.get('date', ''),
+            'date_ts': primary.get('date_ts') or parse_news_timestamp(primary.get('date')),
             'source': display_source,
             'logo': '⚡',
             'category': category,
@@ -2201,7 +2253,7 @@ def do_fetch_category_news(category, max_per_feed=15):
         curr_links = {it.get('link') for it in curated_items if it.get('link')}
         for pn in prev_news:
             if not pn.get('is_custom') and pn.get('link') and pn.get('link') not in curr_links:
-                ts = parse_news_timestamp(pn.get('date'))
+                ts = pn.get('date_ts') or parse_news_timestamp(pn.get('date'))
                 if time.time() - ts < 4 * 3600:  # 4시간 이내의 최신 기사만 보존
                     curated_items.append(pn)
                     curr_links.add(pn.get('link'))
@@ -2218,17 +2270,28 @@ def do_fetch_category_news(category, max_per_feed=15):
                     cn_copy['source'] = clean_display_source(cn.get('source'), category if category != '전체' else cn.get('category'))
                     if not cn_copy.get('date') or cn_copy.get('date') == '최근':
                         cn_copy['date'] = datetime.now(KST).strftime('%m.%d %H:%M')
+                    if not cn_copy.get('date_ts'):
+                        cn_copy['date_ts'] = cn_copy.get('created_ts') or parse_news_timestamp(cn_copy.get('date'))
                     curated_items.append(cn_copy)
                     curr_links.add(cn.get('link'))
 
-    # 4. 날짜별 최신순 정렬 (제일 위부터 최신 뉴스글 순서로 정렬)
-    # 당일(24시간 이내) 등록된 커스텀 뉴스는 최신 기사들 중에서도 상단 우선 노출되도록 보장
-    now_ts = time.time()
+    # 4. 날짜별 최신순 정렬 및 1등 순번 규칙:
+    # - 기본적으로 모든 기사는 최신 날짜/시간 순으로 맨 위부터 정렬 (내림차순)
+    # - 수동 링크를 등록하면 그 시점에는 1등(최상단)
+    # - 단, RSS가 새로 수집되어 들어오면 자동으로 새로 가져온 최신 RSS 기사가 다시 순번 1등이 됨!
+    def get_item_ts(it):
+        return float(it.get('date_ts') or it.get('created_ts') or parse_news_timestamp(it.get('date')) or 0)
+
+    rss_items = [it for it in curated_items if not it.get('is_custom')]
+    max_rss_ts = max((get_item_ts(it) for it in rss_items), default=0)
+
     def get_sort_key(item):
-        ts = parse_news_timestamp(item.get('date'))
-        # 24시간 이내의 커스텀 뉴스인 경우 최신 우선 보너스 부여 (+2시간)
-        if item.get('is_custom') and (now_ts - ts < 24 * 3600):
-            return ts + 7200
+        ts = get_item_ts(item)
+        if item.get('is_custom'):
+            # RSS 기사가 수집되어 있을 때: 최신 RSS 기사가 1등이 되도록, 수동 기사는 최신 RSS보다 1초 뒤(또는 본인 등록 시각 중 작은 값)로 자동 배치
+            if rss_items and max_rss_ts > 0:
+                return min(ts, max_rss_ts - 1.0)
+            return ts
         return ts
 
     curated_items.sort(key=get_sort_key, reverse=True)
@@ -2275,10 +2338,11 @@ def background_refresh_category(category):
 
 def auto_rss_refresh_daemon():
     """서버 시작 시 사전 캐시를 빌드하고, 이후 3분마다 24시간 실시간 최신 뉴스를 자동 수집/대체"""
-    # 서버 기동 즉시 전체 및 주요 카테고리 최신 뉴스 우선 1회 백그라운드 갱신
+    # 서버 기동 즉시 전체 11개 카테고리 최신 뉴스 우선 1회 백그라운드 갱신
+    ALL_CATEGORIES = ['전체', '정치', '경제', '부동산', '증권', '연예', '사회', 'IT/과학', '스포츠', '세계', '문화']
     try:
         feeds_config = load_feeds_config()
-        target_cats = list(feeds_config.keys()) if feeds_config else ['전체', '경제', '부동산', '정치', '사회', '증권', '연예', 'IT/과학', '스포츠']
+        target_cats = list(feeds_config.keys()) if feeds_config else ALL_CATEGORIES
         for cat in target_cats:
             try:
                 news = do_fetch_category_news(cat)
@@ -2292,7 +2356,7 @@ def auto_rss_refresh_daemon():
                         }
             except Exception:
                 pass
-            time.sleep(0.5)
+            time.sleep(0.3)
         save_snapshot()
     except Exception as e:
         print(f"[Initial RSS Warmup Error]: {e}")
@@ -2689,6 +2753,7 @@ def admin_add_custom_news():
             'category': target_category,
             'is_custom': True,
             'created_ts': time.time(),
+            'date_ts': time.time(),
             'paragraphs': art.get('paragraphs', []),
             'summary_points': art.get('summary_points', []),
             'publisher': publisher,

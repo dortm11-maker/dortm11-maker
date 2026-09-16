@@ -57,7 +57,7 @@ function switchCategory(cat) {
 // ============================================================
 // 초고속 브라우저 로컬 캐시 & 스켈레톤 관리
 // ============================================================
-const LOCAL_CACHE_PREFIX = 'news_cache_v9_';
+const LOCAL_CACHE_PREFIX = 'news_cache_v11_';
 
 function getLocalCache(category) {
     try {
@@ -259,9 +259,8 @@ function renderHeadlines() {
     const section = document.getElementById('headlineSection');
     if (!section || allNews.length === 0) return;
 
-    // 이미지 있는 것 우선, 없으면 상위 2개
-    const withImg = allNews.filter(n => n.image);
-    const top2 = withImg.length >= 2 ? withImg.slice(0, 2) : allNews.slice(0, 2);
+    // 무조건 전체 뉴스 중 가장 최신인 최상단 1등, 2등 기사 배치!
+    const top2 = allNews.slice(0, 2);
 
     section.innerHTML = `<div class="headline-grid">` + top2.map(item => createHeadlineCard(item)).join('') + `</div>`;
 }
@@ -270,11 +269,8 @@ function renderGrid() {
     const grid = document.getElementById('newsGrid');
     if (!grid) return;
 
-    // 상단에 나간 헤드라인 2개 제외하고 목록 구성
-    const withImg = allNews.filter(n => n.image);
-    const top2 = withImg.length >= 2 ? withImg.slice(0, 2) : allNews.slice(0, 2);
-    const top2Links = new Set(top2.map(t => t.link));
-    const rest = allNews.filter(n => !top2Links.has(n.link));
+    // 상단에 나간 최신 헤드라인 2개(0, 1번)를 제외하고 2번 기사부터 목록 구성
+    const rest = allNews.slice(2);
 
     const toShow = rest.slice(0, PAGE_SIZE);
     displayedCount = toShow.length;
@@ -296,11 +292,7 @@ function loadMore() {
     const grid = document.getElementById('newsGrid');
     if (!grid) return;
 
-    const withImg = allNews.filter(n => n.image);
-    const top2 = withImg.length >= 2 ? withImg.slice(0, 2) : allNews.slice(0, 2);
-    const top2Links = new Set(top2.map(t => t.link));
-    const rest = allNews.filter(n => !top2Links.has(n.link));
-
+    const rest = allNews.slice(2);
     const nextItems = rest.slice(displayedCount, displayedCount + PAGE_SIZE);
     grid.insertAdjacentHTML('beforeend', nextItems.map(item => createNewsCard(item)).join(''));
     displayedCount += nextItems.length;
