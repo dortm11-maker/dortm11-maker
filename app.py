@@ -1849,7 +1849,7 @@ def index():
 
 @app.route('/health')
 def health_check():
-    return jsonify({'status': 'ok', 'service': 'news-now'}), 200
+    return jsonify({'status': 'ok', 'service': 'news-now', 'deploy_version': '2026-09-18-newsis-fix-v2'}), 200
 
 @app.route('/article')
 def article_page():
