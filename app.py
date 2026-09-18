@@ -1139,8 +1139,8 @@ def get_raw_origin_image(url, title=None):
                 soup.find('div', id='dic_area') or              # 네이버 뉴스
                 soup.find('div', id='newsct_article') or        # 네이버 모바일
                 soup.find('div', class_='article_view') or      # 다음 뉴스
-                soup.find('div', id='textBody') or              # 뉴시스
-                soup.find('div', class_='view_text') or         # 뉴스1
+                soup.find('div', class_='viewer') or            # 뉴시스
+                soup.find('div', class_='view_text') or         # 뉴스1 / 뉴시스
                 soup.find('div', class_='story-news') or        # 연합뉴스
                 soup.find('section', class_='article-body') or  # 조선일보
                 soup.find('div', class_='news_cnt_detail_wrap') or # 매일경제 상세
@@ -1401,7 +1401,9 @@ def get_publisher_info(url, soup=None):
         'mt.co.kr': ('머니투데이', '💰'),
         'asiae.co.kr': ('아시아경제', '🌐'),
         'heraldcorp.com': ('헤럴드경제', '🗞️'),
-        'etnews.com': ('전자신문', '💻')
+        'etnews.com': ('전자신문', '💻'),
+        'newsis.com': ('뉴시스', '📰'),
+        'news1.kr': ('뉴스1', '📰')
     }
     for dom, (name, logo) in domain_map.items():
         if dom in url:
@@ -1429,7 +1431,13 @@ def fetch_article_detail(url):
     if url in ARTICLE_CACHE:
         cached_time, cached_data = ARTICLE_CACHE[url]
         if now_ts - cached_time < 3600:
-            if cached_data.get('paragraphs') and len(cached_data['paragraphs']) >= 1:
+            paras = cached_data.get('paragraphs', [])
+            is_bad_cache = (
+                len(paras) < 3 or
+                sum(len(p) for p in paras) < 150 or
+                any('email protected' in p or '조감도' in p for p in paras)
+            )
+            if not is_bad_cache:
                 return cached_data
 
     from services.news_cluster import canonicalize_url
@@ -1545,7 +1553,10 @@ def fetch_article_detail(url):
             any(re.search(r'매경플러스|더중앙플러스|아르떼|QR코드|QR\s*코드|스마트폰으로\s*찍으면|매일경제신문|한국경제신문|네이버에서.*검색|기사\s*전문은', p) for p in paras) or
             any(re.search(r'매경플러스|더중앙플러스|아르떼|QR코드|QR\s*코드|스마트폰으로\s*찍으면|매일경제신문|한국경제신문|네이버에서.*검색|기사\s*전문은', s) for s in summary_pts)
         )
-        has_caption_junk = any(re.search(r'촬영|제공|재판매|DB\s*금지|송고시간|송고|\d{4}년\s*\d{1,2}월\s*\d{1,2}일\s*\d{1,2}시', p) for p in paras)
+        has_caption_junk = (
+            any(re.search(r'촬영|제공|재판매|DB\s*금지|송고시간|송고|\d{4}년\s*\d{1,2}월\s*\d{1,2}일\s*\d{1,2}시|email\s*protected|조감도|투시도|그래픽|[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', p, re.I) for p in paras) or
+            any(re.search(r'email\s*protected|조감도|[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', s, re.I) for s in summary_pts)
+        )
         has_host_junk = any(re.search(r'진행\s*[:：]|출연\s*[:：]|한겨레\s*정치팀|시청\s*바랍니다|시청바랍니다', p) for p in paras)
         has_web_junk = any(re.search(r'폰트\s*\d단계|\d+px|글자크기|본문\s*글자\s*크기|구독\s*구독중|심민규|북마크|공유하기|카카오톡|페이스북|메신저|네이버\s*밴드|URL\s*복사|프린트|제보', p) for p in paras) or any(re.search(r'폰트\s*\d단계|글자크기|북마크|카카오톡|페이스북|URL\s*복사', s) for s in summary_pts)
         has_bracket_tag = bool(re.search(r'\[[^\]]+\]', current_ai_t)) or any('촬영' in s for s in summary_pts)

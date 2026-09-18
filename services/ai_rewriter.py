@@ -179,10 +179,16 @@ def clean_news_line(text):
     t = re.sub(r'[가-힣]{2,4}\s*기자\s*구독', '', t)
     t = re.sub(r'이선\s*다음', '', t)
 
-    # 5. 빈 괄호 제거
+    # 5. 이메일 및 Cloudflare 난독화 찌꺼기 제거
+    t = re.sub(r'\[email\s*protected\]|email\s*protected', '', t, flags=re.IGNORECASE)
+    t = re.sub(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', '', t)
+    t = re.sub(r'[\(\[\{]\s*(?:사진|자료|그래픽|출처)\s*=[^\]\)\}]*[\)\]\}]', '', t)
+    t = re.sub(r'photo@[a-zA-Z0-9-.]+', '', t)
+
+    # 6. 빈 괄호 제거
     t = re.sub(r'\[\s*\]|\(\s*\)', '', t)
 
-    # 6. 연속 공백 단일화 및 연속 마침표 정리
+    # 7. 연속 공백 단일화 및 연속 마침표 정리
     t = re.sub(r'[ \t]{2,}', ' ', t)
     t = re.sub(r'\.{2,}', '.', t)
     t = t.replace('．', '.')
@@ -196,6 +202,9 @@ def is_valid_news_paragraph(line):
         return False
     # 플랫폼 홍보 및 검색/QR 유도 찌꺼기 검출 시 즉시 탈락
     if is_promotional_or_junk_line(line):
+        return False
+    # 이메일 주소 및 Cloudflare email protection 난독화 문구 검출 시 즉시 탈락
+    if re.search(r'\[email\s*protected\]|email\s*protected|[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+', line, re.I):
         return False
     # 웹페이지 버튼, 폰트 조절, 공유, 구독, 북마크, 앱 다운로드 UI 쓰레기 검출
     if re.search(r'폰트\s*\d단계|\d+px|글자크기|본문\s*글자\s*크기|글자\s*크기|프린트|제보|인쇄|스크랩', line):
@@ -217,6 +226,8 @@ def is_valid_news_paragraph(line):
     if re.search(r'촬영|제공|재판매|DB\s*금지|전재|무단|송고|연합뉴스', line):
         return False
     if re.search(r'내려다보이고\s*있다|바라보고\s*있다|포즈를\s*취하고|기념촬영|전망대.*스카이에서|자료사진|사진은\s*기사|사진제공|출처\s*[:：]|설명회에서\s*발언하고|간담회에서\s*발언하고', line):
+        return False
+    if re.search(r'조감도|투시도|평면도|배치도|그래픽|사진\s*=|자료\s*=', line):
         return False
     # 슬로건이나 짧은 구호 형태의 캡션 줄 검출
     if re.search(r'슬로건$|전경$|사진$|모습$', line):
@@ -558,41 +569,65 @@ def extract_factual_data(url, title=""):
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(html_text, 'html.parser')
             
-            # UI 및 찌꺼기 엘리먼트 전면 파기 (사진 캡션 태그 포함)
-            for junk in soup.select('script, style, button, nav, header, footer, noscript, svg, form, input, select, textarea, .share_wrap, .sns_wrap, .byline, .reporter, .font_size, .btn_area, .util_area, .reply_area, .comment_area, .copyright, .article_relation, .recommend_news, .subscribe_wrap, .subscribe_box, .sns_area, .aside_wrap, .link_news, .ad_wrap, .vod_area, .vod_player, figcaption, .photo_layout, .photo_desc, .view_caption, .img_desc, .caption'):
+            # 1. Cloudflare email protection 및 이메일 난독화 태그 즉시 완전 분해
+            for email_elem in soup.select('[class*="cf_email"], [href*="email-protection"], [data-cfemail]'):
+                email_elem.decompose()
+
+            # 2. UI 및 찌꺼기 엘리먼트 전면 파기 (언론사 사진 캡션 및 바이라인 태그 철저 분해)
+            junk_selectors = [
+                'script', 'style', 'button', 'nav', 'header', 'footer', 'noscript', 'svg', 'form', 'input', 'select', 'textarea',
+                '.share_wrap', '.sns_wrap', '.byline', '.reporter', '.font_size', '.btn_area', '.util_area', '.reply_area', '.comment_area',
+                '.copyright', '.article_relation', '.recommend_news', '.subscribe_wrap', '.subscribe_box', '.sns_area', '.aside_wrap',
+                '.link_news', '.ad_wrap', '.vod_area', '.vod_player', 'figcaption', '.photo_layout', '.photo_desc', '.view_caption',
+                '.img_desc', '.caption', '.photojournal', '.article_photo', '.thumCont', '[id^="imgartitable"]', '[id^="caption_"]',
+                '.photo-desc', '.photo_caption', '.image-caption', '.article-figure-caption', '.desc.photojournal', '.tit_caption',
+                '.view_photo', '.thumb_area', '.photo_area', '.article_photo_wrap', 'td.img', 'p.photojournal', 'p.desc'
+            ]
+            for junk in soup.select(', '.join(junk_selectors)):
                 junk.decompose()
             
-            # 국내 주요 포털 및 언론사 본문 컨테이너 정밀 탐색 (네이버, 다음, 뉴시스, 뉴스1, 조선, 중앙, 동아, 매경, 한경, KBS, SBS, MBC 등)
-            body = (
-                soup.select_one('#dic_area') or              # 네이버 뉴스 본문
-                soup.select_one('#newsct_article') or        # 네이버 뉴스 모바일/PC
-                soup.select_one('.article_view') or          # 다음 뉴스 본문
-                soup.select_one('#textBody') or              # 뉴시스 본문
-                soup.select_one('article#textBody') or       # 뉴시스
-                soup.select_one('.view_text') or             # 뉴시스 / 뉴스1
-                soup.select_one('#articles_detail') or       # 뉴스1 본문
-                soup.select_one('article.story-news') or     # 연합뉴스 본문
-                soup.select_one('.story-news') or            # 연합뉴스
-                soup.select_one('section.article-body') or   # 조선일보 본문
-                soup.select_one('.article-body') or          # 조선/중앙 본문
-                soup.select_one('.main_text') or             # SBS 뉴스 본문
-                soup.select_one('.article_cont') or          # SBS / 방송사 본문
-                soup.select_one('#cont_newstext') or         # KBS 뉴스 본문
-                soup.select_one('.detail-body') or           # KBS 상세 본문
-                soup.select_one('.news_content') or          # MBC 뉴스 본문
-                soup.select_one('.art_txt') or               # 매일경제
-                soup.select_one('#articletxt') or            # 한국경제
-                soup.select_one('.article_txt') or           # 동아일보
-                soup.select_one('#article_body') or          # 매경/중앙
-                soup.select_one('article._article_body') or  # 주요 포털
-                soup.select_one('article.comp_news_article') or
-                soup.select_one('#articleWrap') or
-                soup.select_one('.news_cnt_detail_wrap') or
-                soup.select_one('#articleBody') or
-                soup.find('article') or
-                soup.select_one('.article') or
-                soup.select_one('.content')
-            )
+            # 3. 국내 주요 포털 및 언론사 본문 컨테이너 정밀 탐색
+            # ※ 뉴시스의 #textBody는 첫 번째 사진/캡션 블록이므로 본문으로 오인되지 않도록 제외하고, .viewer article / .viewer 우선 매칭
+            candidate_selectors = [
+                '#dic_area',               # 네이버 뉴스 본문
+                '#newsct_article',         # 네이버 뉴스 모바일/PC
+                '.article_view',           # 다음 뉴스 본문
+                '.viewer article',         # 뉴시스 본문
+                '.viewer',                 # 뉴시스 뷰어
+                'article.story-news',      # 연합뉴스 본문
+                '.story-news',             # 연합뉴스
+                'section.article-body',    # 조선일보 본문
+                '.article-body',           # 조선/중앙 본문
+                '.main_text',              # SBS 뉴스 본문
+                '.article_cont',           # SBS / 방송사 본문
+                '#cont_newstext',          # KBS 뉴스 본문
+                '.detail-body',            # KBS 상세 본문
+                '.news_content',           # MBC 뉴스 본문
+                '.art_txt',                # 매일경제
+                '#articletxt',             # 한국경제
+                '.article_txt',            # 동아일보
+                '#article_body',           # 매경/중앙
+                '#articles_detail',        # 뉴스1 본문
+                '.view_text',              # 뉴스1 / 뉴시스 모바일
+                'article._article_body',   # 주요 포털
+                'article.comp_news_article',
+                '#articleWrap',
+                '.news_cnt_detail_wrap',
+                '#articleBody',
+                'article',
+                '.article',
+                '.content'
+            ]
+            
+            # 후보 컨테이너들 중 가장 풍부하고 긴 텍스트를 담고 있는 컨테이너를 본문으로 선택
+            body = None
+            max_body_len = 0
+            for sel in candidate_selectors:
+                for elem in soup.select(sel):
+                    txt_len = len(elem.get_text(strip=True))
+                    if txt_len > max_body_len:
+                        max_body_len = txt_len
+                        body = elem
             
             raw_blocks = []
             if body:
@@ -641,6 +676,10 @@ def extract_factual_data(url, title=""):
                 if len(facts) >= 80:
                     break
 
+            # 찌꺼기 캡션만 1~2개 긁힌 경우(총 글자수 120자 미만 등) 가짜 팩트로 오인되지 않도록 초기화
+            if facts and (len(facts) < 3 or sum(len(f) for f in facts) < 120):
+                facts = []
+
             # 제목과 내용 간의 교차 연관성 검증 (사이드바 추천 기사나 엉뚱한 광고성 텍스트가 긁혔는지 방어)
             if title and facts:
                 keywords = [w for w in re.findall(r'[가-힣a-zA-Z0-9]{2,}', title) if w not in ['속보', '단독', '종합', '기자', '뉴스', '오늘', '실시간']]
@@ -663,7 +702,7 @@ def local_generate_issue_briefing(title, category="전체", fact_points=None):
     clean_t = clean_news_title(title)
     
     # 팩트 데이터가 있는 경우: 원문의 통계와 문맥을 살려 풍성한 문단으로 조립
-    if fact_points and len(fact_points) >= 2:
+    if fact_points and len(fact_points) >= 3 and sum(len(f) for f in fact_points) >= 120:
         # 1. 문장 단위 어미 정통 뉴스체 변환 (홍보 및 찌꺼기 라인 철저 배제)
         converted_sentences = []
         for f in fact_points:
