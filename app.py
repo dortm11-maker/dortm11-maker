@@ -1443,10 +1443,18 @@ def fetch_article_detail(url):
     from services.news_cluster import canonicalize_url
     norm_url = canonicalize_url(url)
 
-    # 0. 수동/AI 등록 뉴스(custom_news.json) 최우선 매칭 (0.0001초 초고속 반환)
-    # 카카오톡/네이버 공유 시 원본 썸네일(og_img) 100% 보장 및 1.5초 타임아웃 완전 차단
-    custom_items = load_custom_news()
-    for ci in custom_items:
+    # 0. 순수 수동 등록 파일(custom_news.json) 기사만 최우선 매칭 (DB 기사가 요약문 1줄로 가로채지는 버그 원천 차단)
+    pure_custom_items = []
+    if os.path.exists(CUSTOM_NEWS_FILE):
+        try:
+            with open(CUSTOM_NEWS_FILE, 'r', encoding='utf-8') as f:
+                loaded = json.load(f)
+                if isinstance(loaded, list):
+                    pure_custom_items = loaded
+        except Exception:
+            pass
+
+    for ci in pure_custom_items:
         ci_link = ci.get('link', '')
         if ci_link == url or (norm_url and canonicalize_url(ci_link) == norm_url):
             raw_og = ci.get('og_img') or ci.get('image', '')
@@ -1454,6 +1462,9 @@ def fetch_article_detail(url):
             if not paras or len(paras) == 0:
                 s_text = ci.get('summary', '')
                 paras = [p.strip() + '.' for p in s_text.split('. ') if p.strip()] if s_text else [ci.get('title', '')]
+            # 조감도나 email protected 등 찌꺼기가 있거나 문단이 너무 빈약하면 0단계에서 가로채지 않고 아래 1/3단계에서 완전 생성
+            if any('조감도' in p or 'email protected' in p for p in paras) or len(paras) < 3:
+                break
             summs = ci.get('summary_points') or [ci.get('summary', '')]
             res = {
                 'id': '',
@@ -1986,6 +1997,8 @@ def load_custom_news():
                     'source': clean_display_source(d.get('source_name'), cat),
                     'logo': '⚡',
                     'category': cat,
+                    'summary_points': ai_cnt.get('summary_points', []),
+                    'paragraphs': paras,
                     'is_custom': True
                 })
         except Exception as e:
