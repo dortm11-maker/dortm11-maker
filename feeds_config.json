@@ -13,6 +13,12 @@
       "enabled": true
     },
     {
+      "name": "매일경제",
+      "url": "https://www.mk.co.kr/rss/30000001/",
+      "logo": "💹",
+      "enabled": true
+    },
+    {
       "name": "SBS 뉴스",
       "url": "https://news.sbs.co.kr/news/headlineRssFeed.do?plink=RSSREADER",
       "logo": "🟡",
@@ -25,9 +31,9 @@
       "enabled": true
     },
     {
-      "name": "매일경제",
-      "url": "https://www.mk.co.kr/rss/30000001/",
-      "logo": "💹",
+      "name": "동아일보",
+      "url": "https://rss.donga.com/total.xml",
+      "logo": "⭕",
       "enabled": true
     },
     {
@@ -57,6 +63,12 @@
       "enabled": true
     },
     {
+      "name": "동아일보 정치",
+      "url": "https://rss.donga.com/politics.xml",
+      "logo": "⭕",
+      "enabled": true
+    },
+    {
       "name": "SBS 정치",
       "url": "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=01&plink=RSSREADER",
       "logo": "🟡",
@@ -83,7 +95,7 @@
   ],
   "경제": [
     {
-      "name": "한국경제",
+      "name": "한국경제 경제",
       "url": "https://www.hankyung.com/feed/economy",
       "logo": "📈",
       "enabled": true
@@ -95,63 +107,81 @@
       "enabled": true
     },
     {
+      "name": "매일경제 기업·경영",
+      "url": "https://www.mk.co.kr/rss/50100032/",
+      "logo": "💹",
+      "enabled": true
+    },
+    {
+      "name": "동아일보 경제",
+      "url": "https://rss.donga.com/economy.xml",
+      "logo": "⭕",
+      "enabled": true
+    },
+    {
       "name": "SBS 경제",
       "url": "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=02&plink=RSSREADER",
       "logo": "🟡",
       "enabled": true
     },
     {
-      "name": "매일경제",
-      "url": "https://www.mk.co.kr/rss/40300001/",
-      "logo": "💹",
-      "enabled": true
-    },
-    {
-      "name": "조선일보 경제",
-      "url": "https://www.chosun.com/arc/outboundfeeds/rss/category/economy/?outputType=xml",
-      "logo": "⚫",
-      "enabled": true
-    }
-  ],
-  "부동산": [
-    {
-      "name": "한국경제 부동산",
-      "url": "https://www.hankyung.com/feed/realestate",
-      "logo": "🏢",
-      "enabled": true
-    },
-    {
-      "name": "SBS 부동산/경제",
-      "url": "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=02&plink=RSSREADER",
-      "logo": "🏦",
-      "enabled": true
-    },
-    {
-      "name": "연합뉴스 경제/부동산",
-      "url": "https://www.yna.co.kr/rss/economy.xml",
-      "logo": "🔴",
-      "enabled": true
-    },
-    {
       "name": "조선일보 경제",
       "url": "https://www.chosun.com/arc/outboundfeeds/rss/category/economy/?outputType=xml",
       "logo": "⚫",
       "enabled": true
     },
     {
-      "name": "경향 부동산/경제",
+      "name": "경향신문 경제",
       "url": "https://www.khan.co.kr/rss/rssdata/economy_news.xml",
       "logo": "🔶",
       "enabled": true
     },
     {
-      "name": "한겨레 경제/부동산",
+      "name": "한겨레 경제",
       "url": "https://www.hani.co.kr/rss/economy/",
       "logo": "🔷",
       "enabled": true
     }
   ],
+  "부동산": [
+    {
+      "name": "매일경제 부동산",
+      "url": "https://www.mk.co.kr/rss/50300009/",
+      "logo": "🏢",
+      "enabled": true
+    },
+    {
+      "name": "한국경제 부동산",
+      "url": "https://www.hankyung.com/feed/realestate",
+      "logo": "📈",
+      "enabled": true
+    },
+    {
+      "name": "아시아경제 부동산",
+      "url": "https://www.asiae.co.kr/rss/realestate.htm",
+      "logo": "🏘️",
+      "enabled": true
+    },
+    {
+      "name": "조선비즈 부동산",
+      "url": "https://biz.chosun.com/arc/outboundfeeds/rss/category/real_estate/?outputType=xml",
+      "logo": "⚫",
+      "enabled": true
+    }
+  ],
   "증권": [
+    {
+      "name": "매일경제 증권",
+      "url": "https://www.mk.co.kr/rss/50200011/",
+      "logo": "💹",
+      "enabled": true
+    },
+    {
+      "name": "연합뉴스 증시/마켓",
+      "url": "https://www.yna.co.kr/rss/market.xml",
+      "logo": "🔴",
+      "enabled": true
+    },
     {
       "name": "한국경제 증권",
       "url": "https://www.hankyung.com/feed/finance",
@@ -159,33 +189,15 @@
       "enabled": true
     },
     {
-      "name": "SBS 증권/경제",
-      "url": "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=02&plink=RSSREADER",
-      "logo": "🏦",
-      "enabled": true
-    },
-    {
-      "name": "연합뉴스 증권/경제",
-      "url": "https://www.yna.co.kr/rss/economy.xml",
-      "logo": "🔴",
-      "enabled": true
-    },
-    {
       "name": "아시아경제 증권",
       "url": "https://www.asiae.co.kr/rss/stock.htm",
-      "logo": "💹",
+      "logo": "📊",
       "enabled": true
     },
     {
-      "name": "경향 경제/증권",
-      "url": "https://www.khan.co.kr/rss/rssdata/economy_news.xml",
-      "logo": "🔶",
-      "enabled": true
-    },
-    {
-      "name": "매일경제 증권",
-      "url": "https://www.mk.co.kr/rss/50200011/",
-      "logo": "💹",
+      "name": "조선비즈 증권",
+      "url": "https://biz.chosun.com/arc/outboundfeeds/rss/category/stock/?outputType=xml",
+      "logo": "⚫",
       "enabled": true
     }
   ],
@@ -203,21 +215,21 @@
       "enabled": true
     },
     {
-      "name": "SBS 연예",
-      "url": "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=08&plink=RSSREADER",
+      "name": "스포츠동아 연예",
+      "url": "https://rss.donga.com/sportsdonga/entertainment.xml",
       "logo": "🎬",
       "enabled": true
     },
     {
-      "name": "경향 연예/문화",
-      "url": "https://www.khan.co.kr/rss/rssdata/culture_news.xml",
-      "logo": "🔶",
+      "name": "조선일보 연예",
+      "url": "https://www.chosun.com/arc/outboundfeeds/rss/category/entertainments/?outputType=xml",
+      "logo": "⚫",
       "enabled": true
     },
     {
-      "name": "한겨레 연예/문화",
-      "url": "https://www.hani.co.kr/rss/culture/",
-      "logo": "🔷",
+      "name": "동아일보 연예",
+      "url": "https://rss.donga.com/entertainment.xml",
+      "logo": "🎭",
       "enabled": true
     }
   ],
@@ -232,6 +244,18 @@
       "name": "연합뉴스 사회",
       "url": "https://www.yna.co.kr/rss/society.xml",
       "logo": "🔴",
+      "enabled": true
+    },
+    {
+      "name": "매일경제 사회",
+      "url": "https://www.mk.co.kr/rss/50400012/",
+      "logo": "💹",
+      "enabled": true
+    },
+    {
+      "name": "동아일보 사회",
+      "url": "https://rss.donga.com/national.xml",
+      "logo": "⭕",
       "enabled": true
     },
     {
@@ -253,7 +277,7 @@
       "enabled": true
     },
     {
-      "name": "경향 사회",
+      "name": "경향신문 사회",
       "url": "https://www.khan.co.kr/rss/rssdata/society_news.xml",
       "logo": "🔶",
       "enabled": true
@@ -267,15 +291,27 @@
       "enabled": true
     },
     {
-      "name": "연합뉴스 IT/과학",
-      "url": "https://www.yna.co.kr/rss/it-science.xml",
-      "logo": "🔴",
+      "name": "조선비즈 IT/과학",
+      "url": "https://biz.chosun.com/arc/outboundfeeds/rss/category/it-science/?outputType=xml",
+      "logo": "🔬",
       "enabled": true
     },
     {
-      "name": "매일경제 IT",
-      "url": "https://www.mk.co.kr/rss/30100041/",
-      "logo": "💹",
+      "name": "전자신문",
+      "url": "https://rss.etnews.com/Section902.xml",
+      "logo": "⚡",
+      "enabled": true
+    },
+    {
+      "name": "지디넷코리아",
+      "url": "https://feeds.feedburner.com/zdkorea",
+      "logo": "🤖",
+      "enabled": true
+    },
+    {
+      "name": "블로터",
+      "url": "https://www.bloter.net/rss/allArticle.xml",
+      "logo": "📱",
       "enabled": true
     },
     {
@@ -285,7 +321,7 @@
       "enabled": true
     },
     {
-      "name": "경향 과학",
+      "name": "경향신문 과학",
       "url": "https://www.khan.co.kr/rss/rssdata/science_news.xml",
       "logo": "🔶",
       "enabled": true
@@ -305,13 +341,19 @@
       "enabled": true
     },
     {
+      "name": "동아일보 스포츠",
+      "url": "https://rss.donga.com/sports.xml",
+      "logo": "⭕",
+      "enabled": true
+    },
+    {
       "name": "SBS 스포츠",
       "url": "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=09&plink=RSSREADER",
       "logo": "⚾",
       "enabled": true
     },
     {
-      "name": "조선 스포츠",
+      "name": "조선일보 스포츠",
       "url": "https://www.chosun.com/arc/outboundfeeds/rss/category/sports/?outputType=xml",
       "logo": "⚫",
       "enabled": true
@@ -331,13 +373,19 @@
       "enabled": true
     },
     {
+      "name": "동아일보 국제",
+      "url": "https://rss.donga.com/international.xml",
+      "logo": "⭕",
+      "enabled": true
+    },
+    {
       "name": "SBS 국제",
       "url": "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=07&plink=RSSREADER",
       "logo": "🌐",
       "enabled": true
     },
     {
-      "name": "조선 국제",
+      "name": "조선일보 국제",
       "url": "https://www.chosun.com/arc/outboundfeeds/rss/category/international/?outputType=xml",
       "logo": "⚫",
       "enabled": true
@@ -346,6 +394,12 @@
       "name": "한겨레 국제",
       "url": "https://www.hani.co.kr/rss/international/",
       "logo": "🔷",
+      "enabled": true
+    },
+    {
+      "name": "경향신문 국제",
+      "url": "https://www.khan.co.kr/rss/rssdata/world_news.xml",
+      "logo": "🔶",
       "enabled": true
     }
   ],
@@ -363,7 +417,13 @@
       "enabled": true
     },
     {
-      "name": "조선 문화",
+      "name": "동아일보 문화",
+      "url": "https://rss.donga.com/culture.xml",
+      "logo": "⭕",
+      "enabled": true
+    },
+    {
+      "name": "조선일보 문화",
       "url": "https://www.chosun.com/arc/outboundfeeds/rss/category/culture-life/?outputType=xml",
       "logo": "⚫",
       "enabled": true
@@ -375,7 +435,7 @@
       "enabled": true
     },
     {
-      "name": "경향 문화",
+      "name": "경향신문 문화",
       "url": "https://www.khan.co.kr/rss/rssdata/culture_news.xml",
       "logo": "🔶",
       "enabled": true
