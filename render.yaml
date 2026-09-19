@@ -11,4 +11,8 @@ services:
     buildFilter:
       ignoredPaths:
         - visitor_stats.json
+        - news_snapshot.json
+        - data/**
+        - backup_*
+        - "*.bat"
 
