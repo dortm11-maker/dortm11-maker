@@ -1,48 +1,26 @@
 {
-  "total_uv": 106,
-  "total_pv": 174,
-  "current_date": "2026-09-12",
+  "total_uv": 109,
+  "total_pv": 181,
+  "current_date": "2026-09-19",
   "today_vids": [
-    "127.0.0.1"
+    "209.85.238.167",
+    "2406:5900:7078:40d2:89e9:c00b:85be:d015"
   ],
   "daily": {
-    "2026-09-09": {
-      "uv": 0,
-      "pv": 0
-    },
     "2026-09-12": {
       "uv": 1,
       "pv": 2
+    },
+    "2026-09-18": {
+      "uv": 1,
+      "pv": 3
+    },
+    "2026-09-19": {
+      "uv": 2,
+      "pv": 4
     }
   },
   "visitor_logs": {
-    "211.234.200.11": {
-      "ip": "211.234.200.11",
-      "device": "📱 모바일",
-      "visit_count": 0,
-      "first_seen": "20:16:45",
-      "last_seen": "20:16:45",
-      "last_seen_ts": 1788779805.4958353,
-      "last_page": "📰 기사 상세 읽는 중"
-    },
-    "118.219.82.18": {
-      "ip": "118.219.82.18",
-      "device": "📱 모바일",
-      "visit_count": 0,
-      "first_seen": "20:17:19",
-      "last_seen": "20:17:19",
-      "last_seen_ts": 1788779839.1019022,
-      "last_page": "📰 기사 상세 읽는 중"
-    },
-    "211.235.80.201": {
-      "ip": "211.235.80.201",
-      "device": "📱 모바일",
-      "visit_count": 0,
-      "first_seen": "20:17:23",
-      "last_seen": "20:17:23",
-      "last_seen_ts": 1788779843.668774,
-      "last_page": "📰 기사 상세 읽는 중"
-    },
     "111.65.71.126": {
       "ip": "111.65.71.126",
       "device": "📱 모바일",
@@ -465,41 +443,57 @@
       "last_seen": "23:53:43",
       "last_seen_ts": 1788879223.2592478,
       "last_page": "🌐 메인 뉴스 홈"
+    },
+    "127.0.0.1": {
+      "ip": "127.0.0.1",
+      "device": "💻 PC",
+      "visit_count": 3,
+      "first_seen": "16:45:50",
+      "last_seen": "16:46:05",
+      "last_seen_ts": 1789717565.768774,
+      "last_page": "📰 기사 상세 읽는 중"
+    },
+    "209.85.238.167": {
+      "ip": "209.85.238.167",
+      "device": "💻 PC",
+      "visit_count": 1,
+      "first_seen": "11:53:16",
+      "last_seen": "11:53:16",
+      "last_seen_ts": 1789786396.0303311,
+      "last_page": "📰 기사 상세 읽는 중"
+    },
+    "2406:5900:7078:40d2:89e9:c00b:85be:d015": {
+      "ip": "2406:5900:7078:40d2:89e9:c00b:85be:d015",
+      "device": "💻 PC",
+      "visit_count": 3,
+      "first_seen": "12:16:32",
+      "last_seen": "12:29:02",
+      "last_seen_ts": 1789788542.3375475,
+      "last_page": "📰 기사 상세 읽는 중"
     }
   },
   "ad_clicks": {
     "by_type_total": {
-      "left": 3,
-      "right": 2,
-      "center": 8,
+      "left": 4,
+      "right": 4,
+      "center": 10,
       "popup": 6,
       "link": 0,
-      "auto_redirect": 17,
+      "auto_redirect": 19,
       "mobile": 6,
       "unknown": 1
     },
     "by_type_today": {
-      "left": 1,
-      "right": 2,
-      "center": 0,
+      "left": 2,
+      "right": 4,
+      "center": 2,
       "popup": 0,
       "link": 0,
-      "auto_redirect": 0,
+      "auto_redirect": 2,
       "mobile": 0,
       "unknown": 0
     },
     "daily": {
-      "2026-09-09": {
-        "pure_total": 0,
-        "by_type": {
-          "left": 0,
-          "right": 0,
-          "center": 0,
-          "popup": 0,
-          "link": 0,
-          "auto_redirect": 0
-        }
-      },
       "2026-09-12": {
         "pure_total": 3,
         "by_type": {
@@ -509,6 +503,28 @@
           "popup": 0,
           "link": 0,
           "auto_redirect": 0
+        }
+      },
+      "2026-09-18": {
+        "pure_total": 2,
+        "by_type": {
+          "left": 0,
+          "right": 2,
+          "center": 0,
+          "popup": 0,
+          "link": 0,
+          "auto_redirect": 1
+        }
+      },
+      "2026-09-19": {
+        "pure_total": 3,
+        "by_type": {
+          "left": 1,
+          "right": 0,
+          "center": 2,
+          "popup": 0,
+          "link": 0,
+          "auto_redirect": 1
         }
       }
     },
@@ -854,6 +870,69 @@
         "label": "우측 날개 배너",
         "page": "메인 뉴스 홈",
         "ts": 1789189277.062911
+      },
+      {
+        "time": "16:46:12",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "right",
+        "label": "우측 날개 배너",
+        "page": "광명 자이아파트 '줍줍' 6가구 나왔다… 시세차익 최대 7억",
+        "ts": 1789717572.1662493
+      },
+      {
+        "time": "16:46:18",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "right",
+        "label": "우측 날개 배너",
+        "page": "광명 자이아파트 '줍줍' 6가구 나왔다… 시세차익 최대 7억",
+        "ts": 1789717578.3168256
+      },
+      {
+        "time": "16:46:36",
+        "ip": "127.0.0.1",
+        "device": "💻 PC",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "광명 자이아파트 '줍줍' 6가구 나왔다… 시세차익 최대 7억",
+        "ts": 1789717596.8740795
+      },
+      {
+        "time": "12:16:38",
+        "ip": "2406:5900:7078:40d2:89e9:c00b:85be:d015",
+        "device": "💻 PC",
+        "ad_type": "left",
+        "label": "좌측 날개 배너",
+        "page": "철산자이",
+        "ts": 1789787798.1254625
+      },
+      {
+        "time": "12:16:56",
+        "ip": "2406:5900:7078:40d2:89e9:c00b:85be:d015",
+        "device": "💻 PC",
+        "ad_type": "center",
+        "label": "정면 본문 배너",
+        "page": "철산자이",
+        "ts": 1789787816.9007542
+      },
+      {
+        "time": "12:28:59",
+        "ip": "2406:5900:7078:40d2:89e9:c00b:85be:d015",
+        "device": "💻 PC",
+        "ad_type": "center",
+        "label": "정면 본문 배너",
+        "page": "광명 자이아파트 '줍줍' 6가구 나왔다… 시세차익 최대 7억",
+        "ts": 1789788539.774333
+      },
+      {
+        "time": "12:29:24",
+        "ip": "2406:5900:7078:40d2:89e9:c00b:85be:d015",
+        "device": "💻 PC",
+        "ad_type": "auto_redirect",
+        "label": "자동 자리이동",
+        "page": "광명 자이아파트 '줍줍' 6가구 나왔다… 시세차익 최대 7억",
+        "ts": 1789788564.3372002
       }
     ]
   }

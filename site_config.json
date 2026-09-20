@@ -2,57 +2,57 @@
   "admin_password": "xlghk12!@",
   "ads": {
     "center": {
-      "coupang_id": 1026359,
-      "custom_html": "",
-      "enabled": true,
-      "height": 140,
+      "enabled": false,
       "mode": "coupang",
-      "sub_id": "dortm111",
+      "coupang_id": 1026359,
       "tracking_code": "AF3197388",
-      "width": 680
+      "sub_id": "dortm111",
+      "width": 680,
+      "height": 140,
+      "custom_html": ""
     },
     "left": {
-      "coupang_id": 1026359,
-      "custom_html": "",
-      "enabled": true,
-      "height": 600,
+      "enabled": false,
       "mode": "coupang",
-      "sub_id": "dortm111",
+      "coupang_id": 1026359,
       "tracking_code": "AF3197388",
-      "width": 200
+      "sub_id": "dortm111",
+      "width": 200,
+      "height": 600,
+      "custom_html": ""
     },
     "mobile": {
-      "coupang_id": 1026359,
-      "custom_html": "",
-      "enabled": true,
-      "height": 100,
+      "enabled": false,
       "mode": "coupang",
-      "sub_id": "dortm111",
+      "coupang_id": 1026359,
       "tracking_code": "AF3197388",
-      "width": 360
+      "sub_id": "dortm111",
+      "width": 360,
+      "height": 100,
+      "custom_html": ""
     },
     "popup": {
+      "enabled": false,
+      "mode": "coupang",
+      "delay": 120,
+      "interval_minutes": 5,
       "close_delay": 3,
       "coupang_id": 1026359,
-      "custom_html": "",
-      "delay": 120,
-      "enabled": true,
-      "height": 300,
-      "interval_minutes": 5,
-      "mode": "coupang",
-      "sub_id": "dortm111",
       "tracking_code": "AF3197388",
-      "width": 300
+      "sub_id": "dortm111",
+      "width": 300,
+      "height": 300,
+      "custom_html": ""
     },
     "right": {
-      "coupang_id": 1026359,
-      "custom_html": "",
-      "enabled": true,
-      "height": 600,
+      "enabled": false,
       "mode": "coupang",
-      "sub_id": "dortm111",
+      "coupang_id": 1026359,
       "tracking_code": "AF3197388",
-      "width": 200
+      "sub_id": "dortm111",
+      "width": 200,
+      "height": 600,
+      "custom_html": ""
     }
   },
   "ai_rewrite": {
@@ -71,7 +71,7 @@
     "apply_target": "article",
     "trigger_mode": "either",
     "time_seconds": 30,
-    "scroll_percent": 100,
+    "scroll_percent": 75,
     "prevent_repeat": true
   },
   "share": {
@@ -85,36 +85,36 @@
     "enabled": true,
     "items": [
       {
-        "title": "🔥 [속보] 가천대 수시 8만3천여명 몰려… 지원자 수 3년 연속 전국 1위",
-        "link": "https://www.yna.co.kr/view/AKR20260912022600061"
+        "link": "https://www.yna.co.kr/view/AKR20260912022600061",
+        "title": "🔥 [속보] 가천대 수시 8만3천여명 몰려… 지원자 수 3년 연속 전국 1위"
       },
       {
-        "title": "🔥 [속보] 광양서 산불… 한 시간 만에 큰 불길 잡아",
-        "link": "https://www.yna.co.kr/view/AKR20260912022500054"
+        "link": "https://www.yna.co.kr/view/AKR20260912022500054",
+        "title": "🔥 [속보] 광양서 산불… 한 시간 만에 큰 불길 잡아"
       },
       {
-        "title": "🔥 [속보] 황희찬, 샬케 데뷔전서 도움… ‘쐐기골 배달’로 3-1 승리",
-        "link": "https://www.hani.co.kr/arti/international/europe/1277461.html"
+        "link": "https://www.hani.co.kr/arti/international/europe/1277461.html",
+        "title": "🔥 [속보] 황희찬, 샬케 데뷔전서 도움… ‘쐐기골 배달’로 3-1 승리"
       },
       {
-        "title": "🔥 [속보] ‘집착녀’ 니키를… 만든 건 과연 누구였을까",
-        "link": "https://www.hani.co.kr/arti/culture/book/1277460.html"
+        "link": "https://www.hani.co.kr/arti/culture/book/1277460.html",
+        "title": "🔥 [속보] ‘집착녀’ 니키를… 만든 건 과연 누구였을까"
       },
       {
-        "title": "🔥 [속보] 트럼프 “9·11 테러는 거대한 악… 오늘 우리가 싸우는 이유”",
-        "link": "https://www.khan.co.kr/article/202609121101001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news"
+        "link": "https://www.khan.co.kr/article/202609121101001/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
+        "title": "🔥 [속보] 트럼프 “9·11 테러는 거대한 악… 오늘 우리가 싸우는 이유”"
       },
       {
-        "title": "🔥 [속보] ‘책을 냉동실에?’… 뜻밖의 중고책 관리법",
-        "link": "https://www.khan.co.kr/article/202609121100011/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news"
+        "link": "https://www.khan.co.kr/article/202609121100011/?utm_source=khan_rss&utm_medium=rss&utm_campaign=total_news",
+        "title": "🔥 [속보] ‘책을 냉동실에?’… 뜻밖의 중고책 관리법"
       },
       {
-        "title": "🔥 [속보] 데이트할때 남성은 14만원 쓴다… 여성은?",
-        "link": "https://www.donga.com/news/Society/article/all/20260912/134654765/1"
+        "link": "https://www.donga.com/news/Society/article/all/20260912/134654765/1",
+        "title": "🔥 [속보] 데이트할때 남성은 14만원 쓴다… 여성은?"
       },
       {
-        "title": "🔥 [속보] 日자위대… 민간인 ‘性的 취향’ 정보 수집, 왜?",
-        "link": "https://www.donga.com/news/Inter/article/all/20260912/134654756/1"
+        "link": "https://www.donga.com/news/Inter/article/all/20260912/134654756/1",
+        "title": "🔥 [속보] 日자위대… 민간인 ‘性的 취향’ 정보 수집, 왜?"
       }
     ],
     "speed": 30
