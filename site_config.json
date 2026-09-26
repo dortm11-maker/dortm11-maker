@@ -2,57 +2,57 @@
   "admin_password": "xlghk12!@",
   "ads": {
     "center": {
-      "enabled": false,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 680,
+      "custom_html": "",
+      "enabled": false,
       "height": 140,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 680
     },
     "left": {
-      "enabled": false,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 200,
+      "custom_html": "",
+      "enabled": false,
       "height": 600,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 200
     },
     "mobile": {
-      "enabled": false,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 360,
+      "custom_html": "",
+      "enabled": false,
       "height": 100,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 360
     },
     "popup": {
-      "enabled": false,
-      "mode": "coupang",
-      "delay": 120,
-      "interval_minutes": 5,
       "close_delay": 3,
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 300,
+      "custom_html": "",
+      "delay": 120,
+      "enabled": false,
       "height": 300,
-      "custom_html": ""
+      "interval_minutes": 5,
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 300
     },
     "right": {
-      "enabled": false,
-      "mode": "coupang",
       "coupang_id": 1026359,
-      "tracking_code": "AF3197388",
-      "sub_id": "dortm111",
-      "width": 200,
+      "custom_html": "",
+      "enabled": false,
       "height": 600,
-      "custom_html": ""
+      "mode": "coupang",
+      "sub_id": "dortm111",
+      "tracking_code": "AF3197388",
+      "width": 200
     }
   },
   "ai_rewrite": {
@@ -71,7 +71,7 @@
     "apply_target": "article",
     "trigger_mode": "either",
     "time_seconds": 30,
-    "scroll_percent": 75,
+    "scroll_percent": 65,
     "prevent_repeat": true
   },
   "share": {
